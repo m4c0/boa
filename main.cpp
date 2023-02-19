@@ -42,9 +42,9 @@ struct extent_stuff {
   vee::pipeline_layout pl = vee::create_pipeline_layout();
 
   vee::shader_module vert =
-      vee::create_shader_module_from_resource("poc.vert.spv");
+      vee::create_shader_module_from_resource("main.vert.spv");
   vee::shader_module frag =
-      vee::create_shader_module_from_resource("poc.frag.spv");
+      vee::create_shader_module_from_resource("main.frag.spv");
   vee::gr_pipeline gp =
       vee::create_graphics_pipeline(*pl, *rp,
                                     {
@@ -134,7 +134,7 @@ extern "C" void casein_handle(const casein::event &e) {
     default:
       break;
     }
-    state = sires::open("poc.vert.spv")
+    state = sires::open("main.vert.spv")
                 .map([](auto &&) { return setup_stuff; })
                 .unwrap(failed_to_start);
     break;

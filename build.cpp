@@ -14,7 +14,17 @@ int main(int argc, char **argv) {
   b->add_wsdep("sires", sires());
   b->add_wsdep("traits", traits());
   b->add_wsdep("vee", vee());
+
+  b->add_unit<spirv>("main.vert");
+  b->add_unit<spirv>("main.frag");
+  b->add_resource("main.vert.spv");
+  b->add_resource("main.frag.spv");
+
   b->add_unit<>("main");
 
-  return run_main(b, argc, argv);
+  auto pf = unit::create<per_feat<seq>>("pf");
+  pf->for_feature(posix).add_ref(b);
+  pf->for_feature(android_ndk).add_ref(b);
+
+  return run_main(pf, argc, argv);
 }
