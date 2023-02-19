@@ -1,0 +1,34 @@
+name: build game
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 🧰 Setup ECOW
+        uses: m4c0/ecow/.github/actions/setup@main
+        with:
+          os: ${{ matrix.os }}
+      - name: 🧴 Setup Casein
+        uses: m4c0/casein/.github/actions/deps@main
+      - name: 🌋 Setup Vee
+        uses: m4c0/vee/.github/actions/deps@main
+      - name: 🛒 Checkout Boa
+        uses: actions/checkout@v3
+        with:
+          repository: m4c0/boa
+          path: boa
+      - name: 🔨 Build
+        uses: m4c0/ecow/.github/actions/compile@main
+        with:
+          os: ${{ matrix.os }}
+          project: boa
+
