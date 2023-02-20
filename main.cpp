@@ -8,15 +8,7 @@ import vee;
 using device_stuff = boa::vulkan::per_device;
 using extent_stuff = boa::vulkan::per_extent;
 using inflight_stuff = boa::vulkan::per_inflight;
-
-struct inflights {
-  unsigned qf;
-
-  vee::command_pool cp = vee::create_command_pool(qf);
-
-  inflight_stuff front{&cp};
-  inflight_stuff back{&cp};
-};
+using inflights = boa::vulkan::inflight_pair;
 
 struct frame_stuff {
   const extent_stuff *xs;
@@ -26,12 +18,6 @@ struct frame_stuff {
       vee::allocate_primary_command_buffer(xs->command_pool());
   vee::framebuffer fb = xs->create_framebuffer(iv);
 };
-
-inline void flip(inflights &i) {
-  auto tmp = traits::move(i.front);
-  i.front = traits::move(i.back);
-  i.back = traits::move(tmp);
-}
 
 enum states {
   waiting_nptr,
@@ -68,7 +54,7 @@ extern "C" void casein_handle(const casein::event &e) {
     switch (state) {
     case setup_stuff: {
       ext = hai::uptr<extent_stuff>::make(&*dev);
-      infs = hai::uptr<inflights>::make(dev->queue_family());
+      infs = hai::uptr<inflights>::make(&*dev);
 
       auto imgs = vee::get_swapchain_images(ext->swapchain());
       frms = decltype(frms)::make(imgs.size());
@@ -90,9 +76,7 @@ extern "C" void casein_handle(const casein::event &e) {
     }
     case ready_to_paint: {
       try {
-        flip(*infs);
-
-        auto &inf = infs->back;
+        auto &inf = infs->flip();
 
         auto idx = inf.wait_and_takeoff(&*ext);
         auto &frame = (*frms)[idx];

@@ -10,4 +10,5 @@ namespace boa::vulkan {
 export class per_device;
 export class per_extent;
 export class per_inflight;
+export class inflight_pair;
 } // namespace boa::vulkan
