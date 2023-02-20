@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
   b->add_resource("main.frag.spv");
 
   auto m = b->add_unit<mod>("boa");
+  m->add_part("ecs_objects");
   m->add_part("vulkan");
 
   b->add_unit<>("main");
