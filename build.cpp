@@ -23,8 +23,7 @@ int main(int argc, char **argv) {
   auto m = b->add_unit<mod>("boa");
   m->add_part("ecs_objects");
   m->add_part("vulkan");
-
-  b->add_unit<>("main");
+  m->add_part("casein");
 
   auto pf = unit::create<per_feat<seq>>("pf");
   pf->for_feature(posix).add_ref(b);

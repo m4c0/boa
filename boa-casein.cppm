@@ -1,4 +1,6 @@
-import boa;
+export module boa:casein;
+import :ecs_objects;
+import :vulkan;
 import casein;
 import hai;
 import sires;
