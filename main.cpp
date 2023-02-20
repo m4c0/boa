@@ -68,11 +68,8 @@ extern "C" void casein_handle(const casein::event &e) {
       try {
         auto &inf = infs->flip();
 
-        auto idx = inf.wait_and_takeoff(&*ext);
-        {
-          vee::cmd_draw(inf.command_buffer(), 3);
-          vee::end_cmd_buf(inf.command_buffer());
-        }
+        auto idx =
+            inf.wait_and_takeoff(&*ext, [](auto cb) { vee::cmd_draw(cb, 3); });
 
         inf.submit(&*dev, (*frms)[idx]->one_time_submit([&inf](auto cb) {
           vee::cmd_execute_command(cb, inf.command_buffer());
