@@ -55,6 +55,7 @@ extern "C" void casein_handle(const casein::event &e) {
         (*frms)[i] = hai::uptr<frame_stuff>::make(&*dev, &*ext, img);
       }
 
+      // TODO: return number of vertices, store in pipeline
       ext->map_vertices([](auto *vs) {
         vs[0] = {-1, -1};
         vs[1] = {0, 1};
@@ -70,8 +71,7 @@ extern "C" void casein_handle(const casein::event &e) {
 
         auto idx = inf.wait_and_takeoff(&*ext);
 
-        ext->build_secondary_cmdbuf(inf.command_buffer(),
-                                    [](auto cb) { vee::cmd_draw(cb, 3); });
+        ext->build_pipeline(inf.command_buffer());
 
         inf.submit(&*dev, (*frms)[idx]->one_time_submit([&inf](auto cb) {
           vee::cmd_execute_command(cb, inf.command_buffer());

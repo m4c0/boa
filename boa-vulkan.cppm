@@ -38,11 +38,12 @@ class per_extent {
       vee::get_surface_capabilities(dev->physical_device(), dev->surface())
           .currentExtent;
 
-  vee::command_pool cp = vee::create_command_pool(dev->queue_family());
-  vee::render_pass rp =
-      vee::create_render_pass(dev->physical_device(), dev->surface());
   vee::swapchain swc =
       vee::create_swapchain(dev->physical_device(), dev->surface());
+
+  vee::command_pool pcp = vee::create_command_pool(dev->queue_family());
+  vee::render_pass rp =
+      vee::create_render_pass(dev->physical_device(), dev->surface());
 
   vee::pipeline_layout pl = vee::create_pipeline_layout();
 
@@ -78,19 +79,21 @@ class per_extent {
 public:
   per_extent(const per_device *dev) : dev{dev} {}
 
-  [[nodiscard]] constexpr auto command_pool() const noexcept { return *cp; }
+  [[nodiscard]] constexpr auto primary_command_pool() const noexcept {
+    return *pcp;
+  }
   [[nodiscard]] constexpr auto extent_2d() const noexcept { return extent; }
   [[nodiscard]] constexpr auto render_pass() const noexcept { return *rp; }
   [[nodiscard]] constexpr auto swapchain() const noexcept { return *swc; }
 
   // TODO: move pipeline stuff out of "per_extent"
-  void build_secondary_cmdbuf(vee::command_buffer cb, auto fn) const {
+  void build_pipeline(vee::command_buffer cb) const {
     vee::begin_cmd_buf_render_pass_continue(cb, *rp);
     vee::cmd_set_scissor(cb, extent);
     vee::cmd_set_viewport(cb, extent);
     vee::cmd_bind_gr_pipeline(cb, *gp);
     vee::cmd_bind_vertex_buffers(cb, 0, *v_buf);
-    fn(cb);
+    vee::cmd_draw(cb, 3);
     vee::end_cmd_buf(cb);
   }
 
@@ -163,7 +166,7 @@ class per_frame {
   const per_extent *ext;
   vee::image_view iv;
   vee::command_buffer cb =
-      vee::allocate_primary_command_buffer(ext->command_pool());
+      vee::allocate_primary_command_buffer(ext->primary_command_pool());
   vee::framebuffer fb = ext->create_framebuffer(iv);
 
 public:
