@@ -20,6 +20,9 @@ int main(int argc, char **argv) {
   b->add_resource("main.vert.spv");
   b->add_resource("main.frag.spv");
 
+  auto m = b->add_unit<mod>("boa");
+  m->add_part("vulkan");
+
   b->add_unit<>("main");
 
   auto pf = unit::create<per_feat<seq>>("pf");

@@ -1,3 +1,4 @@
+import boa;
 import casein;
 import hai;
 import sires;
@@ -11,26 +12,11 @@ struct point {
   float w;
 };
 
-struct device_stuff {
-  casein::native_handle_t nptr;
-
-  vee::instance i = vee::create_instance("my-app");
-  vee::debug_utils_messenger dbg = vee::create_debug_utils_messenger();
-  vee::surface s = vee::create_surface(nptr);
-  vee::physical_device_pair pdqf =
-      vee::find_physical_device_with_universal_queue(*s);
-  vee::device d =
-      vee::create_single_queue_device(pdqf.physical_device, pdqf.queue_family);
-
-  vee::descriptor_set_layout dsl =
-      vee::create_descriptor_set_layout<vee::dsl_fragment_uniform>();
-
-  vee::queue q = vee::get_queue_for_family(pdqf.queue_family);
-};
+using device_stuff = boa::vulkan::per_device;
 
 struct extent_stuff {
   vee::physical_device pd;
-  vee::surface &s;
+  const vee::surface &s;
   unsigned qf;
 
   vee::extent extent = vee::get_surface_capabilities(pd, *s).currentExtent;
@@ -141,8 +127,8 @@ extern "C" void casein_handle(const casein::event &e) {
   case casein::REPAINT:
     switch (state) {
     case setup_stuff: {
-      const auto &[pd, qf] = dev->pdqf;
-      ext = hai::uptr<extent_stuff>::make(pd, dev->s, qf);
+      const auto &[pd, qf] = dev->physical_device_pair();
+      ext = hai::uptr<extent_stuff>::make(pd, dev->surface(), qf);
       infs = hai::uptr<inflights>::make(qf);
 
       auto imgs = vee::get_swapchain_images(*ext->swc);
@@ -195,14 +181,14 @@ extern "C" void casein_handle(const casein::event &e) {
         }
 
         vee::queue_submit({
-            .queue = dev->q,
+            .queue = dev->queue(),
             .fence = *inf.f,
             .command_buffer = frame->cb,
             .wait_semaphore = *inf.img_available_sema,
             .signal_semaphore = *inf.rnd_finished_sema,
         });
         vee::queue_present({
-            .queue = dev->q,
+            .queue = dev->queue(),
             .swapchain = *ext->swc,
             .wait_semaphore = *inf.rnd_finished_sema,
             .image_index = idx,
