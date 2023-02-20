@@ -83,12 +83,15 @@ public:
   [[nodiscard]] constexpr auto render_pass() const noexcept { return *rp; }
   [[nodiscard]] constexpr auto swapchain() const noexcept { return *swc; }
 
-  void begin_secondary_cmdbuf(vee::command_buffer cb) const {
+  // TODO: move pipeline stuff out of "per_extent"
+  void build_secondary_cmdbuf(vee::command_buffer cb, auto fn) const {
     vee::begin_cmd_buf_render_pass_continue(cb, *rp);
     vee::cmd_set_scissor(cb, extent);
     vee::cmd_set_viewport(cb, extent);
     vee::cmd_bind_gr_pipeline(cb, *gp);
     vee::cmd_bind_vertex_buffers(cb, 0, *v_buf);
+    fn(cb);
+    vee::end_cmd_buf(cb);
   }
 
   [[nodiscard]] auto create_framebuffer(const vee::image_view &iv) const {
@@ -120,13 +123,9 @@ public:
     return *rnd_finished_sema;
   }
 
-  [[nodiscard]] auto wait_and_takeoff(const per_extent *ext, auto fn) const {
+  [[nodiscard]] auto wait_and_takeoff(const per_extent *ext) const {
     vee::wait_and_reset_fence(*f);
-    auto idx = vee::acquire_next_image(ext->swapchain(), *img_available_sema);
-    ext->begin_secondary_cmdbuf(cb);
-    fn(cb);
-    vee::end_cmd_buf(cb);
-    return idx;
+    return vee::acquire_next_image(ext->swapchain(), *img_available_sema);
   }
 
   void submit(const per_device *dev,
