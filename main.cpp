@@ -9,15 +9,7 @@ using device_stuff = boa::vulkan::per_device;
 using extent_stuff = boa::vulkan::per_extent;
 using inflight_stuff = boa::vulkan::per_inflight;
 using inflights = boa::vulkan::inflight_pair;
-
-struct frame_stuff {
-  const extent_stuff *xs;
-  vee::image_view iv;
-
-  vee::command_buffer cb =
-      vee::allocate_primary_command_buffer(xs->command_pool());
-  vee::framebuffer fb = xs->create_framebuffer(iv);
-};
+using frame_stuff = boa::vulkan::per_frame;
 
 enum states {
   waiting_nptr,
@@ -60,9 +52,7 @@ extern "C" void casein_handle(const casein::event &e) {
       frms = decltype(frms)::make(imgs.size());
       for (auto i = 0; i < imgs.size(); i++) {
         auto img = (imgs.data())[i];
-        vee::image_view iv = vee::create_rgba_image_view(
-            img, dev->physical_device(), dev->surface());
-        (*frms)[i] = hai::uptr<frame_stuff>::make(&*ext, traits::move(iv));
+        (*frms)[i] = hai::uptr<frame_stuff>::make(&*dev, &*ext, img);
       }
 
       ext->map_vertices([](auto *vs) {
@@ -79,26 +69,14 @@ extern "C" void casein_handle(const casein::event &e) {
         auto &inf = infs->flip();
 
         auto idx = inf.wait_and_takeoff(&*ext);
-        auto &frame = (*frms)[idx];
-
         {
           vee::cmd_draw(inf.command_buffer(), 3);
           vee::end_cmd_buf(inf.command_buffer());
         }
-        {
-          vee::begin_cmd_buf_one_time_submit(frame->cb);
-          vee::cmd_begin_render_pass({
-              .command_buffer = frame->cb,
-              .render_pass = ext->render_pass(),
-              .framebuffer = *frame->fb,
-              .extent = ext->extent_2d(),
-          });
-          vee::cmd_execute_command(frame->cb, inf.command_buffer());
-          vee::cmd_end_render_pass(frame->cb);
-          vee::end_cmd_buf(frame->cb);
-        }
 
-        inf.submit(&*dev, frame->cb);
+        inf.submit(&*dev, (*frms)[idx]->one_time_submit([&inf](auto cb) {
+          vee::cmd_execute_command(cb, inf.command_buffer());
+        }));
         vee::queue_present({
             .queue = dev->queue(),
             .swapchain = ext->swapchain(),
