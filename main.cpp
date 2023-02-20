@@ -7,15 +7,8 @@ import vee;
 
 using device_stuff = boa::vulkan::per_device;
 using extent_stuff = boa::vulkan::per_extent;
+using inflight_stuff = boa::vulkan::per_inflight;
 
-struct inflight_stuff {
-  vee::command_pool *pool;
-  vee::command_buffer cb = vee::allocate_secondary_command_buffer(**pool);
-
-  vee::semaphore img_available_sema = vee::create_semaphore();
-  vee::semaphore rnd_finished_sema = vee::create_semaphore();
-  vee::fence f = vee::create_fence_signaled();
-};
 struct inflights {
   unsigned qf;
 
@@ -100,16 +93,13 @@ extern "C" void casein_handle(const casein::event &e) {
         flip(*infs);
 
         auto &inf = infs->back;
-        vee::wait_and_reset_fence(*inf.f);
 
-        auto idx =
-            vee::acquire_next_image(ext->swapchain(), *inf.img_available_sema);
+        auto idx = inf.wait_and_takeoff(&*ext);
         auto &frame = (*frms)[idx];
 
         {
-          ext->begin_secondary_cmdbuf(inf.cb);
-          vee::cmd_draw(inf.cb, 3);
-          vee::end_cmd_buf(inf.cb);
+          vee::cmd_draw(inf.command_buffer(), 3);
+          vee::end_cmd_buf(inf.command_buffer());
         }
         {
           vee::begin_cmd_buf_one_time_submit(frame->cb);
@@ -119,22 +109,16 @@ extern "C" void casein_handle(const casein::event &e) {
               .framebuffer = *frame->fb,
               .extent = ext->extent_2d(),
           });
-          vee::cmd_execute_command(frame->cb, inf.cb);
+          vee::cmd_execute_command(frame->cb, inf.command_buffer());
           vee::cmd_end_render_pass(frame->cb);
           vee::end_cmd_buf(frame->cb);
         }
 
-        vee::queue_submit({
-            .queue = dev->queue(),
-            .fence = *inf.f,
-            .command_buffer = frame->cb,
-            .wait_semaphore = *inf.img_available_sema,
-            .signal_semaphore = *inf.rnd_finished_sema,
-        });
+        inf.submit(&*dev, frame->cb);
         vee::queue_present({
             .queue = dev->queue(),
             .swapchain = ext->swapchain(),
-            .wait_semaphore = *inf.rnd_finished_sema,
+            .wait_semaphore = inf.render_finished_sema(),
             .image_index = idx,
         });
       } catch (vee::out_of_date_error) {
