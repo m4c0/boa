@@ -60,8 +60,13 @@ extern "C" void casein_handle(const casein::event &e) {
       // TODO: return number of vertices, store in pipeline
       ext->map_vertices([](auto *vs) {
         vs[0] = {-1, -1};
-        vs[1] = {0, 1};
+        vs[1] = {1, 1};
         vs[2] = {1, -1};
+
+        vs[3] = {1, 1};
+        vs[4] = {-1, -1};
+        vs[5] = {-1, 1};
+        return 6;
       });
 
       state = ready_to_paint;

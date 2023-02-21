@@ -64,7 +64,8 @@ class per_extent {
           vee::vertex_attribute_vec2(0, 0),
       });
 
-  vee::buffer v_buf = vee::create_vertex_buffer(sizeof(ecs::point) * 3);
+  static constexpr const auto v_max = 1024;
+  vee::buffer v_buf = vee::create_vertex_buffer(sizeof(ecs::point) * v_max);
   vee::device_memory v_mem =
       vee::create_host_buffer_memory(dev->physical_device(), *v_buf);
   decltype(nullptr) v_bind = vee::bind_buffer_memory(*v_buf, *v_mem);
@@ -75,6 +76,8 @@ class per_extent {
       vee::create_local_image_memory(dev->physical_device(), *d_img);
   decltype(nullptr) d_bind = vee::bind_image_memory(*d_img, *d_mem);
   vee::image_view d_iv = vee::create_depth_image_view(*d_img);
+
+  unsigned v_count{};
 
 public:
   per_extent(const per_device *dev) : dev{dev} {}
@@ -93,7 +96,7 @@ public:
     vee::cmd_set_viewport(cb, extent);
     vee::cmd_bind_gr_pipeline(cb, *gp);
     vee::cmd_bind_vertex_buffers(cb, 0, *v_buf);
-    vee::cmd_draw(cb, 3);
+    vee::cmd_draw(cb, v_count);
     vee::end_cmd_buf(cb);
   }
 
@@ -108,7 +111,9 @@ public:
     return vee::create_framebuffer(fbp);
   }
 
-  void map_vertices(auto fn) { vee::map_memory<boa::ecs::point>(*v_mem, fn); }
+  void map_vertices(auto fn) {
+    vee::map_memory<boa::ecs::point>(*v_mem, [&](auto p) { v_count = fn(p); });
+  }
 };
 
 class per_inflight {
