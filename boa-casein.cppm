@@ -21,43 +21,51 @@ enum states {
   done,
   failed_to_start,
 };
+namespace boa::casein {
+class fsm {
+  hai::uptr<vulkan::per_device> m_dev{};
+  states m_state{};
+
+public:
+  void create_window(const ::casein::events::create_window &e) {
+    if (m_state == waiting_nptr) {
+      auto nptr = e.native_window_handle();
+      vee::initialise();
+      m_dev = hai::uptr<device_stuff>::make(nptr);
+    }
+    m_state = sires::open("main.vert.spv")
+                  .map([](auto &&) { return setup_stuff; })
+                  .unwrap(failed_to_start);
+  }
+
+  [[nodiscard]] auto &state() noexcept { return m_state; }
+  [[nodiscard]] const auto *dev() const noexcept { return &*m_dev; }
+};
+} // namespace boa::casein
 
 extern "C" void casein_handle(const casein::event &e) {
-  static volatile casein::native_handle_t nptr{};
-  static hai::uptr<device_stuff> dev{};
+  static boa::casein::fsm fsm{};
   static hai::uptr<extent_stuff> ext{};
   static hai::uptr<boa::vulkan::pipeline> ppl{};
   static hai::uptr<inflights> infs{};
   static hai::holder<hai::uptr<frame_stuff>[]> frms{};
-  static states state = waiting_nptr;
 
   switch (e.type()) {
   case casein::CREATE_WINDOW:
-    switch (state) {
-    case waiting_nptr:
-      vee::initialise();
-      nptr = e.as<casein::events::create_window>().native_window_handle();
-      dev = hai::uptr<device_stuff>::make(nptr);
-      break;
-    default:
-      break;
-    }
-    state = sires::open("main.vert.spv")
-                .map([](auto &&) { return setup_stuff; })
-                .unwrap(failed_to_start);
+    fsm.create_window(e.as<casein::events::create_window>());
     break;
   case casein::REPAINT:
-    switch (state) {
+    switch (fsm.state()) {
     case setup_stuff: {
-      ext = hai::uptr<extent_stuff>::make(&*dev);
-      ppl = hai::uptr<boa::vulkan::pipeline>::make(&*dev, &*ext);
-      infs = hai::uptr<inflights>::make(&*dev);
+      ext = hai::uptr<extent_stuff>::make(fsm.dev());
+      ppl = hai::uptr<boa::vulkan::pipeline>::make(fsm.dev(), &*ext);
+      infs = hai::uptr<inflights>::make(fsm.dev());
 
       auto imgs = vee::get_swapchain_images(ext->swapchain());
       frms = decltype(frms)::make(imgs.size());
       for (auto i = 0; i < imgs.size(); i++) {
         auto img = (imgs.data())[i];
-        (*frms)[i] = hai::uptr<frame_stuff>::make(&*dev, &*ext, img);
+        (*frms)[i] = hai::uptr<frame_stuff>::make(fsm.dev(), &*ext, img);
       }
 
       ppl->map_vertices([](auto *vs) {
@@ -71,7 +79,7 @@ extern "C" void casein_handle(const casein::event &e) {
         return 6;
       });
 
-      state = ready_to_paint;
+      fsm.state() = ready_to_paint;
       break;
     }
     case ready_to_paint: {
@@ -82,17 +90,17 @@ extern "C" void casein_handle(const casein::event &e) {
 
         ppl->build_commands(inf.command_buffer());
 
-        inf.submit(&*dev, (*frms)[idx]->one_time_submit([&inf](auto cb) {
+        inf.submit(fsm.dev(), (*frms)[idx]->one_time_submit([&inf](auto cb) {
           vee::cmd_execute_command(cb, inf.command_buffer());
         }));
         vee::queue_present({
-            .queue = dev->queue(),
+            .queue = fsm.dev()->queue(),
             .swapchain = ext->swapchain(),
             .wait_semaphore = inf.render_finished_sema(),
             .image_index = idx,
         });
       } catch (vee::out_of_date_error) {
-        state = setup_stuff;
+        fsm.state() = setup_stuff;
         vee::device_wait_idle();
       }
       break;
@@ -107,8 +115,8 @@ extern "C" void casein_handle(const casein::event &e) {
     infs = {};
     ppl = {};
     ext = {};
-    dev = {};
-    state = done;
+    fsm = {};
+    fsm.state() = done;
     break;
   default:
     break;
