@@ -20,11 +20,17 @@ public:
 
   void map(auto fn) { vee::map_memory<Tp>(*m_mem, fn); }
 };
+struct pcs {
+  ecs::xy grid_pos{10, 10};
+  ecs::xy grid_size{10, 10};
+};
 class pipeline {
   const per_device *dev;
   const per_extent *ext;
 
-  vee::pipeline_layout pl = vee::create_pipeline_layout();
+  vee::pipeline_layout pl = vee::create_pipeline_layout({
+      vee::vertex_push_constant_range<pcs>(),
+  });
 
   vee::shader_module vert =
       vee::create_shader_module_from_resource("main.vert.spv");
@@ -86,6 +92,7 @@ public:
     const auto extent = ext->extent_2d();
     constexpr const auto v_count = 6;
     constexpr const auto i_count = 10 * 10;
+    constexpr const pcs pc{};
 
     vee::begin_cmd_buf_render_pass_continue(cb, ext->render_pass());
     vee::cmd_set_scissor(cb, extent);
@@ -94,6 +101,7 @@ public:
     vee::cmd_bind_vertex_buffers(cb, 0, *vertices);
     vee::cmd_bind_vertex_buffers(cb, 1, *instance_pos);
     vee::cmd_bind_vertex_buffers(cb, 2, *instance_colour);
+    vee::cmd_push_vertex_constants(cb, *pl, &pc);
     vee::cmd_draw(cb, v_count, i_count);
     vee::end_cmd_buf(cb);
   }
