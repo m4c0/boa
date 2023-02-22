@@ -23,10 +23,12 @@ class pipeline {
       {
           vee::vertex_input_bind(sizeof(ecs::point)),
           vee::vertex_input_bind_per_instance(sizeof(ecs::quad)),
+          vee::vertex_input_bind_per_instance(sizeof(ecs::quad)),
       },
       {
-          vee::vertex_attribute_vec2(0, 0),
-          vee::vertex_attribute_vec2(1, 0),
+          vee::vertex_attribute_vec2(0, offset_of(&ecs::point::pos)),
+          vee::vertex_attribute_vec2(1, offset_of(&ecs::quad::pos)),
+          vee::vertex_attribute_vec2(1, offset_of(&ecs::quad::color)),
       });
 
   static constexpr const auto v_max = 1024;

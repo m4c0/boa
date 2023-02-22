@@ -50,8 +50,12 @@ class fsm {
       unsigned i = 0;
       for (auto y = 0; y < 10; y++) {
         for (auto x = 0; x < 10; x++, i++) {
-          is[i].x = x;
-          is[i].y = y;
+          is[i].pos.x = x;
+          is[i].pos.y = y;
+          is[i].color.r = x / 10.0f;
+          is[i].color.g = y / 10.0f;
+          is[i].color.b = 1;
+          is[i].color.a = 1;
         }
       }
       return i;
