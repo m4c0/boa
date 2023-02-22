@@ -36,31 +36,6 @@ class fsm {
       (*m_frms)[i] = hai::uptr<per_frame>::make(&*m_dev, &*m_ext, img);
     }
 
-    m_ppl->map_vertices([](auto *vs) {
-      vs[0] = {0, 0};
-      vs[1] = {1, 1};
-      vs[2] = {1, 0};
-
-      vs[3] = {1, 1};
-      vs[4] = {0, 0};
-      vs[5] = {0, 1};
-      return 6;
-    });
-    m_ppl->map_instances([](auto *is) {
-      unsigned i = 0;
-      for (auto y = 0; y < 10; y++) {
-        for (auto x = 0; x < 10; x++, i++) {
-          is[i].pos.x = x;
-          is[i].pos.y = y;
-          is[i].color.r = x / 10.0f;
-          is[i].color.g = y / 10.0f;
-          is[i].color.b = 1;
-          is[i].color.a = 1;
-        }
-      }
-      return i;
-    });
-
     m_state = ready_to_paint;
   }
 

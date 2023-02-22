@@ -16,12 +16,4 @@ struct rgba {
   float b;
   float a;
 };
-
-struct point {
-  xy pos;
-};
-struct quad {
-  xy pos;
-  rgba color;
-};
 } // namespace boa::ecs
