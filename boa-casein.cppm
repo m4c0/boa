@@ -1,5 +1,6 @@
 export module boa:casein;
 import :ecs_objects;
+import :pipeline;
 import :vulkan;
 import casein;
 import hai;
@@ -25,6 +26,7 @@ extern "C" void casein_handle(const casein::event &e) {
   static volatile casein::native_handle_t nptr{};
   static hai::uptr<device_stuff> dev{};
   static hai::uptr<extent_stuff> ext{};
+  static hai::uptr<boa::vulkan::pipeline> ppl{};
   static hai::uptr<inflights> infs{};
   static hai::holder<hai::uptr<frame_stuff>[]> frms{};
   static states state = waiting_nptr;
@@ -48,6 +50,7 @@ extern "C" void casein_handle(const casein::event &e) {
     switch (state) {
     case setup_stuff: {
       ext = hai::uptr<extent_stuff>::make(&*dev);
+      ppl = hai::uptr<boa::vulkan::pipeline>::make(&*dev, &*ext);
       infs = hai::uptr<inflights>::make(&*dev);
 
       auto imgs = vee::get_swapchain_images(ext->swapchain());
@@ -57,8 +60,7 @@ extern "C" void casein_handle(const casein::event &e) {
         (*frms)[i] = hai::uptr<frame_stuff>::make(&*dev, &*ext, img);
       }
 
-      // TODO: return number of vertices, store in pipeline
-      ext->map_vertices([](auto *vs) {
+      ppl->map_vertices([](auto *vs) {
         vs[0] = {-1, -1};
         vs[1] = {1, 1};
         vs[2] = {1, -1};
@@ -78,7 +80,7 @@ extern "C" void casein_handle(const casein::event &e) {
 
         auto idx = inf.wait_and_takeoff(&*ext);
 
-        ext->build_pipeline(inf.command_buffer());
+        ppl->build_commands(inf.command_buffer());
 
         inf.submit(&*dev, (*frms)[idx]->one_time_submit([&inf](auto cb) {
           vee::cmd_execute_command(cb, inf.command_buffer());
@@ -103,6 +105,7 @@ extern "C" void casein_handle(const casein::event &e) {
     vee::device_wait_idle();
     frms = {};
     infs = {};
+    ppl = {};
     ext = {};
     dev = {};
     state = done;

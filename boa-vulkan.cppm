@@ -45,31 +45,6 @@ class per_extent {
   vee::render_pass rp =
       vee::create_render_pass(dev->physical_device(), dev->surface());
 
-  vee::pipeline_layout pl = vee::create_pipeline_layout();
-
-  vee::shader_module vert =
-      vee::create_shader_module_from_resource("main.vert.spv");
-  vee::shader_module frag =
-      vee::create_shader_module_from_resource("main.frag.spv");
-  vee::gr_pipeline gp = vee::create_graphics_pipeline(
-      *pl, *rp,
-      {
-          vee::pipeline_vert_stage(*vert, "main"),
-          vee::pipeline_frag_stage(*frag, "main"),
-      },
-      {
-          vee::vertex_input_bind(sizeof(ecs::point)),
-      },
-      {
-          vee::vertex_attribute_vec2(0, 0),
-      });
-
-  static constexpr const auto v_max = 1024;
-  vee::buffer v_buf = vee::create_vertex_buffer(sizeof(ecs::point) * v_max);
-  vee::device_memory v_mem =
-      vee::create_host_buffer_memory(dev->physical_device(), *v_buf);
-  decltype(nullptr) v_bind = vee::bind_buffer_memory(*v_buf, *v_mem);
-
   vee::image d_img =
       vee::create_depth_image(dev->physical_device(), dev->surface());
   vee::device_memory d_mem =
@@ -89,17 +64,6 @@ public:
   [[nodiscard]] constexpr auto render_pass() const noexcept { return *rp; }
   [[nodiscard]] constexpr auto swapchain() const noexcept { return *swc; }
 
-  // TODO: move pipeline stuff out of "per_extent"
-  void build_pipeline(vee::command_buffer cb) const {
-    vee::begin_cmd_buf_render_pass_continue(cb, *rp);
-    vee::cmd_set_scissor(cb, extent);
-    vee::cmd_set_viewport(cb, extent);
-    vee::cmd_bind_gr_pipeline(cb, *gp);
-    vee::cmd_bind_vertex_buffers(cb, 0, *v_buf);
-    vee::cmd_draw(cb, v_count);
-    vee::end_cmd_buf(cb);
-  }
-
   [[nodiscard]] auto create_framebuffer(const vee::image_view &iv) const {
     vee::fb_params fbp{
         .physical_device = dev->physical_device(),
@@ -109,10 +73,6 @@ public:
         .depth_buffer = *this->d_iv,
     };
     return vee::create_framebuffer(fbp);
-  }
-
-  void map_vertices(auto fn) {
-    vee::map_memory<boa::ecs::point>(*v_mem, [&](auto p) { v_count = fn(p); });
   }
 };
 
