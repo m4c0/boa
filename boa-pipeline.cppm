@@ -65,7 +65,7 @@ public:
     vee::map_memory<boa::ecs::point>(*v_mem, [&](auto p) { v_count = fn(p); });
   }
   void map_instances(auto fn) {
-    vee::map_memory<boa::ecs::point>(*i_mem, [&](auto p) { i_count = fn(p); });
+    vee::map_memory<boa::ecs::quad>(*i_mem, [&](auto p) { i_count = fn(p); });
   }
 };
 } // namespace boa::vulkan
