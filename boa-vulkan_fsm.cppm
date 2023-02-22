@@ -37,13 +37,13 @@ class fsm {
     }
 
     m_ppl->map_vertices([](auto *vs) {
-      vs[0] = {-1, -1};
+      vs[0] = {0, 0};
       vs[1] = {1, 1};
-      vs[2] = {1, -1};
+      vs[2] = {1, 0};
 
       vs[3] = {1, 1};
-      vs[4] = {-1, -1};
-      vs[5] = {-1, 1};
+      vs[4] = {0, 0};
+      vs[5] = {0, 1};
       return 6;
     });
     m_ppl->map_instances([](auto *is) {
@@ -51,7 +51,8 @@ class fsm {
       is[1] = {0, 5};
       is[2] = {5, 5};
       is[3] = {5, 0};
-      return 4;
+      is[4] = {9, 9};
+      return 5;
     });
 
     m_state = ready_to_paint;
