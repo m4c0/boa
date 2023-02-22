@@ -22,9 +22,11 @@ class pipeline {
       },
       {
           vee::vertex_input_bind(sizeof(ecs::point)),
+          vee::vertex_input_bind_per_instance(sizeof(ecs::quad)),
       },
       {
           vee::vertex_attribute_vec2(0, 0),
+          vee::vertex_attribute_vec2(1, 0),
       });
 
   static constexpr const auto v_max = 1024;
@@ -33,7 +35,14 @@ class pipeline {
       vee::create_host_buffer_memory(dev->physical_device(), *v_buf);
   decltype(nullptr) v_bind = vee::bind_buffer_memory(*v_buf, *v_mem);
 
+  static constexpr const auto i_max = 1024;
+  vee::buffer i_buf = vee::create_vertex_buffer(sizeof(ecs::quad) * i_max);
+  vee::device_memory i_mem =
+      vee::create_host_buffer_memory(dev->physical_device(), *i_buf);
+  decltype(nullptr) i_bind = vee::bind_buffer_memory(*i_buf, *i_mem);
+
   unsigned v_count{};
+  unsigned i_count{};
 
 public:
   explicit pipeline(const per_device *d, const per_extent *e)
@@ -47,12 +56,16 @@ public:
     vee::cmd_set_viewport(cb, extent);
     vee::cmd_bind_gr_pipeline(cb, *gp);
     vee::cmd_bind_vertex_buffers(cb, 0, *v_buf);
-    vee::cmd_draw(cb, v_count);
+    vee::cmd_bind_vertex_buffers(cb, 1, *i_buf);
+    vee::cmd_draw(cb, v_count, i_count);
     vee::end_cmd_buf(cb);
   }
 
   void map_vertices(auto fn) {
     vee::map_memory<boa::ecs::point>(*v_mem, [&](auto p) { v_count = fn(p); });
+  }
+  void map_instances(auto fn) {
+    vee::map_memory<boa::ecs::point>(*i_mem, [&](auto p) { i_count = fn(p); });
   }
 };
 } // namespace boa::vulkan

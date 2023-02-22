@@ -46,6 +46,13 @@ class fsm {
       vs[5] = {-1, 1};
       return 6;
     });
+    m_ppl->map_instances([](auto *is) {
+      is[0] = {0, 0};
+      is[1] = {0, 5};
+      is[2] = {5, 5};
+      is[3] = {5, 0};
+      return 4;
+    });
 
     m_state = ready_to_paint;
   }

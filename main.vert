@@ -1,7 +1,9 @@
 #version 450
 
 layout(location = 0) in vec2 pos;
+layout(location = 1) in vec2 i_pos;
 
 void main() {
-  gl_Position = vec4(pos, 0, 1);
+  vec2 f_pos = (pos + i_pos) / 10;
+  gl_Position = vec4(f_pos, 0, 1);
 }
