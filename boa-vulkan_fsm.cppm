@@ -47,12 +47,14 @@ class fsm {
       return 6;
     });
     m_ppl->map_instances([](auto *is) {
-      is[0] = {0, 0};
-      is[1] = {0, 5};
-      is[2] = {5, 5};
-      is[3] = {5, 0};
-      is[4] = {9, 9};
-      return 5;
+      unsigned i = 0;
+      for (auto y = 0; y < 10; y++) {
+        for (auto x = 0; x < 10; x++, i++) {
+          is[i].x = x;
+          is[i].y = y;
+        }
+      }
+      return i;
     });
 
     m_state = ready_to_paint;
