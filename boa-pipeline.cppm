@@ -4,11 +4,10 @@ import :vulkan;
 import vee;
 
 namespace boa::vulkan {
-template <typename Tp> class bound_buffer {
-  static constexpr const auto m_max = 1024;
+template <typename Tp, unsigned Max> class bound_buffer {
   const per_device *m_dev;
 
-  vee::buffer m_buf = vee::create_vertex_buffer(sizeof(Tp) * m_max);
+  vee::buffer m_buf = vee::create_vertex_buffer(sizeof(Tp) * Max);
   vee::device_memory m_mem =
       vee::create_host_buffer_memory(m_dev->physical_device(), *m_buf);
   decltype(nullptr) m_bind = vee::bind_buffer_memory(*m_buf, *m_mem);
@@ -53,9 +52,12 @@ class pipeline {
           vee::vertex_attribute_vec2(2, 0),
       });
 
-  bound_buffer<ecs::xy> vertices{dev};
-  bound_buffer<ecs::xy> instance_pos{dev};
-  bound_buffer<ecs::rgba> instance_colour{dev};
+  static constexpr const auto v_count = 6;
+  static constexpr const auto i_count = ecs::grid_w * ecs::grid_h;
+
+  bound_buffer<ecs::xy, v_count> vertices{dev};
+  bound_buffer<ecs::xy, i_count> instance_pos{dev};
+  bound_buffer<ecs::rgba, i_count> instance_colour{dev};
 
   void map_vertices() {
     vertices.map([](auto vs) {
@@ -90,8 +92,6 @@ public:
 
   void build_commands(vee::command_buffer cb) const {
     const auto extent = ext->extent_2d();
-    constexpr const auto v_count = 6;
-    constexpr const auto i_count = ecs::grid_w * ecs::grid_h;
     constexpr const pcs pc{};
 
     vee::begin_cmd_buf_render_pass_continue(cb, ext->render_pass());
