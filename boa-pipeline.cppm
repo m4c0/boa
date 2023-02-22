@@ -21,8 +21,8 @@ public:
   void map(auto fn) { vee::map_memory<Tp>(*m_mem, fn); }
 };
 struct pcs {
-  ecs::xy grid_pos{10, 10};
-  ecs::xy grid_size{10, 10};
+  ecs::xy grid_pos{ecs::grid_w / 2, ecs::grid_h / 2};
+  ecs::xy grid_size{ecs::grid_w / 2, ecs::grid_h / 2};
 };
 class pipeline {
   const per_device *dev;
@@ -91,7 +91,7 @@ public:
   void build_commands(vee::command_buffer cb) const {
     const auto extent = ext->extent_2d();
     constexpr const auto v_count = 6;
-    constexpr const auto i_count = 10 * 10;
+    constexpr const auto i_count = ecs::grid_w * ecs::grid_h;
     constexpr const pcs pc{};
 
     vee::begin_cmd_buf_render_pass_continue(cb, ext->render_pass());
