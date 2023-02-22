@@ -65,8 +65,8 @@ class pipeline {
   void map_instances_pos() {
     instance_pos.map([](auto is) {
       unsigned i = 0;
-      for (auto y = 0; y < 10; y++) {
-        for (auto x = 0; x < 10; x++, i++) {
+      for (auto y = 0; y < ecs::grid_h; y++) {
+        for (auto x = 0; x < ecs::grid_w; x++, i++) {
           is[i].x = x;
           is[i].y = y;
         }
@@ -79,6 +79,8 @@ public:
     map_vertices();
     map_instances_pos();
   }
+
+  void map_instances_colour(auto fn) { instance_colour.map(fn); }
 
   void build_commands(vee::command_buffer cb) const {
     const auto extent = ext->extent_2d();

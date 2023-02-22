@@ -36,6 +36,22 @@ class fsm {
       (*m_frms)[i] = hai::uptr<per_frame>::make(&*m_dev, &*m_ext, img);
     }
 
+    ecs::grid g{};
+    g.set(2, 5, true);
+    g.set(2, 6, true);
+    g.set(2, 7, true);
+    g.set(1, 7, true);
+
+    m_ppl->map_instances_colour([&](auto is) {
+      constexpr const ecs::rgba on{1, 1, 1, 1};
+      constexpr const ecs::rgba off{0, 0.1, 0, 1};
+
+      for (auto b : g) {
+        *is = b ? on : off;
+        is++;
+      }
+    });
+
     m_state = ready_to_paint;
   }
 
