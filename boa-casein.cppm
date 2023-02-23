@@ -14,6 +14,8 @@ extern "C" void casein_handle(const casein::event &e) {
     fsm->update(g.grid());
     break;
   case casein::REPAINT:
+    if (g.tick())
+      fsm->update(g.grid());
     fsm->repaint();
     break;
   case casein::KEY_DOWN:
