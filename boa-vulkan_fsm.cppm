@@ -22,7 +22,6 @@ class fsm {
   hai::uptr<pipeline> m_ppl{};
   hai::uptr<inflight_pair> m_infs{};
   hai::holder<hai::uptr<per_frame>[]> m_frms{};
-  states m_state{};
 
   void setup() {
     m_ext = hai::uptr<per_extent>::make(&*m_dev);
@@ -35,24 +34,6 @@ class fsm {
       auto img = (imgs.data())[i];
       (*m_frms)[i] = hai::uptr<per_frame>::make(&*m_dev, &*m_ext, img);
     }
-
-    ecs::grid g{};
-    g.set(2, 5, true);
-    g.set(2, 6, true);
-    g.set(2, 7, true);
-    g.set(1, 7, true);
-
-    m_ppl->map_instances_colour([&](auto is) {
-      constexpr const ecs::rgba on{1, 1, 1, 1};
-      constexpr const ecs::rgba off{0, 0.1, 0, 1};
-
-      for (auto b : g) {
-        *is = b ? on : off;
-        is++;
-      }
-    });
-
-    m_state = ready_to_paint;
   }
 
   void paint() {
@@ -73,37 +54,33 @@ class fsm {
           .image_index = idx,
       });
     } catch (vee::out_of_date_error) {
-      m_state = setup_stuff;
       vee::device_wait_idle();
+      setup();
     }
   }
 
 public:
   void create_window(const ::casein::events::create_window &e) {
-    if (m_state == waiting_nptr) {
-      auto nptr = e.native_window_handle();
-      vee::initialise();
-      m_dev = hai::uptr<per_device>::make(nptr);
-    }
-    m_state = sires::open("main.vert.spv")
-                  .map([](auto &&) { return setup_stuff; })
-                  .unwrap(failed_to_start);
+    auto nptr = e.native_window_handle();
+    vee::initialise();
+    m_dev = hai::uptr<per_device>::make(nptr);
+    setup();
   }
 
-  void repaint() {
-    if (m_state == setup_stuff) {
-      setup();
-    } else if (m_state == ready_to_paint) {
-      paint();
-    }
+  void repaint() { paint(); }
+
+  void update(const ecs::grid &g) {
+    m_ppl->map_instances_colour([&](auto is) {
+      constexpr const ecs::rgba on{1, 1, 1, 1};
+      constexpr const ecs::rgba off{0, 0.1, 0, 1};
+
+      for (auto b : g) {
+        *is = b ? on : off;
+        is++;
+      }
+    });
   }
 
-  void quit() {
-    vee::device_wait_idle();
-    m_state = done;
-  }
-
-  [[nodiscard]] auto &state() noexcept { return m_state; }
-  [[nodiscard]] const auto *dev() const noexcept { return &*m_dev; }
+  void quit() { vee::device_wait_idle(); }
 };
 } // namespace boa::vulkan
