@@ -13,6 +13,20 @@ extern "C" void casein_handle(const casein::event &e) {
   case casein::REPAINT:
     fsm->repaint();
     break;
+  case casein::KEY_DOWN:
+    switch (e.as<casein::events::key_down>().key_code()) {
+    case casein::K_UP:
+      break;
+    case casein::K_DOWN:
+      break;
+    case casein::K_LEFT:
+      break;
+    case casein::K_RIGHT:
+      break;
+    default:
+      break;
+    }
+    break;
   case casein::QUIT:
     fsm->quit();
     fsm = {};
