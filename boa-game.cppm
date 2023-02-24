@@ -19,6 +19,7 @@ public:
       it = p ^ m_data[it];
     }
   }
+  constexpr bool is_empty(unsigned p) const noexcept { return m_data[p] == 0; }
 
   [[nodiscard]] constexpr auto size() const noexcept {
     auto res = 0U;
@@ -43,6 +44,7 @@ public:
     }
     auto last = m_data[m_end] ^ null;
     m_data[last] ^= m_end ^ null;
+    m_data[m_end] = 0;
     m_end = last;
   }
 };
@@ -85,7 +87,7 @@ static_assert([] {
 class game {
   static constexpr const auto ticks = 10;
 
-  enum { O, L, R, U, D } m_dir{};
+  enum { O, L, R, U, D, E } m_dir{};
   xor_ll m_snake{};
   unsigned m_ticks{};
   unsigned m_target = 3;
@@ -93,20 +95,22 @@ class game {
   unsigned y{ecs::grid_h / 2};
 
 public:
+  constexpr game() { m_snake.push_front(y * ecs::grid_w + x); }
+
   void up() {
-    if (m_dir != D)
+    if (m_dir != D && m_dir != E)
       m_dir = U;
   }
   void down() {
-    if (m_dir != U)
+    if (m_dir != U && m_dir != E)
       m_dir = D;
   }
   void left() {
-    if (m_dir != R)
+    if (m_dir != R && m_dir != E)
       m_dir = L;
   }
   void right() {
-    if (m_dir != L)
+    if (m_dir != L && m_dir != E)
       m_dir = R;
   }
 
@@ -122,8 +126,10 @@ public:
       return false;
 
     switch (m_dir) {
+    case E:
+      return false;
     case O:
-      break;
+      return false;
     case U:
       y = (y - 1 + ecs::grid_h) % ecs::grid_h;
       break;
@@ -136,6 +142,12 @@ public:
     case R:
       x = (x + 1 + ecs::grid_w) % ecs::grid_w;
       break;
+    }
+
+    const auto p = y * ecs::grid_w + x;
+    if (!m_snake.is_empty(p)) {
+      m_dir = E;
+      return true;
     }
 
     m_snake.push_front(y * ecs::grid_w + x);
