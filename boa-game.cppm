@@ -7,6 +7,7 @@ class xor_ll {
   unsigned m_data[ecs::grid_cells]{};
   unsigned m_start{null};
   unsigned m_end{null};
+  unsigned m_size{0};
 
 public:
   constexpr void iterate(auto fn) const noexcept {
@@ -21,12 +22,9 @@ public:
   }
   constexpr bool is_empty(unsigned p) const noexcept { return m_data[p] == 0; }
 
-  [[nodiscard]] constexpr auto size() const noexcept {
-    auto res = 0U;
-    iterate([&](auto) { res++; });
-    return res;
-  }
+  [[nodiscard]] constexpr auto size() const noexcept { return m_size; }
   constexpr void push_front(unsigned p) noexcept {
+    m_size++;
     if (m_start == null) {
       m_start = m_end = p;
       m_data[p] = null ^ null;
@@ -37,6 +35,7 @@ public:
     m_start = p;
   }
   constexpr void pop_back() noexcept {
+    m_size--;
     if (m_start == m_end) {
       m_data[m_end] = null ^ null; // 0
       m_start = m_end = null;
