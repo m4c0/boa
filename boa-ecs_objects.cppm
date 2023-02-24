@@ -20,9 +20,7 @@ class grid {
   bool m_data[grid_cells]{};
 
 public:
-  constexpr void set(unsigned x, unsigned y, bool on) {
-    m_data[y * grid_w + x] = on;
-  }
+  constexpr void set(unsigned p) { m_data[p] = true; }
 
   [[nodiscard]] const auto begin() const noexcept { return m_data; }
   [[nodiscard]] const auto end() const noexcept { return &m_data[grid_cells]; }

@@ -8,6 +8,7 @@ class xor_ll {
   unsigned m_start{null};
   unsigned m_end{null};
 
+public:
   constexpr void iterate(auto fn) const noexcept {
     unsigned it = m_start;
     unsigned prev = null;
@@ -19,7 +20,6 @@ class xor_ll {
     }
   }
 
-public:
   [[nodiscard]] constexpr auto size() const noexcept {
     auto res = 0U;
     iterate([&](auto) { res++; });
@@ -88,8 +88,9 @@ class game {
   enum { O, L, R, U, D } m_dir{};
   xor_ll m_snake{};
   unsigned m_ticks{};
-  unsigned x{};
-  unsigned y{};
+  unsigned m_target = 3;
+  unsigned x{ecs::grid_w / 2};
+  unsigned y{ecs::grid_h / 2};
 
 public:
   void up() {
@@ -111,7 +112,7 @@ public:
 
   [[nodiscard]] ecs::grid grid() {
     ecs::grid g{};
-    g.set(x, y, true);
+    m_snake.iterate([&](auto p) { g.set(p); });
     return g;
   }
 
@@ -136,6 +137,10 @@ public:
       x = (x + 1 + ecs::grid_w) % ecs::grid_w;
       break;
     }
+
+    m_snake.push_front(y * ecs::grid_w + x);
+    if (m_snake.size() > m_target)
+      m_snake.pop_back();
     return true;
   }
 };
