@@ -15,8 +15,9 @@ struct rgba {
 
 constexpr const auto grid_w = 60;
 constexpr const auto grid_h = 40;
+constexpr const auto grid_cells = grid_w * grid_h;
 class grid {
-  bool m_data[grid_w * grid_h]{};
+  bool m_data[grid_cells]{};
 
 public:
   constexpr void set(unsigned x, unsigned y, bool on) {
@@ -24,8 +25,6 @@ public:
   }
 
   [[nodiscard]] const auto begin() const noexcept { return m_data; }
-  [[nodiscard]] const auto end() const noexcept {
-    return &m_data[grid_h * grid_w];
-  }
+  [[nodiscard]] const auto end() const noexcept { return &m_data[grid_cells]; }
 };
 } // namespace boa::ecs

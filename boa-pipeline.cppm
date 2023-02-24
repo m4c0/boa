@@ -53,7 +53,7 @@ class pipeline {
       });
 
   static constexpr const auto v_count = 6;
-  static constexpr const auto i_count = ecs::grid_w * ecs::grid_h;
+  static constexpr const auto i_count = ecs::grid_cells;
 
   bound_buffer<ecs::xy, v_count> vertices{dev};
   bound_buffer<ecs::xy, i_count> instance_pos{dev};
