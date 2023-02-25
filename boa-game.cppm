@@ -5,16 +5,24 @@ import :xorll;
 namespace boa {
 class game {
   static constexpr const auto ticks = 10;
+  static constexpr const auto initial_size = 3;
+  static constexpr const auto size_increment = 3;
 
   enum { O, L, R, U, D, E } m_dir{};
   xor_ll m_snake{};
   unsigned m_ticks{};
-  unsigned m_target = 3;
+  unsigned m_food;
+  unsigned m_target = initial_size;
   unsigned x{ecs::grid_w / 2};
   unsigned y{ecs::grid_h / 2};
 
+  void reset_food() { m_food = 20; }
+
 public:
-  constexpr game() { m_snake.push_front(y * ecs::grid_w + x); }
+  constexpr game() {
+    m_snake.push_front(y * ecs::grid_w + x);
+    reset_food();
+  }
 
   void up() {
     if (m_dir != D && m_dir != E)
@@ -35,6 +43,7 @@ public:
 
   [[nodiscard]] ecs::grid grid() {
     ecs::grid g{};
+    g.set(m_food);
     m_snake.iterate([&](auto p) { g.set(p); });
     return g;
   }
@@ -67,6 +76,9 @@ public:
     if (!m_snake.is_empty(p)) {
       m_dir = E;
       return true;
+    }
+    if (m_food == p) {
+      m_target += size_increment;
     }
 
     m_snake.push_front(y * ecs::grid_w + x);
