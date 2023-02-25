@@ -17,9 +17,20 @@ class game {
   unsigned x{ecs::grid_w / 2};
   unsigned y{ecs::grid_h / 2};
 
-  void reset_food() {
+  void reset_food(unsigned n = 0) {
     m_food = (m_ticks * random_prime) % ecs::grid_cells;
-    // TODO: avoid positions owned by snakes
+    if (m_snake.is_empty(m_food))
+      return;
+    if (n < 100) {
+      reset_food(n + 1);
+      return;
+    }
+    auto wtf = m_food;
+    do {
+      m_food = (m_food + 1) % ecs::grid_cells;
+      if (m_snake.is_empty(m_food))
+        return;
+    } while (wtf != m_food);
   }
 
 public:
