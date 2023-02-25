@@ -13,8 +13,8 @@ struct rgba {
   float a;
 };
 
-constexpr const auto grid_w = 60;
-constexpr const auto grid_h = 40;
+constexpr const auto grid_w = 32;
+constexpr const auto grid_h = 24;
 constexpr const auto grid_cells = grid_w * grid_h;
 class grid {
   bool m_data[grid_cells]{};
