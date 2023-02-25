@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
 
   auto m = b->add_unit<mod>("boa");
   m->add_part("ecs_objects");
+  m->add_part("xorll");
   m->add_part("game");
   m->add_part("vulkan");
   m->add_part("pipeline");
