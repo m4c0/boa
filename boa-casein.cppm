@@ -1,22 +1,23 @@
 export module boa:casein;
 import :game;
-import :vulkan_fsm;
+import :render;
 import casein;
 import hai;
 
 extern "C" void casein_handle(const casein::event &e) {
   static boa::game g{};
-  static auto fsm = hai::uptr<boa::vulkan::fsm>::make();
+  static boa::renderer r{};
+  // static auto fsm = hai::uptr<boa::vulkan::fsm>::make();
 
   switch (e.type()) {
   case casein::CREATE_WINDOW:
-    fsm->create_window(e.as<casein::events::create_window>());
-    fsm->update(g.grid());
+    r.setup(e.as<casein::events::create_window>().native_window_handle());
+    r.update(g.grid());
     break;
   case casein::REPAINT:
     if (g.tick())
-      fsm->update(g.grid());
-    fsm->repaint();
+      r.update(g.grid());
+    r.repaint();
     break;
   case casein::KEY_DOWN:
     switch (e.as<casein::events::key_down>().key_code()) {
@@ -38,11 +39,10 @@ extern "C" void casein_handle(const casein::event &e) {
     default:
       break;
     }
-    fsm->update(g.grid());
+    r.update(g.grid());
     break;
   case casein::QUIT:
-    fsm->quit();
-    fsm = {};
+    r.quit();
     break;
   default:
     break;

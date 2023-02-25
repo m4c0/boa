@@ -8,30 +8,39 @@
 int main(int argc, char **argv) {
   using namespace ecow;
 
-  auto b = unit::create<app>("boas");
-  b->add_wsdep("casein", casein());
-  b->add_wsdep("hai", hai());
-  b->add_wsdep("sires", sires());
-  b->add_wsdep("traits", traits());
-  b->add_wsdep("vee", vee());
+  constexpr const auto add_deps = [](app &b) {
+    b.add_wsdep("casein", casein());
+    b.add_wsdep("hai", hai());
+    b.add_wsdep("sires", sires());
+    b.add_wsdep("traits", traits());
+  };
+  constexpr const auto add_mod = [](app &b) {
+    auto m = b.add_unit<mod>("boa");
+    m->add_part("ecs_objects");
+    m->add_part("xorll");
+    m->add_part("game");
+    m->add_part("render");
+    m->add_part("casein");
+    return m;
+  };
 
-  b->add_unit<spirv>("main.vert");
-  b->add_unit<spirv>("main.frag");
-  b->add_resource("main.vert.spv");
-  b->add_resource("main.frag.spv");
+  const auto setup_vulkan = [&](app &b) {
+    b.add_unit<spirv>("main.vert");
+    b.add_unit<spirv>("main.frag");
+    b.add_resource("main.vert.spv");
+    b.add_resource("main.frag.spv");
 
-  auto m = b->add_unit<mod>("boa");
-  m->add_part("ecs_objects");
-  m->add_part("xorll");
-  m->add_part("game");
-  m->add_part("vulkan");
-  m->add_part("pipeline");
-  m->add_part("vulkan_fsm");
-  m->add_part("casein");
+    b.add_wsdep("vee", vee());
+    add_deps(b);
 
-  auto pf = unit::create<per_feat<seq>>("pf");
-  pf->for_feature(posix).add_ref(b);
-  pf->for_feature(android_ndk).add_ref(b);
+    auto m = add_mod(b);
+    m->add_part("vulkan");
+    m->add_part("pipeline");
+    m->add_part("vulkan_fsm");
+  };
 
-  return run_main(pf, argc, argv);
+  auto a = unit::create<per_feat<app>>("boas");
+  setup_vulkan(a->for_feature(posix));
+  setup_vulkan(a->for_feature(android_ndk));
+  return run_main(a, argc, argv);
 }
