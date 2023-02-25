@@ -11,19 +11,21 @@ class game {
   enum { O, L, R, U, D, E } m_dir{};
   xor_ll m_snake{};
   unsigned m_ticks{};
-  unsigned m_food;
+  unsigned m_food{~0U};
   unsigned m_target = initial_size;
   unsigned x{ecs::grid_w / 2};
   unsigned y{ecs::grid_h / 2};
 
-  void reset_food() { m_food = 20; }
-
-public:
-  constexpr game() {
-    m_snake.push_front(y * ecs::grid_w + x);
-    reset_food();
+  void reset_food() {
+    m_food = m_ticks % ecs::grid_cells;
+    // TODO: fix randomness (as it is clearly monotonically increasing)
+    // TODO: avoid positions owned by snakes
   }
 
+public:
+  constexpr game() { m_snake.push_front(y * ecs::grid_w + x); }
+
+  // TODO: find a way to avoid walking reverse
   void up() {
     if (m_dir != D && m_dir != E)
       m_dir = U;
@@ -43,14 +45,15 @@ public:
 
   [[nodiscard]] ecs::grid grid() {
     ecs::grid g{};
-    g.set(m_food);
+    if (m_food != ~0U)
+      g.set(m_food);
     m_snake.iterate([&](auto p) { g.set(p); });
     return g;
   }
 
   [[nodiscard]] bool tick() {
-    m_ticks = (m_ticks + 1) % ticks;
-    if (m_ticks > 0)
+    m_ticks++;
+    if (m_ticks % ticks > 0)
       return false;
 
     switch (m_dir) {
@@ -72,6 +75,9 @@ public:
       break;
     }
 
+    if (m_food == ~0)
+      reset_food();
+
     const auto p = y * ecs::grid_w + x;
     if (!m_snake.is_empty(p)) {
       m_dir = E;
@@ -79,6 +85,7 @@ public:
     }
     if (m_food == p) {
       m_target += size_increment;
+      reset_food();
     }
 
     m_snake.push_front(y * ecs::grid_w + x);
