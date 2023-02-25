@@ -7,6 +7,7 @@ class game {
   static constexpr const auto ticks = 10;
   static constexpr const auto initial_size = 3;
   static constexpr const auto size_increment = 3;
+  static constexpr const auto random_prime = 5393;
 
   enum { O, L, R, U, D, E } m_dir{};
   xor_ll m_snake{};
@@ -17,8 +18,7 @@ class game {
   unsigned y{ecs::grid_h / 2};
 
   void reset_food() {
-    m_food = m_ticks % ecs::grid_cells;
-    // TODO: fix randomness (as it is clearly monotonically increasing)
+    m_food = (m_ticks * random_prime) % ecs::grid_cells;
     // TODO: avoid positions owned by snakes
   }
 
