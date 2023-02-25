@@ -4,7 +4,9 @@ import :xorll;
 
 namespace boa {
 class game {
-  static constexpr const auto ticks = 10;
+  static constexpr const auto min_ticks_per_move = 2;
+  static constexpr const auto max_ticks_per_move = 10;
+  static constexpr const auto food_per_decrement = 4;
   static constexpr const auto initial_size = 3;
   static constexpr const auto size_increment = 3;
   static constexpr const auto random_prime = 5393;
@@ -12,6 +14,8 @@ class game {
   enum { O, L, R, U, D, E } m_dir{};
   xor_ll m_snake{};
   unsigned m_ticks{};
+  unsigned m_tpm{max_ticks_per_move};
+  unsigned m_fpd{food_per_decrement};
   unsigned m_food{~0U};
   unsigned m_target = initial_size;
   unsigned x{ecs::grid_w / 2};
@@ -64,7 +68,7 @@ public:
 
   [[nodiscard]] bool tick() {
     m_ticks++;
-    if (m_ticks % ticks > 0)
+    if (m_ticks % m_tpm > 0)
       return false;
 
     switch (m_dir) {
@@ -95,6 +99,10 @@ public:
       return true;
     }
     if (m_food == p) {
+      if (m_tpm > min_ticks_per_move && --m_fpd == 0) {
+        m_fpd = food_per_decrement;
+        m_tpm--;
+      }
       m_target += size_increment;
       reset_food();
     }
