@@ -32,6 +32,9 @@ extern "C" void casein_handle(const casein::event &e) {
     case casein::K_RIGHT:
       g.right();
       break;
+    case casein::K_SPACE:
+      g = {};
+      break;
     default:
       break;
     }
