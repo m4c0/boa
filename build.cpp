@@ -38,9 +38,16 @@ int main(int argc, char **argv) {
     m->add_part("pipeline");
     m->add_part("vulkan_fsm");
   };
+  const auto setup_wasm = [&](app &b) {
+    add_deps(b);
+
+    auto m = add_mod(b);
+    m->add_part("wasm");
+  };
 
   auto a = unit::create<per_feat<app>>("boas");
   setup_vulkan(a->for_feature(posix));
   setup_vulkan(a->for_feature(android_ndk));
+  setup_wasm(a->for_feature(webassembly));
   return run_main(a, argc, argv);
 }
