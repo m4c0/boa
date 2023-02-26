@@ -1,0 +1,27 @@
+<html>
+  <head><title>Boa</title></head>
+  <body>
+    <script type="text/javascript" src="out/wasm/boas.js"></script>
+    <script type="text/javascript">
+      var exp;
+
+      function repaint() {
+        exp.casein_repaint();
+        window.requestAnimationFrame(repaint);
+      }
+      function start(exports) {
+        exp = exports;
+        exp.casein_create_window();
+        window.requestAnimationFrame(repaint);
+        console.log("started");
+      }
+
+      (function() {
+        ecow({ base_dir: "out/wasm" }).then(obj => {
+          obj.start();
+          start(obj.exports);
+        });
+      })();
+    </script>
+  </body>
+</html>
