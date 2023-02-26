@@ -1,8 +1,12 @@
 <html>
   <head><title>Boa</title></head>
   <body>
+    <canvas id="app" width="800" height="600"></canvas>
     <script type="text/javascript" src="out/wasm/boas.js"></script>
     <script type="text/javascript">
+      const app = document.getElementById("app");
+      const ctx = app.getContext("2d");
+
       var exp;
 
       function repaint() {
@@ -10,6 +14,9 @@
         window.requestAnimationFrame(repaint);
       }
       function start(exports) {
+        document.addEventListener('keydown', (e) => exports.casein_key_down(0));
+        document.addEventListener('keyup', (e) => exports.casein_key_up(0));
+
         exp = exports;
         exp.casein_create_window();
         window.requestAnimationFrame(repaint);

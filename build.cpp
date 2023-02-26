@@ -43,6 +43,8 @@ int main(int argc, char **argv) {
 
     auto m = add_mod(b);
     m->add_part("wasm");
+    m->add_feat<js>()->set("boa_paint_grid", R"((ptr) => {
+})");
   };
 
   auto a = unit::create<per_feat<app>>("boas");
