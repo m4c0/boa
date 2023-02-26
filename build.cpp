@@ -43,8 +43,10 @@ int main(int argc, char **argv) {
 
     auto m = add_mod(b);
     m->add_part("wasm");
-    m->add_feat<js>()->set("boa_paint_grid", R"((ptr) => {
+    m->add_feat<js>()->set("boa_fill_colour", R"((r, g, b) => {
+  ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
 })");
+    m->add_feat<js>()->set("boa_fill_rect", "ctx.fillRect.bind(ctx)");
   };
 
   auto a = unit::create<per_feat<app>>("boas");
