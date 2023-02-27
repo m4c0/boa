@@ -8,14 +8,12 @@
 int main(int argc, char **argv) {
   using namespace ecow;
 
-  constexpr const auto add_deps = [](app &b) {
-    b.add_wsdep("casein", casein());
-    b.add_wsdep("hai", hai());
-    b.add_wsdep("sires", sires());
-    b.add_wsdep("traits", traits());
-  };
   constexpr const auto add_mod = [](app &b) {
     auto m = b.add_unit<mod>("boa");
+    m->add_wsdep("casein", casein());
+    m->add_wsdep("hai", hai());
+    m->add_wsdep("sires", sires());
+    m->add_wsdep("traits", traits());
     m->add_part("ecs_objects");
     m->add_part("xorll");
     m->add_part("game");
@@ -31,7 +29,6 @@ int main(int argc, char **argv) {
     b.add_resource("main.frag.spv");
 
     b.add_wsdep("vee", vee());
-    add_deps(b);
 
     auto m = add_mod(b);
     m->add_part("vulkan");
@@ -39,14 +36,12 @@ int main(int argc, char **argv) {
     m->add_part("vulkan_fsm");
   };
   const auto setup_wasm = [&](app &b) {
-    add_deps(b);
-
     auto m = add_mod(b);
     m->add_part("wasm");
-    m->add_feat<js>()->set("boa_fill_colour", R"((r, g, b) => {
+    m->add_feat<inline_js>("boa_fill_colour", R"((r, g, b) => {
   ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
 })");
-    m->add_feat<js>()->set("boa_fill_rect", "ctx.fillRect.bind(ctx)");
+    m->add_feat<inline_js>("boa_fill_rect", "ctx.fillRect.bind(ctx)");
   };
 
   auto a = unit::create<per_feat<app>>("boas");

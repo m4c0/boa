@@ -7,26 +7,9 @@
       const app = document.getElementById("app");
       const ctx = app.getContext("2d");
 
-      var exp;
-
-      function repaint() {
-        exp.casein_repaint();
-        window.requestAnimationFrame(repaint);
-      }
-      function start(exports) {
-        document.addEventListener('keydown', (e) => exports.casein_key_down(0));
-        document.addEventListener('keyup', (e) => exports.casein_key_up(0));
-
-        exp = exports;
-        exp.casein_create_window();
-        window.requestAnimationFrame(repaint);
-        console.log("started");
-      }
-
       (function() {
         ecow({ base_dir: "out/wasm" }).then(obj => {
           obj.start();
-          start(obj.exports);
         });
       })();
     </script>

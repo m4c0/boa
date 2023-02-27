@@ -7,7 +7,6 @@ import hai;
 extern "C" void casein_handle(const casein::event &e) {
   static boa::game g{};
   static boa::renderer r{};
-  // static auto fsm = hai::uptr<boa::vulkan::fsm>::make();
 
   switch (e.type()) {
   case casein::CREATE_WINDOW:
