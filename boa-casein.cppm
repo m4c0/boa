@@ -19,7 +19,7 @@ extern "C" void casein_handle(const casein::event &e) {
     r.repaint();
     break;
   case casein::KEY_DOWN:
-    switch (e.as<casein::events::key_down>().key_code()) {
+    switch (e.as<casein::events::key_down>().key()) {
     case casein::K_UP:
       g.up();
       break;
