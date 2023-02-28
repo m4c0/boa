@@ -25,4 +25,21 @@ public:
   [[nodiscard]] const auto begin() const noexcept { return m_data; }
   [[nodiscard]] const auto end() const noexcept { return &m_data[grid_cells]; }
 };
+
+class grid2colour {
+  const grid &m_g;
+
+public:
+  explicit constexpr grid2colour(const grid &g) : m_g{g} {}
+
+  void operator()(rgba *is) const {
+    constexpr const ecs::rgba on{1, 1, 1, 1};
+    constexpr const ecs::rgba off{0, 0.1, 0, 1};
+
+    for (auto b : m_g) {
+      *is = b ? on : off;
+      is++;
+    }
+  }
+};
 } // namespace boa::ecs

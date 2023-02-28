@@ -7,7 +7,7 @@ namespace boa {
 struct renderer {
   virtual ~renderer() {}
   virtual void setup(casein::native_handle_t) = 0;
-  virtual void update(const ecs::grid &) = 0;
+  virtual void update(const ecs::grid2colour &) = 0;
   virtual void repaint() = 0;
   virtual void quit() = 0;
 };

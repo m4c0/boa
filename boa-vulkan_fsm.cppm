@@ -69,17 +69,7 @@ public:
 
   void repaint() { paint(); }
 
-  void update(const ecs::grid &g) {
-    m_ppl->map_instances_colour([&](auto is) {
-      constexpr const ecs::rgba on{1, 1, 1, 1};
-      constexpr const ecs::rgba off{0, 0.1, 0, 1};
-
-      for (auto b : g) {
-        *is = b ? on : off;
-        is++;
-      }
-    });
-  }
+  void update(const ecs::grid2colour &g) { m_ppl->map_instances_colour(g); }
 
   void quit() { vee::device_wait_idle(); }
 };
@@ -94,7 +84,7 @@ public:
   void setup(casein::native_handle_t nptr) override {
     m_data->create_window(nptr);
   }
-  void update(const ecs::grid &g) override { m_data->update(g); }
+  void update(const ecs::grid2colour &g) override { m_data->update(g); }
   void repaint() override { m_data->repaint(); }
   void quit() override {
     m_data->quit();
