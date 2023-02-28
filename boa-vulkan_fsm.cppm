@@ -84,15 +84,24 @@ public:
   void quit() { vee::device_wait_idle(); }
 };
 
-renderer::renderer() : m_data{hai::uptr<r_pimpl>::make()} {}
-renderer::~renderer() {}
-void renderer::setup(casein::native_handle_t nptr) {
-  m_data->create_window(nptr);
-}
-void renderer::update(const ecs::grid &g) { m_data->update(g); }
-void renderer::repaint() { m_data->repaint(); }
-void renderer::quit() {
-  m_data->quit();
-  m_data = {};
+class v_renderer : public renderer {
+  hai::uptr<r_pimpl> m_data;
+
+public:
+  v_renderer() : m_data{hai::uptr<r_pimpl>::make()} {}
+  ~v_renderer() {}
+
+  void setup(casein::native_handle_t nptr) override {
+    m_data->create_window(nptr);
+  }
+  void update(const ecs::grid &g) override { m_data->update(g); }
+  void repaint() override { m_data->repaint(); }
+  void quit() override {
+    m_data->quit();
+    m_data = {};
+  }
+};
+hai::uptr<renderer> create_renderer() {
+  return hai::uptr<renderer>{new v_renderer()};
 }
 } // namespace boa

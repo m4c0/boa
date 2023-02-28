@@ -6,17 +6,17 @@ import hai;
 
 extern "C" void casein_handle(const casein::event &e) {
   static boa::game g{};
-  static boa::renderer r{};
+  static hai::uptr<boa::renderer> r = boa::create_renderer();
 
   switch (e.type()) {
   case casein::CREATE_WINDOW:
-    r.setup(e.as<casein::events::create_window>().native_window_handle());
-    r.update(g.grid());
+    r->setup(e.as<casein::events::create_window>().native_window_handle());
+    r->update(g.grid());
     break;
   case casein::REPAINT:
     if (g.tick())
-      r.update(g.grid());
-    r.repaint();
+      r->update(g.grid());
+    r->repaint();
     break;
   case casein::KEY_DOWN:
     switch (e.as<casein::events::key_down>().key()) {
@@ -38,10 +38,10 @@ extern "C" void casein_handle(const casein::event &e) {
     default:
       break;
     }
-    r.update(g.grid());
+    r->update(g.grid());
     break;
   case casein::QUIT:
-    r.quit();
+    r->quit();
     break;
   default:
     break;

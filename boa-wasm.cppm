@@ -8,39 +8,41 @@ extern "C" void boa_fill_colour(float r, float g, float b);
 extern "C" void boa_fill_rect(unsigned x, unsigned y, unsigned w, unsigned h);
 
 namespace boa {
-class r_pimpl {
+class w_renderer : public renderer {
   ecs::rgba m_map[ecs::grid_cells];
 
-public:
   void map_colours(auto fn) { fn(m_map); }
+
+public:
+  void setup(casein::native_handle_t) {}
+  void update(const ecs::grid &g) {
+    map_colours([&](auto is) {
+      constexpr const ecs::rgba on{1, 1, 1, 1};
+      constexpr const ecs::rgba off{0, 0.1, 0, 1};
+
+      for (auto b : g) {
+        *is = b ? on : off;
+        is++;
+      }
+    });
+  }
+  void repaint() {
+    map_colours([&](auto is) {
+      for (auto i = 0; i < ecs::grid_cells; i++) {
+        const auto &b = is[i];
+        const auto w = 800 / ecs::grid_w;
+        const auto h = 600 / ecs::grid_h;
+        const auto x = w * (i % ecs::grid_w);
+        const auto y = h * (i / ecs::grid_w);
+
+        boa_fill_colour(b.r, b.g, b.b);
+        boa_fill_rect(x, y, w, h);
+      }
+    });
+  }
+  void quit() {}
 };
-renderer::renderer() : m_data{hai::uptr<r_pimpl>::make()} {}
-renderer::~renderer() {}
-void renderer::setup(casein::native_handle_t) {}
-void renderer::update(const ecs::grid &g) {
-  m_data->map_colours([&](auto is) {
-    constexpr const ecs::rgba on{1, 1, 1, 1};
-    constexpr const ecs::rgba off{0, 0.1, 0, 1};
-
-    for (auto b : g) {
-      *is = b ? on : off;
-      is++;
-    }
-  });
+hai::uptr<renderer> create_renderer() {
+  return hai::uptr<renderer>{new w_renderer{}};
 }
-void renderer::repaint() {
-  m_data->map_colours([&](auto is) {
-    for (auto i = 0; i < ecs::grid_cells; i++) {
-      const auto &b = is[i];
-      const auto w = 800 / ecs::grid_w;
-      const auto h = 600 / ecs::grid_h;
-      const auto x = w * (i % ecs::grid_w);
-      const auto y = h * (i / ecs::grid_w);
-
-      boa_fill_colour(b.r, b.g, b.b);
-      boa_fill_rect(x, y, w, h);
-    }
-  });
-}
-void renderer::quit() {}
 } // namespace boa
