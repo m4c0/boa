@@ -4,7 +4,7 @@ import :render;
 import casein;
 import hai;
 
-extern "C" void boa_fill_colour(unsigned r, unsigned g, unsigned b);
+extern "C" void boa_fill_colour(float r, float g, float b);
 extern "C" void boa_fill_rect(unsigned x, unsigned y, unsigned w, unsigned h);
 
 namespace boa {
@@ -20,7 +20,7 @@ void renderer::setup(casein::native_handle_t) {}
 void renderer::update(const ecs::grid &g) {
   m_data->map_colours([&](auto is) {
     constexpr const ecs::rgba on{1, 1, 1, 1};
-    constexpr const ecs::rgba off{0, 0.3, 0, 1};
+    constexpr const ecs::rgba off{0, 0.1, 0, 1};
 
     for (auto b : g) {
       *is = b ? on : off;
@@ -37,7 +37,7 @@ void renderer::repaint() {
       const auto x = w * (i % ecs::grid_w);
       const auto y = h * (i / ecs::grid_w);
 
-      boa_fill_colour(b.r * 256.0, b.g * 256.0, b.b * 256.0);
+      boa_fill_colour(b.r, b.g, b.b);
       boa_fill_rect(x, y, w, h);
     }
   });

@@ -39,7 +39,10 @@ int main(int argc, char **argv) {
     auto m = add_mod(b);
     m->add_part("wasm");
     m->add_feat<inline_js>("boa_fill_colour", R"((r, g, b) => {
-  ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+  var rr = Math.pow(r, 1.0 / 2.2) * 256.0;
+  var gg = Math.pow(g, 1.0 / 2.2) * 256.0;
+  var bb = Math.pow(b, 1.0 / 2.2) * 256.0;
+  ctx.fillStyle = `rgb(${rr}, ${gg}, ${bb})`;
 })");
     m->add_feat<inline_js>("boa_fill_rect", "ctx.fillRect.bind(ctx)");
   };
