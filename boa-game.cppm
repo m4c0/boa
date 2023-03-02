@@ -44,30 +44,11 @@ class game {
       return;
     if (m_dir == E)
       return;
+
     m_dir = n;
   }
 
-public:
-  constexpr game() { m_snake.push_front(y * ecs::grid_w + x); }
-
-  void up() { update_dir(U, D); }
-  void down() { update_dir(D, U); }
-  void left() { update_dir(L, R); }
-  void right() { update_dir(R, L); }
-
-  [[nodiscard]] ecs::grid grid() {
-    ecs::grid g{};
-    if (m_food != ~0U)
-      g.set(m_food);
-    m_snake.iterate([&](auto p) { g.set(p); });
-    return g;
-  }
-
-  [[nodiscard]] bool tick() {
-    m_ticks++;
-    if (m_ticks % m_tpm > 0)
-      return false;
-
+  [[nodiscard]] bool run_tick() {
     switch (m_dir) {
     case E:
       return false;
@@ -108,6 +89,30 @@ public:
     if (m_snake.size() > m_target)
       m_snake.pop_back();
     return true;
+  }
+
+public:
+  constexpr game() { m_snake.push_front(y * ecs::grid_w + x); }
+
+  void up() { update_dir(U, D); }
+  void down() { update_dir(D, U); }
+  void left() { update_dir(L, R); }
+  void right() { update_dir(R, L); }
+
+  [[nodiscard]] ecs::grid grid() {
+    ecs::grid g{};
+    if (m_food != ~0U)
+      g.set(m_food);
+    m_snake.iterate([&](auto p) { g.set(p); });
+    return g;
+  }
+
+  [[nodiscard]] bool tick() {
+    m_ticks++;
+    if (m_ticks % m_tpm > 0)
+      return false;
+
+    return run_tick();
   }
 };
 } // namespace boa
