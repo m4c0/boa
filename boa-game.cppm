@@ -37,26 +37,23 @@ class game {
     } while (wtf != m_food);
   }
 
+  void update_dir(decltype(m_dir) n, decltype(m_dir) opp) {
+    if (m_dir == n)
+      return;
+    if (m_dir == opp)
+      return;
+    if (m_dir == E)
+      return;
+    m_dir = n;
+  }
+
 public:
   constexpr game() { m_snake.push_front(y * ecs::grid_w + x); }
 
-  // TODO: find a way to avoid walking reverse
-  void up() {
-    if (m_dir != D && m_dir != E)
-      m_dir = U;
-  }
-  void down() {
-    if (m_dir != U && m_dir != E)
-      m_dir = D;
-  }
-  void left() {
-    if (m_dir != R && m_dir != E)
-      m_dir = L;
-  }
-  void right() {
-    if (m_dir != L && m_dir != E)
-      m_dir = R;
-  }
+  void up() { update_dir(U, D); }
+  void down() { update_dir(D, U); }
+  void left() { update_dir(L, R); }
+  void right() { update_dir(R, L); }
 
   [[nodiscard]] ecs::grid grid() {
     ecs::grid g{};
