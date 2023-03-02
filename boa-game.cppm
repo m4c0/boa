@@ -46,6 +46,8 @@ class game {
       return;
 
     m_dir = n;
+    m_ticks = ((m_ticks / m_tpm) + 1) * m_tpm;
+    auto _ = run_tick();
   }
 
   [[nodiscard]] bool run_tick() {
