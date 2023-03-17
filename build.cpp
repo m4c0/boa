@@ -14,10 +14,10 @@ int main(int argc, char **argv) {
     m->add_wsdep("hai", hai());
     m->add_wsdep("sires", sires());
     m->add_wsdep("traits", traits());
+    m->add_part("render");
     m->add_part("ecs_objects");
     m->add_part("xorll");
     m->add_part("game");
-    m->add_part("render");
     m->add_part("casein");
     return m;
   };

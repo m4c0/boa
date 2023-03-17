@@ -17,7 +17,7 @@ public:
 
   [[nodiscard]] auto operator*() const noexcept { return *m_buf; }
 
-  void map(auto fn) { vee::map_memory<Tp>(*m_mem, fn); }
+  void map(auto &&fn) { vee::map_memory<Tp>(*m_mem, fn); }
 };
 struct pcs {
   ecs::xy grid_pos{ecs::grid_w / 2, ecs::grid_h / 2};
@@ -44,7 +44,7 @@ class pipeline {
       {
           vee::vertex_input_bind(sizeof(ecs::xy)),
           vee::vertex_input_bind_per_instance(sizeof(ecs::xy)),
-          vee::vertex_input_bind_per_instance(sizeof(ecs::rgba)),
+          vee::vertex_input_bind_per_instance(sizeof(quad)),
       },
       {
           vee::vertex_attribute_vec2(0, 0),
@@ -57,7 +57,7 @@ class pipeline {
 
   bound_buffer<ecs::xy, v_count> vertices{dev};
   bound_buffer<ecs::xy, i_count> instance_pos{dev};
-  bound_buffer<ecs::rgba, i_count> instance_colour{dev};
+  bound_buffer<quad, i_count> instance_colour{dev};
 
   void map_vertices() {
     vertices.map([](auto vs) {
@@ -88,7 +88,7 @@ public:
     map_instances_pos();
   }
 
-  void map_instances_colour(auto fn) { instance_colour.map(fn); }
+  void map_instances_colour(auto &&fn) { instance_colour.map(fn); }
 
   void build_commands(vee::command_buffer cb) const {
     const auto extent = ext->extent_2d();

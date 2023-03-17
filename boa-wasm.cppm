@@ -9,12 +9,12 @@ extern "C" void boa_fill_rect(unsigned x, unsigned y, unsigned w, unsigned h);
 
 namespace boa {
 class w_renderer : public renderer {
-  ecs::rgba m_map[ecs::grid_cells];
+  quad m_map[ecs::grid_cells];
 
 public:
-  void setup(casein::native_handle_t) {}
-  void update(const ecs::grid2colour &g) { g(m_map); }
-  void repaint() {
+  void setup(casein::native_handle_t) override {}
+  void update(const filler &g) override { g(m_map); }
+  void repaint() override {
     for (auto i = 0; i < ecs::grid_cells; i++) {
       const auto &b = m_map[i];
       const auto w = 800 / ecs::grid_w;
@@ -26,7 +26,7 @@ public:
       boa_fill_rect(x, y, w, h);
     }
   }
-  void quit() {}
+  void quit() override {}
 };
 hai::uptr<renderer> create_renderer() {
   return hai::uptr<renderer>{new w_renderer{}};
