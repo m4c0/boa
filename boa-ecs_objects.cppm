@@ -20,8 +20,8 @@ public:
   [[nodiscard]] const auto end() const noexcept { return &m_data[grid_cells]; }
 };
 
-struct gridpos : public quack::filler<quack::pos> {
-  void operator()(quack::pos *is) const noexcept override {
+struct gridpos {
+  void operator()(quack::pos *is) const noexcept {
     unsigned i = 0;
     for (auto y = 0; y < ecs::grid_h; y++) {
       for (auto x = 0; x < ecs::grid_w; x++, i++) {
@@ -31,13 +31,13 @@ struct gridpos : public quack::filler<quack::pos> {
     }
   }
 };
-class grid2colour : public quack::filler<quack::colour> {
+class grid2colour {
   const grid &m_g;
 
 public:
   explicit constexpr grid2colour(const grid &g) : m_g{g} {}
 
-  void operator()(quack::colour *is) const noexcept override {
+  void operator()(quack::colour *is) const noexcept {
     constexpr const quack::colour on{1, 1, 1, 1};
     constexpr const quack::colour off{0, 0.1, 0, 1};
 
