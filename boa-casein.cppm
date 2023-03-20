@@ -1,22 +1,26 @@
 export module boa:casein;
 import :game;
-import :render;
 import casein;
-import hai;
+import quack;
 
 extern "C" void casein_handle(const casein::event &e) {
   static boa::game g{};
-  static hai::uptr<boa::renderer> r = boa::create_renderer();
+  static quack::renderer r{quack::params{
+      .grid_w = boa::ecs::grid_w,
+      .grid_h = boa::ecs::grid_h,
+      .max_quads = boa::ecs::grid_cells,
+  }};
 
   switch (e.type()) {
   case casein::CREATE_WINDOW:
-    r->setup(e.as<casein::events::create_window>().native_window_handle());
-    r->update(boa::ecs::grid2colour{g.grid()});
+    r.setup(e.as<casein::events::create_window>().native_window_handle());
+    r.fill_pos(boa::ecs::gridpos{});
+    r.fill_colour(boa::ecs::grid2colour{g.grid()});
     break;
   case casein::REPAINT:
     if (g.tick())
-      r->update(boa::ecs::grid2colour{g.grid()});
-    r->repaint();
+      r.fill_colour(boa::ecs::grid2colour{g.grid()});
+    r.repaint(boa::ecs::grid_cells);
     break;
   case casein::KEY_DOWN:
     switch (e.as<casein::events::key_down>().key()) {
@@ -38,10 +42,10 @@ extern "C" void casein_handle(const casein::event &e) {
     default:
       break;
     }
-    r->update(boa::ecs::grid2colour{g.grid()});
+    r.fill_colour(boa::ecs::grid2colour{g.grid()});
     break;
   case casein::QUIT:
-    r->quit();
+    r.quit();
     break;
   default:
     break;
