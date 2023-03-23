@@ -19,8 +19,8 @@ jobs:
           os: ${{ matrix.os }}
       - name: 🧴 Setup Casein
         uses: m4c0/casein/.github/actions/deps@main
-      - name: 🌋 Setup Vee
-        uses: m4c0/vee/.github/actions/deps@main
+      - name: 🦆 Setup Quack
+        uses: m4c0/quack/.github/actions/deps@main
       - name: 🖖 Install glslang
         uses: m4c0/vee/.github/actions/glslang@main
         with:
