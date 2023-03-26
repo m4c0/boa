@@ -16,6 +16,7 @@ extern "C" void casein_handle(const casein::event &e) {
     r.setup(e.as<casein::events::create_window>().native_window_handle());
     r.fill_pos(boa::ecs::gridpos{});
     r.fill_colour(boa::ecs::grid2colour{g.grid()});
+    r.load_atlas(16, 16, [](auto *) {});
     break;
   case casein::REPAINT:
     if (g.tick())
