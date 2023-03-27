@@ -1,9 +1,6 @@
 #include "../casein/build.hpp"
 #include "../ecow/ecow.hpp"
-#include "../hai/build.hpp"
 #include "../quack/build.hpp"
-#include "../traits/build.hpp"
-#include "../vee/build.hpp"
 
 int main(int argc, char **argv) {
   using namespace ecow;
@@ -16,7 +13,6 @@ int main(int argc, char **argv) {
   m->add_part("ecs_objects");
   m->add_part("xorll");
   m->add_part("game");
-  m->add_part("casein");
 
   return run_main(a, argc, argv);
 }
