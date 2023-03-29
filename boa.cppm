@@ -11,9 +11,10 @@ extern "C" void casein_handle(const casein::event &e) {
       .max_quads = boa::ecs::grid_cells,
   }};
 
+  r.process_event(e);
+
   switch (e.type()) {
   case casein::CREATE_WINDOW:
-    r.setup(*e.as<casein::events::create_window>());
     r.fill_pos(boa::ecs::gridpos{});
     r.fill_colour(boa::ecs::grid2colour{g.grid()});
     r.load_atlas(16, 16, [](auto *) {});
@@ -44,9 +45,6 @@ extern "C" void casein_handle(const casein::event &e) {
       break;
     }
     r.fill_colour(boa::ecs::grid2colour{g.grid()});
-    break;
-  case casein::QUIT:
-    r.quit();
     break;
   default:
     break;
