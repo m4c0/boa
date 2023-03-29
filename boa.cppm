@@ -13,7 +13,7 @@ extern "C" void casein_handle(const casein::event &e) {
 
   switch (e.type()) {
   case casein::CREATE_WINDOW:
-    r.setup(e.as<casein::events::create_window>().native_window_handle());
+    r.setup(*e.as<casein::events::create_window>());
     r.fill_pos(boa::ecs::gridpos{});
     r.fill_colour(boa::ecs::grid2colour{g.grid()});
     r.load_atlas(16, 16, [](auto *) {});
@@ -24,7 +24,7 @@ extern "C" void casein_handle(const casein::event &e) {
     r.repaint(boa::ecs::grid_cells);
     break;
   case casein::KEY_DOWN:
-    switch (e.as<casein::events::key_down>().key()) {
+    switch (*e.as<casein::events::key_down>()) {
     case casein::K_UP:
       g.up();
       break;
