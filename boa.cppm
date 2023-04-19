@@ -23,6 +23,28 @@ extern "C" void casein_handle(const casein::event &e) {
     if (g.tick())
       il.batch()->colours().map(boa::ecs::grid2colour{g.grid()});
     break;
+  case casein::GESTURE:
+    switch (*e.as<casein::events::gesture>()) {
+    case casein::G_SWIPE_UP:
+      g.up();
+      break;
+    case casein::G_SWIPE_DOWN:
+      g.down();
+      break;
+    case casein::G_SWIPE_LEFT:
+      g.left();
+      break;
+    case casein::G_SWIPE_RIGHT:
+      g.right();
+      break;
+    case casein::G_SHAKE:
+      g = {};
+      break;
+    default:
+      break;
+    }
+    il.batch()->colours().map(boa::ecs::grid2colour{g.grid()});
+    break;
   case casein::KEY_DOWN:
     switch (*e.as<casein::events::key_down>()) {
     case casein::K_UP:
