@@ -13,6 +13,7 @@ int main(int argc, char **argv) {
   m->add_part("ecs_objects");
   m->add_part("xorll");
   m->add_part("game");
+  m->add_part("agg");
 
   return run_main(a, argc, argv);
 }

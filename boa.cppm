@@ -1,114 +1,70 @@
 export module boa;
-import :game;
+import :agg;
 import casein;
-import quack;
 
-namespace boa {
-class agg {
-  game m_g{};
-  quack::renderer m_r{1};
-  quack::instance_layout<bool, boa::ecs::grid_cells> m_il{&m_r};
+class event_map {
+  using callback = void (*)(const casein::event &e);
+
+  callback m_map[casein::MAX_EVENT_TYPE];
 
 public:
-  void process_event(const casein::event &e) {
-    m_r.process_event(e);
-    m_il.process_event(e);
+  [[nodiscard]] constexpr auto &operator[](casein::event_type idx) noexcept {
+    return m_map[idx];
   }
 
-  void create_window() {
-    m_il.batch()->positions().map(boa::ecs::gridpos{});
-    m_il.batch()->colours().map(boa::ecs::grid2colour{m_g.grid()});
-    m_il.batch()->resize(boa::ecs::grid_w, boa::ecs::grid_h, boa::ecs::grid_w,
-                         boa::ecs::grid_h);
-    m_r.load_atlas(16, 16, [](auto *) {});
-  }
-
-  void paint() {
-    m_il.batch()->colours().map(boa::ecs::grid2colour{m_g.grid()});
-  }
-  void repaint() {
-    if (m_g.tick())
-      paint();
-  }
-
-  void up() {
-    m_g.up();
-    paint();
-  }
-  void down() {
-    m_g.down();
-    paint();
-  }
-  void left() {
-    m_g.left();
-    paint();
-  }
-  void right() {
-    m_g.right();
-    paint();
-  }
-
-  void reset() {
-    m_g = {};
-    paint();
+  constexpr void handle(const casein::event &e) const {
+    auto fn = m_map[e.type()];
+    if (fn)
+      fn(e);
   }
 };
-} // namespace boa
+
+template <typename ET, ET::type Max> class subevent_map {
+  using callback = void (*)(const casein::event &e);
+
+  callback m_map[Max];
+
+public:
+  [[nodiscard]] constexpr auto &operator[](ET::type idx) noexcept {
+    return m_map[idx];
+  }
+
+  constexpr void handle(const casein::event &e) const {
+    auto fn = m_map[*e.as<ET>()];
+    if (fn)
+      fn(e);
+  }
+};
 
 extern "C" void casein_handle(const casein::event &e) {
   static boa::agg gg{};
-  gg.process_event(e);
+  static constexpr auto g_map = [] {
+    subevent_map<casein::events::gesture, casein::G_MAX> res{};
+    res[casein::G_SWIPE_UP] = [](auto) { gg.up(); };
+    res[casein::G_SWIPE_DOWN] = [](auto) { gg.down(); };
+    res[casein::G_SWIPE_LEFT] = [](auto) { gg.left(); };
+    res[casein::G_SWIPE_RIGHT] = [](auto) { gg.right(); };
+    res[casein::G_SHAKE] = [](auto) { gg.reset(); };
+    return res;
+  }();
+  static constexpr auto k_map = [] {
+    subevent_map<casein::events::key_down, casein::K_MAX> res{};
+    res[casein::K_UP] = [](auto) { gg.up(); };
+    res[casein::K_DOWN] = [](auto) { gg.down(); };
+    res[casein::K_LEFT] = [](auto) { gg.left(); };
+    res[casein::K_RIGHT] = [](auto) { gg.right(); };
+    res[casein::K_SPACE] = [](auto) { gg.reset(); };
+    return res;
+  }();
+  static constexpr auto map = [] {
+    event_map res{};
+    res[casein::CREATE_WINDOW] = [](auto) { gg.create_window(); };
+    res[casein::REPAINT] = [](auto) { gg.repaint(); };
+    res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
+    res[casein::KEY_DOWN] = [](auto e) { k_map.handle(e); };
+    return res;
+  }();
 
-  switch (e.type()) {
-  case casein::CREATE_WINDOW:
-    gg.create_window();
-    break;
-  case casein::REPAINT:
-    gg.repaint();
-    break;
-  case casein::GESTURE:
-    switch (*e.as<casein::events::gesture>()) {
-    case casein::G_SWIPE_UP:
-      gg.up();
-      break;
-    case casein::G_SWIPE_DOWN:
-      gg.down();
-      break;
-    case casein::G_SWIPE_LEFT:
-      gg.left();
-      break;
-    case casein::G_SWIPE_RIGHT:
-      gg.right();
-      break;
-    case casein::G_SHAKE:
-      gg.reset();
-      break;
-    default:
-      break;
-    }
-    break;
-  case casein::KEY_DOWN:
-    switch (*e.as<casein::events::key_down>()) {
-    case casein::K_UP:
-      gg.up();
-      break;
-    case casein::K_DOWN:
-      gg.down();
-      break;
-    case casein::K_LEFT:
-      gg.left();
-      break;
-    case casein::K_RIGHT:
-      gg.right();
-      break;
-    case casein::K_SPACE:
-      gg.reset();
-      break;
-    default:
-      break;
-    }
-    break;
-  default:
-    break;
-  }
+  gg.process_event(e);
+  map.handle(e);
 }
