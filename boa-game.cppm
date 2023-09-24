@@ -13,7 +13,7 @@ export class game {
   static constexpr const auto random_prime = 5393;
 
   enum { O, L, R, U, D, E } m_dir{};
-  xor_ll m_snake{};
+  xor_ll m_snake{ecs::grid_cells};
   unsigned m_ticks{};
   unsigned m_tpm{max_ticks_per_move};
   unsigned m_fpd{food_per_decrement};

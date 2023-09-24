@@ -1,15 +1,17 @@
 export module boa:xorll;
-import :ecs_objects;
+import hai;
 
 namespace boa {
 class xor_ll {
   static constexpr const auto null = ~0U;
-  unsigned m_data[ecs::grid_cells]{};
+  hai::array<unsigned> m_data;
   unsigned m_start{null};
   unsigned m_end{null};
   unsigned m_size{0};
 
 public:
+  constexpr xor_ll(unsigned cells) : m_data{cells} {}
+
   constexpr void iterate(auto fn) const noexcept {
     unsigned it = m_start;
     unsigned prev = null;
@@ -47,26 +49,26 @@ public:
     m_end = last;
   }
 };
-static_assert(xor_ll{}.size() == 0);
+static_assert(xor_ll{32}.size() == 0);
 static_assert([] {
-  xor_ll l{};
+  xor_ll l{32};
   l.push_front(5);
   return l.size() == 1;
 }());
 static_assert([] {
-  xor_ll l{};
+  xor_ll l{32};
   l.push_front(3);
   l.push_front(4);
   return l.size() == 2;
 }());
 static_assert([] {
-  xor_ll l{};
+  xor_ll l{32};
   l.push_front(9);
   l.pop_back();
   return l.size() == 0;
 }());
 static_assert([] {
-  xor_ll l{};
+  xor_ll l{32};
   l.push_front(6);
   l.push_front(7);
   l.push_front(8);
@@ -74,7 +76,7 @@ static_assert([] {
   return l.size() == 2;
 }());
 static_assert([] {
-  xor_ll l{};
+  xor_ll l{32};
   l.push_front(6);
   l.push_front(7);
   l.push_front(8);
