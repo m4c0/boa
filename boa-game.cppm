@@ -1,6 +1,7 @@
 export module boa:game;
 import :ecs_objects;
 import :xorll;
+import hai;
 
 namespace boa {
 export class game {
@@ -101,11 +102,11 @@ public:
   void left() { update_dir(L, R); }
   void right() { update_dir(R, L); }
 
-  [[nodiscard]] ecs::grid grid() {
-    ecs::grid g{};
+  [[nodiscard]] auto grid() {
+    hai::array<bool> g{ecs::grid_cells};
     if (m_food != ~0U)
-      g.set(m_food);
-    m_snake.iterate([&](auto p) { g.set(p); });
+      g[m_food] = true;
+    m_snake.iterate([&](auto p) { g[p] = true; });
     return g;
   }
 
