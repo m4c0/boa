@@ -5,13 +5,12 @@ import casein;
 import quack;
 
 class agg {
-  static constexpr const auto grid_h = 24;
-  static constexpr const auto grid_w = 32;
-  static constexpr const auto grid_cells = grid_w * grid_h;
+  static constexpr const auto grid_size = 24;
+  static constexpr const auto max_cells = grid_size * grid_size * 2;
 
-  boa::game m_g{grid_w, grid_h};
+  boa::game m_g{grid_size * 3 / 2, grid_size};
   quack::renderer m_r{1};
-  quack::ilayout m_il{&m_r, grid_cells};
+  quack::ilayout m_il{&m_r, max_cells};
 
 public:
   void process_event(const casein::event &e) {
@@ -20,11 +19,15 @@ public:
   }
 
   void create_window() {
+    auto grid_h = m_g.grid_height();
+    auto grid_w = m_g.grid_width();
+    auto grid_cells = grid_w * grid_h;
+
     m_il->center_at(grid_w / 2.0, grid_h / 2.0);
     m_il->set_grid(grid_w, grid_h);
     m_il->set_count(grid_cells);
     m_il->load_atlas(16, 16, [](auto *) {});
-    m_il->map_all([](auto p) {
+    m_il->map_all([grid_w, grid_h](auto p) {
       auto &[cs, ms, ps, us] = p;
       for (float y = 0; y < grid_h; y++) {
         for (float x = 0; x < grid_w; x++) {
@@ -71,7 +74,7 @@ public:
   }
 
   void reset() {
-    m_g = {grid_w, grid_h};
+    m_g = {m_g.grid_width(), m_g.grid_height()};
     paint();
   }
 };

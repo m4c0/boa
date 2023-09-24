@@ -101,6 +101,9 @@ public:
     m_snake.push_front(y * grid_w + x);
   }
 
+  [[nodiscard]] constexpr auto grid_width() const noexcept { return grid_w; }
+  [[nodiscard]] constexpr auto grid_height() const noexcept { return grid_h; }
+
   void up() { update_dir(U, D); }
   void down() { update_dir(D, U); }
   void left() { update_dir(L, R); }
