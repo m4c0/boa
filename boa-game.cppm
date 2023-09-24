@@ -5,7 +5,7 @@ import :xorll;
 namespace boa {
 export class game {
   static constexpr const auto min_ticks_per_move = 2;
-  static constexpr const auto max_ticks_per_move = 10;
+  static constexpr const auto max_ticks_per_move = 8;
   static constexpr const auto food_per_decrement = 4;
   static constexpr const auto initial_size = 3;
   static constexpr const auto size_increment = 3;
