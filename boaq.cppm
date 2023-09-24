@@ -5,11 +5,11 @@ import casein;
 import quack;
 
 class agg {
-  static constexpr const auto grid_h = boa::ecs::grid_h;
-  static constexpr const auto grid_w = boa::ecs::grid_w;
-  static constexpr const auto grid_cells = boa::ecs::grid_cells;
+  static constexpr const auto grid_h = 24;
+  static constexpr const auto grid_w = 32;
+  static constexpr const auto grid_cells = grid_w * grid_h;
 
-  boa::game m_g{};
+  boa::game m_g{grid_w, grid_h};
   quack::renderer m_r{1};
   quack::ilayout m_il{&m_r, grid_cells};
 
@@ -71,7 +71,7 @@ public:
   }
 
   void reset() {
-    m_g = {};
+    m_g = {grid_w, grid_h};
     paint();
   }
 };
