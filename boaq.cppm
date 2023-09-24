@@ -4,29 +4,14 @@ import boa;
 import casein;
 import quack;
 
-using namespace boa;
-
-class grid2colour {
-  const ecs::grid &m_g;
-
-public:
-  explicit constexpr grid2colour(const ecs::grid &g) : m_g{g} {}
-
-  void operator()(quack::colour *is) const noexcept {
-    constexpr const quack::colour on{1, 1, 1, 1};
-    constexpr const quack::colour off{0, 0.1, 0, 1};
-
-    for (auto b : m_g) {
-      *is = b ? on : off;
-      is++;
-    }
-  }
-};
-
 class agg {
-  game m_g{};
+  static constexpr const auto grid_h = boa::ecs::grid_h;
+  static constexpr const auto grid_w = boa::ecs::grid_w;
+  static constexpr const auto grid_cells = boa::ecs::grid_cells;
+
+  boa::game m_g{};
   quack::renderer m_r{1};
-  quack::ilayout m_il{&m_r, ecs::grid_cells};
+  quack::ilayout m_il{&m_r, grid_cells};
 
 public:
   void process_event(const casein::event &e) {
@@ -35,14 +20,14 @@ public:
   }
 
   void create_window() {
-    m_il->center_at(ecs::grid_w / 2.0, ecs::grid_h / 2.0);
-    m_il->set_grid(ecs::grid_w, ecs::grid_h);
-    m_il->set_count(ecs::grid_cells);
+    m_il->center_at(grid_w / 2.0, grid_h / 2.0);
+    m_il->set_grid(grid_w, grid_h);
+    m_il->set_count(grid_cells);
     m_il->load_atlas(16, 16, [](auto *) {});
     m_il->map_all([](auto p) {
       auto &[cs, ms, ps, us] = p;
-      for (float y = 0; y < ecs::grid_h; y++) {
-        for (float x = 0; x < ecs::grid_w; x++) {
+      for (float y = 0; y < grid_h; y++) {
+        for (float x = 0; x < grid_w; x++) {
           *ps++ = {{x, y}, {1, 1}};
           *us++ = {};
           *ms++ = {1, 1, 1, 1};
@@ -52,7 +37,17 @@ public:
     paint();
   }
 
-  void paint() { m_il->map_colours(grid2colour{m_g.grid()}); }
+  void paint() {
+    m_il->map_colours([this](quack::colour *is) {
+      constexpr const quack::colour on{1, 1, 1, 1};
+      constexpr const quack::colour off{0, 0.1, 0, 1};
+
+      for (auto b : m_g.grid()) {
+        *is = b ? on : off;
+        is++;
+      }
+    });
+  }
   void repaint() {
     if (m_g.tick())
       paint();
