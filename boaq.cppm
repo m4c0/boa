@@ -5,10 +5,9 @@ import casein;
 import quack;
 
 class agg {
-  static constexpr const auto grid_size = 24;
-  static constexpr const auto max_cells = grid_size * grid_size * 2;
+  static constexpr const auto max_cells = 128 * 128;
 
-  boa::game m_g{grid_size * 3 / 2, grid_size};
+  boa::game m_g{32, 24};
   quack::renderer m_r{1};
   quack::ilayout m_il{&m_r, max_cells};
 
@@ -18,11 +17,18 @@ public:
     m_il.process_event(e);
   }
 
-  void create_window() {
-    auto grid_h = m_g.grid_height();
-    auto grid_w = m_g.grid_width();
+  void create_window() { resize(32, 24); }
+  void resize(unsigned w, unsigned h) {
+    auto grid_h = 24U;
+    auto grid_w = grid_h;
+    if (w > h) {
+      grid_w = grid_w * w / h;
+    } else {
+      grid_h = grid_h * h / w;
+    }
     auto grid_cells = grid_w * grid_h;
 
+    m_g = {grid_w, grid_h};
     m_il->center_at(grid_w / 2.0, grid_h / 2.0);
     m_il->set_grid(grid_w, grid_h);
     m_il->set_count(grid_cells);
@@ -102,6 +108,10 @@ extern "C" void casein_handle(const casein::event &e) {
   static constexpr auto map = [] {
     casein::event_map res{};
     res[casein::CREATE_WINDOW] = [](auto) { gg.create_window(); };
+    res[casein::RESIZE_WINDOW] = [](const casein::event &e) {
+      auto [w, h, a, b] = *e.as<casein::events::resize_window>();
+      gg.resize(w, h);
+    };
     res[casein::REPAINT] = [](auto) { gg.repaint(); };
     res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
     res[casein::KEY_DOWN] = [](auto e) { k_map.handle(e); };
