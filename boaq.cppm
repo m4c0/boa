@@ -43,7 +43,7 @@ public:
       auto &[cs, ms, ps, us] = p;
       for (float y = 0; y < ecs::grid_h; y++) {
         for (float x = 0; x < ecs::grid_w; x++) {
-          *ps++ = {{x, y}};
+          *ps++ = {{x, y}, {1, 1}};
           *us++ = {};
           *ms++ = {1, 1, 1, 1};
         }
