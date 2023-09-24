@@ -3,7 +3,7 @@ import :ecs_objects;
 import :xorll;
 
 namespace boa {
-class game {
+export class game {
   static constexpr const auto min_ticks_per_move = 2;
   static constexpr const auto max_ticks_per_move = 10;
   static constexpr const auto food_per_decrement = 4;
@@ -47,7 +47,7 @@ class game {
 
     m_dir = n;
     m_ticks = ((m_ticks / m_tpm) + 1) * m_tpm;
-    auto _ = run_tick();
+    [[maybe_unused]] auto _ = run_tick();
   }
 
   [[nodiscard]] bool run_tick() {
