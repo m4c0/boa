@@ -1,4 +1,3 @@
-#pragma leco app
 export module boaq;
 import boa;
 import casein;
