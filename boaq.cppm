@@ -19,7 +19,7 @@ public:
 
   void create_window() { resize(32, 24); }
   void resize(unsigned w, unsigned h) {
-    auto grid_h = 24U;
+    auto grid_h = 24.0f;
     auto grid_w = grid_h;
     if (w > h) {
       grid_w = grid_w * w / h;
@@ -28,9 +28,9 @@ public:
     }
     auto grid_cells = grid_w * grid_h;
 
-    silog::log(silog::info, "using a %dx%d board", grid_w, grid_h);
+    silog::log(silog::info, "using a %.2f%.2f board", grid_w, grid_h);
 
-    m_g = {grid_w, grid_h};
+    m_g = {static_cast<unsigned>(grid_w), static_cast<unsigned>(grid_h)};
     m_il->center_at(grid_w / 2.0, grid_h / 2.0);
     m_il->set_grid(grid_w, grid_h);
     m_il->resize(w, h);
