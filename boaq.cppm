@@ -26,39 +26,38 @@ public:
     } else {
       grid_h = grid_h * h / w;
     }
-    auto grid_cells = grid_w * grid_h;
 
-    silog::log(silog::info, "using a %.2f%.2f board", grid_w, grid_h);
+    silog::log(silog::info, "using a %.2fx%.2f board", grid_w, grid_h);
 
     m_g = {static_cast<unsigned>(grid_w), static_cast<unsigned>(grid_h)};
     m_il->center_at(grid_w / 2.0, grid_h / 2.0);
     m_il->set_grid(grid_w, grid_h);
     m_il->resize(w, h);
-    m_il->set_count(grid_cells);
     m_il->load_atlas(16, 16, [](auto *) {});
-    m_il->map_all([grid_w, grid_h](auto p) {
-      auto &[cs, ms, ps, us] = p;
-      for (float y = 0; y < grid_h; y++) {
-        for (float x = 0; x < grid_w; x++) {
-          *ps++ = {{x, y}, {1, 1}};
-          *us++ = {};
-          *ms++ = {1, 1, 1, 1};
-        }
-      }
-    });
     paint();
   }
 
   void paint() {
-    m_il->map_colours([this](quack::colour *is) {
-      constexpr const quack::colour on{1, 1, 1, 1};
-      constexpr const quack::colour off{0, 0.1, 0, 1};
-
-      for (auto b : m_g.grid()) {
-        *is = b ? on : off;
-        is++;
+    auto count = 0;
+    m_il->map_all([&](auto p) {
+      auto &[cs, ms, ps, us] = p;
+      const auto paint = [&](auto x, auto y) {
+        auto xf = static_cast<float>(x);
+        auto yf = static_cast<float>(y);
+        *ps++ = {{xf, yf}, {1, 1}};
+        *us++ = {};
+        *ms++ = {1, 1, 1, 1};
+        count++;
+      };
+      for (auto [x, y] : m_g) {
+        paint(x, y);
+        *cs++ = {1, 1, 0, 1};
       }
+      auto [x, y] = m_g.food();
+      paint(x, y);
+      *cs++ = {1, 0, 1, 1};
     });
+    m_il->set_count(count);
   }
   void repaint() {
     if (m_g.tick())

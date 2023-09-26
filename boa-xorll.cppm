@@ -2,8 +2,29 @@ export module boa:xorll;
 import hai;
 
 namespace boa {
+static constexpr const auto null = ~0U;
+
+class xor_ll_iter {
+  const unsigned *m_data{};
+  unsigned m_pos{null};
+  unsigned m_prev{null};
+
+public:
+  constexpr xor_ll_iter() = default;
+  constexpr xor_ll_iter(const unsigned *d, unsigned p) : m_data{d}, m_pos{p} {}
+
+  constexpr auto operator*() const noexcept { return m_pos; }
+  constexpr bool operator==(xor_ll_iter o) const noexcept {
+    return m_pos == o.m_pos;
+  }
+  constexpr auto &operator++() noexcept {
+    auto p = m_prev;
+    m_prev = m_pos;
+    m_pos = p ^ m_data[m_pos];
+    return *this;
+  }
+};
 class xor_ll {
-  static constexpr const auto null = ~0U;
   hai::array<unsigned> m_data;
   unsigned m_start{null};
   unsigned m_end{null};
@@ -12,14 +33,14 @@ class xor_ll {
 public:
   constexpr xor_ll(unsigned cells) : m_data{cells} {}
 
+  constexpr auto begin() const noexcept {
+    return xor_ll_iter{m_data.begin(), m_start};
+  }
+  constexpr auto end() const noexcept { return xor_ll_iter{}; }
+
   constexpr void iterate(auto fn) const noexcept {
-    unsigned it = m_start;
-    unsigned prev = null;
-    while (it != null) {
-      fn(it);
-      auto p = prev;
-      prev = it;
-      it = p ^ m_data[it];
+    for (auto it = begin(); it != end(); ++it) {
+      fn(*it);
     }
   }
   constexpr bool is_empty(unsigned p) const noexcept { return m_data[p] == 0; }

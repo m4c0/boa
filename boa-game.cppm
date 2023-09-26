@@ -3,6 +3,26 @@ import :xorll;
 import hai;
 
 namespace boa {
+export struct point {
+  unsigned x;
+  unsigned y;
+};
+constexpr auto p2point(unsigned p, unsigned w) { return point{p % w, p / w}; }
+
+class snake_iter {
+  xor_ll_iter m_it;
+  unsigned m_w;
+
+public:
+  explicit constexpr snake_iter(xor_ll_iter i, unsigned w) : m_it{i}, m_w{w} {}
+
+  constexpr auto operator*() const noexcept { return p2point(*m_it, m_w); }
+  constexpr bool operator==(snake_iter o) noexcept { return m_it == o.m_it; }
+  constexpr auto &operator++() noexcept {
+    ++m_it;
+    return *this;
+  }
+};
 export class game {
   static constexpr const auto min_ticks_per_move = 2;
   static constexpr const auto max_ticks_per_move = 8;
@@ -109,12 +129,14 @@ public:
   void left() { update_dir(L, R); }
   void right() { update_dir(R, L); }
 
-  [[nodiscard]] auto grid() {
-    hai::array<bool> g{grid_cells};
-    if (m_food != ~0U)
-      g[m_food] = true;
-    m_snake.iterate([&](auto p) { g[p] = true; });
-    return g;
+  [[nodiscard]] constexpr auto begin() const noexcept {
+    return snake_iter{m_snake.begin(), grid_w};
+  }
+  [[nodiscard]] constexpr auto end() const noexcept {
+    return snake_iter{m_snake.end(), grid_w};
+  }
+  [[nodiscard]] constexpr auto food() const noexcept {
+    return p2point(m_food, grid_w);
   }
 
   [[nodiscard]] bool tick() {
