@@ -2,6 +2,7 @@ export module boaq;
 import boa;
 import casein;
 import quack;
+import silog;
 
 class agg {
   static constexpr const auto max_cells = 128 * 128;
@@ -26,6 +27,8 @@ public:
       grid_h = grid_h * h / w;
     }
     auto grid_cells = grid_w * grid_h;
+
+    silog::log(silog::info, "using a %dx%d board", grid_w, grid_h);
 
     m_g = {grid_w, grid_h};
     m_il->center_at(grid_w / 2.0, grid_h / 2.0);
