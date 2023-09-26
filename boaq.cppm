@@ -33,6 +33,7 @@ public:
     m_g = {grid_w, grid_h};
     m_il->center_at(grid_w / 2.0, grid_h / 2.0);
     m_il->set_grid(grid_w, grid_h);
+    m_il->resize(w, h);
     m_il->set_count(grid_cells);
     m_il->load_atlas(16, 16, [](auto *) {});
     m_il->map_all([grid_w, grid_h](auto p) {
