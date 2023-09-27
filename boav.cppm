@@ -35,6 +35,23 @@ public:
       try {
         // Swapchain
         vee::swapchain swc = vee::create_swapchain(pd, *s);
+        auto swc_imgs = vee::get_swapchain_images(*swc);
+
+        vee::image d_img = vee::create_depth_image(pd, *s);
+        vee::device_memory d_mem = vee::create_local_image_memory(pd, *d_img);
+        vee::bind_image_memory(*d_img, *d_mem);
+        vee::image_view d_iv = vee::create_depth_image_view(*d_img);
+
+        vee::extent ext = vee::get_surface_capabilities(pd, *s).currentExtent;
+        vee::image_view c_iv = vee::create_rgba_image_view(swc_imgs[0], pd, *s);
+        vee::render_pass rp = vee::create_render_pass(pd, *s);
+        vee::framebuffer fb = vee::create_framebuffer({
+            .physical_device = pd,
+            .surface = *s,
+            .render_pass = *rp,
+            .image_buffer = *c_iv,
+            .depth_buffer = *d_iv,
+        });
 
         while (!interrupted()) {
           // Flip
@@ -43,6 +60,14 @@ public:
 
           // Build command buffer
           vee::begin_cmd_buf_one_time_submit(cb);
+          vee::cmd_begin_render_pass({
+              .command_buffer = cb,
+              .render_pass = *rp,
+              .framebuffer = *fb,
+              .extent = ext,
+              .clear_color = {{0.1, 0.2, 0.3, 1.0}},
+          });
+          vee::cmd_end_render_pass(cb);
           vee::end_cmd_buf(cb);
 
           // Submit and present
