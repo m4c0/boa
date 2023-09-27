@@ -73,7 +73,7 @@ public:
               .render_pass = *rp,
               .framebuffer = *fbs[idx],
               .extent = ext,
-              .clear_color = {{0.1, 0.2, 0.3, 1.0}},
+              .clear_color = {{0.01, 0.02, 0.05, 1.0}},
           });
           vee::cmd_end_render_pass(cb);
           vee::end_cmd_buf(cb);
