@@ -1,5 +1,6 @@
 export module boav;
 import casein;
+import hai;
 import sith;
 import vee;
 
@@ -37,21 +38,28 @@ public:
         vee::swapchain swc = vee::create_swapchain(pd, *s);
         auto swc_imgs = vee::get_swapchain_images(*swc);
 
+        // Depth buffer
         vee::image d_img = vee::create_depth_image(pd, *s);
         vee::device_memory d_mem = vee::create_local_image_memory(pd, *d_img);
         vee::bind_image_memory(*d_img, *d_mem);
         vee::image_view d_iv = vee::create_depth_image_view(*d_img);
 
         vee::extent ext = vee::get_surface_capabilities(pd, *s).currentExtent;
-        vee::image_view c_iv = vee::create_rgba_image_view(swc_imgs[0], pd, *s);
         vee::render_pass rp = vee::create_render_pass(pd, *s);
-        vee::framebuffer fb = vee::create_framebuffer({
-            .physical_device = pd,
-            .surface = *s,
-            .render_pass = *rp,
-            .image_buffer = *c_iv,
-            .depth_buffer = *d_iv,
-        });
+
+        // Frame buffers
+        hai::array<vee::image_view> c_ivs{swc_imgs.size()};
+        hai::array<vee::framebuffer> fbs{swc_imgs.size()};
+        for (auto i = 0; i < fbs.size(); i++) {
+          c_ivs[i] = vee::create_rgba_image_view(swc_imgs[i], pd, *s);
+          fbs[i] = vee::create_framebuffer({
+              .physical_device = pd,
+              .surface = *s,
+              .render_pass = *rp,
+              .image_buffer = *c_ivs[i],
+              .depth_buffer = *d_iv,
+          });
+        }
 
         while (!interrupted()) {
           // Flip
@@ -63,7 +71,7 @@ public:
           vee::cmd_begin_render_pass({
               .command_buffer = cb,
               .render_pass = *rp,
-              .framebuffer = *fb,
+              .framebuffer = *fbs[idx],
               .extent = ext,
               .clear_color = {{0.1, 0.2, 0.3, 1.0}},
           });
