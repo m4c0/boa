@@ -103,7 +103,8 @@ public:
         }
 
         while (!interrupted()) {
-          m_pc.time = watch.millis();
+          // Passing time in seconds
+          m_pc.time = 0.001 * watch.millis();
 
           // Flip
           vee::wait_and_reset_fence(*f);
