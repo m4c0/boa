@@ -18,13 +18,17 @@ struct quad {
 class thread : public sith::thread {
   casein::native_handle_t m_nptr;
   upc m_pc;
+  volatile float m_resized;
 
 public:
   void start(casein::native_handle_t n) {
     m_nptr = n;
     sith::thread::start();
   }
-  void resize(float w, float h) { m_pc.aspect = w / h; }
+  void resize(float w, float h) {
+    m_pc.aspect = w / h;
+    m_resized = true;
+  }
 
   void run() override {
     sitime::stopwatch watch{};
@@ -102,7 +106,8 @@ public:
           });
         }
 
-        while (!interrupted()) {
+        m_resized = false;
+        while (!interrupted() && !m_resized) {
           // Passing time in seconds
           m_pc.time = 0.001 * watch.millis();
 
