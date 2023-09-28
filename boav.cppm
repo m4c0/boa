@@ -1,8 +1,16 @@
+#pragma leco add_shader "boav.vert"
+#pragma leco add_shader "boav.frag"
+
 export module boav;
 import casein;
 import hai;
 import sith;
 import vee;
+
+struct upc {
+  float aspect;
+  float time;
+};
 
 class thread : public sith::thread {
   casein::native_handle_t m_nptr;
@@ -46,6 +54,27 @@ public:
 
         vee::extent ext = vee::get_surface_capabilities(pd, *s).currentExtent;
         vee::render_pass rp = vee::create_render_pass(pd, *s);
+
+        vee::pipeline_layout pl = vee::create_pipeline_layout(
+            {vee::vert_frag_push_constant_range<upc>()});
+
+        // Pipeline
+        vee::shader_module vert =
+            vee::create_shader_module_from_resource("boav.vert.spv");
+        vee::shader_module frag =
+            vee::create_shader_module_from_resource("boav.frag.spv");
+        vee::gr_pipeline gp = vee::create_graphics_pipeline(
+            *pl, *rp,
+            {
+                vee::pipeline_vert_stage(*vert, "main"),
+                vee::pipeline_frag_stage(*frag, "main"),
+            },
+            {
+                vee::vertex_input_bind(2 * sizeof(float)),
+            },
+            {
+                vee::vertex_attribute_vec2(0, 0),
+            });
 
         // Frame buffers
         hai::array<vee::image_view> c_ivs{swc_imgs.size()};
