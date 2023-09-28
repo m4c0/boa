@@ -40,7 +40,10 @@ void main() {
   vec2 p = frag_coord;
 
   p = p * 5.0;
-  p = op_rot(p, 0.1);
+  p = op_rot(p, PI + 0.3 * sin(pc.time * 0.025));
+
+  float col = floor(p.x);
+  p.y -= sin(pc.time * 0.1 + col) * rand(vec2(123.456, col));
 
   float rp = rand(floor(p));
 
@@ -49,9 +52,9 @@ void main() {
   float sat = 0.5 + rp * 0.5;
 
   float val = 1.0 - rp * 0.5;
-  //val = val * smoothstep(0.0, 0.3, fract(p.x)) * 0.4 + 0.4;
-  val = val * smoothstep(0.0, 0.05, min(fract(p.y), fract(p.x)));
+  val = val * smoothstep(0.1, 0.3, fract(p.x)) * 0.4 + 0.4;
+  val = val * smoothstep(0.0, 0.1, min(fract(p.y), fract(p.x)));
 
-  vec3 rgb = hsv2rgb(vec3(hue, sat, val));
+  vec3 rgb = hsv2rgb(vec3(hue, sat, val)) * 0.1;
   frag_colour = vec4(rgb, 1); 
 }
