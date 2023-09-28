@@ -8,12 +8,18 @@ import sith;
 import vee;
 
 struct upc {
-  float aspect;
+  float aspect{1.0f};
   float time;
+};
+
+struct quad {
+  float points[12]{-1.0, -1.0, 1.0,  1.0,  1.0,  -1.0,
+                   1.0,  1.0,  -1.0, -1.0, -1.0, 1.0};
 };
 
 class thread : public sith::thread {
   casein::native_handle_t m_nptr;
+  upc m_pc;
 
 public:
   void start(casein::native_handle_t n) {
@@ -52,17 +58,22 @@ public:
         vee::bind_image_memory(*d_img, *d_mem);
         vee::image_view d_iv = vee::create_depth_image_view(*d_img);
 
+        // Quad vertex buffer
+        vee::buffer qv_buf = vee::create_vertex_buffer(sizeof(quad));
+        vee::device_memory qv_mem = vee::create_host_buffer_memory(pd, *qv_buf);
+        vee::bind_buffer_memory(*qv_buf, *qv_mem);
+        { *static_cast<quad *>(*vee::mapmem{*qv_mem}) = {}; }
+
         vee::extent ext = vee::get_surface_capabilities(pd, *s).currentExtent;
         vee::render_pass rp = vee::create_render_pass(pd, *s);
-
-        vee::pipeline_layout pl = vee::create_pipeline_layout(
-            {vee::vert_frag_push_constant_range<upc>()});
 
         // Pipeline
         vee::shader_module vert =
             vee::create_shader_module_from_resource("boav.vert.spv");
         vee::shader_module frag =
             vee::create_shader_module_from_resource("boav.frag.spv");
+        vee::pipeline_layout pl = vee::create_pipeline_layout(
+            {vee::vert_frag_push_constant_range<upc>()});
         vee::gr_pipeline gp = vee::create_graphics_pipeline(
             *pl, *rp,
             {
@@ -104,6 +115,12 @@ public:
               .extent = ext,
               .clear_color = {{0.01, 0.02, 0.05, 1.0}},
           });
+
+          vee::cmd_push_vert_frag_constants(cb, *pl, &m_pc);
+          vee::cmd_bind_gr_pipeline(cb, *gp);
+          vee::cmd_bind_vertex_buffers(cb, 0, *qv_buf);
+          vee::cmd_draw(cb, 6);
+
           vee::cmd_end_render_pass(cb);
           vee::end_cmd_buf(cb);
 
