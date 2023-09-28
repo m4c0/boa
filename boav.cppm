@@ -118,7 +118,11 @@ public:
               .framebuffer = *fbs[idx],
               .extent = ext,
               .clear_color = {{0.01, 0.02, 0.05, 1.0}},
+              .use_secondary_cmd_buf = false,
           });
+
+          vee::cmd_set_scissor(cb, ext);
+          vee::cmd_set_viewport(cb, ext);
 
           vee::cmd_push_vert_frag_constants(cb, *pl, &m_pc);
           vee::cmd_bind_gr_pipeline(cb, *gp);
