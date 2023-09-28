@@ -55,6 +55,6 @@ void main() {
   val = val * smoothstep(0.1, 0.3, fract(p.x)) * 0.4 + 0.4;
   val = val * smoothstep(0.0, 0.1, min(fract(p.y), fract(p.x)));
 
-  vec3 rgb = hsv2rgb(vec3(hue, sat, val)) * 0.1;
+  vec3 rgb = hsv2rgb(vec3(hue, sat, val)) * 0.025;
   frag_colour = vec4(rgb, 1); 
 }
