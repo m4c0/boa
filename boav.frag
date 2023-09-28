@@ -24,9 +24,24 @@ vec2 polar(vec2 p) {
   return vec2(r, phi);
 }
 
-void main() { 
-  vec2 pol = polar(frag_coord);
-  vec3 rgb = hsv2rgb(vec3(pol.y, 1.0, pol.x));
+mat2 rot(float a) {
+  return mat2(cos(a), -sin(a), sin(a), cos(a));
+}
+vec2 op_rot(vec2 p, float a) {
+  return mat2(cos(a), -sin(a), sin(a), cos(a)) * p;
+}
 
+void main() { 
+  vec2 p = frag_coord;
+
+  p = p * 5.0;
+  p = op_rot(p, 0.1);
+
+  float val = 1.0;
+  val = val * smoothstep(0.0, 0.1, fract(p.y));
+  val = val * smoothstep(0.0, 0.3, fract(p.x)) * 0.4 + 0.4;
+
+  vec2 pol = polar(frag_coord);
+  vec3 rgb = hsv2rgb(vec3(pol.y, 1.0, val));
   frag_colour = vec4(rgb, 1); 
 }
