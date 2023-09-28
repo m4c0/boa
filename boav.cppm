@@ -1,10 +1,8 @@
-#pragma leco add_shader "boav.vert"
-#pragma leco add_shader "boav.frag"
-
 export module boav;
 import casein;
 import hai;
 import sith;
+import sitime;
 import vee;
 
 struct upc {
@@ -29,6 +27,8 @@ public:
   void resize(float w, float h) { m_pc.aspect = w / h; }
 
   void run() override {
+    sitime::stopwatch watch{};
+
     // Instance
     vee::instance i = vee::create_instance("boas");
     vee::debug_utils_messenger dbg = vee::create_debug_utils_messenger();
@@ -103,6 +103,8 @@ public:
         }
 
         while (!interrupted()) {
+          m_pc.time = watch.millis();
+
           // Flip
           vee::wait_and_reset_fence(*f);
           auto idx = vee::acquire_next_image(*swc, *img_available_sema);
@@ -165,3 +167,6 @@ extern "C" void casein_handle(const casein::event &e) {
 
   map.handle(e);
 }
+
+#pragma leco add_shader "boav.vert"
+#pragma leco add_shader "boav.frag"
