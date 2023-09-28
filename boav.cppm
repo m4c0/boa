@@ -26,6 +26,7 @@ public:
     m_nptr = n;
     sith::thread::start();
   }
+  void resize(float w, float h) { m_pc.aspect = w / h; }
 
   void run() override {
     // Instance
@@ -154,6 +155,10 @@ extern "C" void casein_handle(const casein::event &e) {
     casein::event_map res{};
     res[casein::CREATE_WINDOW] = [](const casein::event &e) {
       t.start(*e.as<casein::events::create_window>());
+    };
+    res[casein::RESIZE_WINDOW] = [](const casein::event &e) {
+      auto [w, h, _, __] = *e.as<casein::events::resize_window>();
+      t.resize(w, h);
     };
     return res;
   }();
