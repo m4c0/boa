@@ -11,6 +11,11 @@ layout(location = 0) in vec2 frag_coord;
 
 layout(location = 0) out vec4 frag_colour;
 
+float rand(vec2 co) {
+  // https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+  return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 vec3 hsv2rgb(vec3 hsv) {
   // https://en.wikipedia.org/wiki/HSL_and_HSV
   vec3 n = vec3(5, 3, 1);
@@ -37,11 +42,16 @@ void main() {
   p = p * 5.0;
   p = op_rot(p, 0.1);
 
-  float val = 1.0;
-  val = val * smoothstep(0.0, 0.1, fract(p.y));
-  val = val * smoothstep(0.0, 0.3, fract(p.x)) * 0.4 + 0.4;
+  float rp = rand(floor(p));
 
-  vec2 pol = polar(frag_coord);
-  vec3 rgb = hsv2rgb(vec3(pol.y, 1.0, val));
+  float hue = 1.8 + rp * 0.8;
+
+  float sat = 0.5 + rp * 0.5;
+
+  float val = 1.0 - rp * 0.5;
+  //val = val * smoothstep(0.0, 0.3, fract(p.x)) * 0.4 + 0.4;
+  val = val * smoothstep(0.0, 0.05, min(fract(p.y), fract(p.x)));
+
+  vec3 rgb = hsv2rgb(vec3(hue, sat, val));
   frag_colour = vec4(rgb, 1); 
 }
