@@ -1,4 +1,5 @@
 export module boav;
+import boa;
 import casein;
 import hai;
 import sith;
@@ -16,11 +17,14 @@ struct quad {
 };
 
 class thread : public sith::thread {
+  boa::game *m_g{};
   casein::native_handle_t m_nptr;
   upc m_pc;
   volatile float m_resized;
 
 public:
+  void render(boa::game *g) { m_g = g; }
+
   void start(casein::native_handle_t n) {
     m_nptr = n;
     sith::thread::start();
@@ -151,6 +155,8 @@ public:
               .wait_semaphore = *rnd_finished_sema,
               .image_index = idx,
           });
+
+          m_g = nullptr;
         }
 
         vee::device_wait_idle();
@@ -162,6 +168,7 @@ public:
 
 extern "C" void casein_handle(const casein::event &e) {
   static thread t{};
+  static hai::uptr<boa::game> g{};
 
   static constexpr auto map = [] {
     casein::event_map res{};
@@ -171,6 +178,18 @@ extern "C" void casein_handle(const casein::event &e) {
     res[casein::RESIZE_WINDOW] = [](const casein::event &e) {
       auto [w, h, _, __] = *e.as<casein::events::resize_window>();
       t.resize(w, h);
+
+      auto grid_h = 24.0f;
+      auto grid_w = grid_h;
+      if (w > h) {
+        grid_w = grid_w * w / h;
+      } else {
+        grid_h = grid_h * h / w;
+      }
+
+      g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w),
+                                     static_cast<unsigned>(grid_h));
+      t.render(&*g);
     };
     res[casein::QUIT] = [](auto) { t.stop(); };
     return res;
