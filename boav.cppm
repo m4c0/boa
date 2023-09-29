@@ -17,8 +17,7 @@ struct upc {
 };
 
 struct quad {
-  float points[12]{-1.0, -1.0, 1.0,  1.0,  1.0,  -1.0,
-                   1.0,  1.0,  -1.0, -1.0, -1.0, 1.0};
+  float points[12]{0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0};
 };
 
 class thread : public sith::thread {
