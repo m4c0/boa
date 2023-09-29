@@ -115,7 +115,9 @@ vec4 snake(vec2 p) {
 
   float sat = 1.0;
 
-  return vec4(hsv2rgb(vec3(hue, sat, val)), e);
+  vec3 rgb = hsv2rgb(vec3(hue, sat, val));
+  rgb = pow(rgb, vec3(0.7));
+  return vec4(rgb, e);
 }
 
 vec3 food(vec2 p) {
@@ -131,7 +133,7 @@ vec3 food(vec2 p) {
   float hue = mix(2.9, 3.0, smoothstep(-0.5, -0.2, d1));
 
   float val = min(abs(d0), abs(d1));
-  val = 0.01 / val;
+  val = 0.1 / val;
   val = mix(val, 0.5, step(d1, 0));
 
   float a = 1.0 - smoothstep(0.0, 3.0, length(p));
