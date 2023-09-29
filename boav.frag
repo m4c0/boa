@@ -64,11 +64,9 @@ vec3 background(vec2 p) {
 
 void main() { 
   vec2 p = frag_coord;
-  vec2 uv = p * 0.5 + 0.5;
 
-  vec2 uv_coord = uv * vec2(pc.grid_w, pc.grid_h);
-  float idx = uv.y * pc.grid_w + uv.x;
-  float i = sb.grid[int(idx)];
+  ivec2 idx = ivec2(frag_grid);
+  float i = sb.grid[idx.y * int(pc.grid_w) + idx.x];
 
   vec3 rgb = background(p) + vec3(i);
 
