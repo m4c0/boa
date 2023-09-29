@@ -41,9 +41,7 @@ vec2 op_rot(vec2 p, float a) {
   return mat2(cos(a), -sin(a), sin(a), cos(a)) * p;
 }
 
-void main() { 
-  vec2 p = frag_coord;
-
+vec3 background(vec2 p) {
   p = p * 5.0;
   p = op_rot(p, PI + 0.3 * sin(pc.time * 0.025));
 
@@ -60,6 +58,13 @@ void main() {
   val = val * smoothstep(0.1, 0.3, fract(p.x)) * 0.4 + 0.4;
   val = val * smoothstep(0.0, 0.1, min(fract(p.y), fract(p.x)));
 
-  vec3 rgb = hsv2rgb(vec3(hue, sat, val)) * 0.025;
+  return hsv2rgb(vec3(hue, sat, val)) * 0.025;
+}
+
+void main() { 
+  vec2 p = frag_coord;
+
+  vec3 rgb = background(p);
+
   frag_colour = vec4(rgb, 1); 
 }
