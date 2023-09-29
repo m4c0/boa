@@ -13,6 +13,7 @@ layout(std140, set = 0, binding = 0) readonly buffer usb {
 } sb;
 
 layout(location = 0) in vec2 frag_coord;
+layout(location = 1) in vec2 frag_grid;
 
 layout(location = 0) out vec4 frag_colour;
 
