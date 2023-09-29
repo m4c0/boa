@@ -75,15 +75,27 @@ float sd_snake(vec2 p) {
   float i = grid(p);
 
   if (i > 0) {
-    return sd_box(fract(p) - 0.5, vec2(0.5));
+    vec2 uv = fract(p);
+    vec2 st = 1.0 - uv;
+    vec4 va = vec4(
+      grid(p + vec2(1.0, 0.0)),
+      grid(p + vec2(-1.0, 0.0)),
+      grid(p + vec2(0.0, 1.0)),
+      grid(p + vec2(0.0, -1.0))
+    );
+
+    vec4 sa = vec4(uv.x, st.x, uv.y, st.y);
+    vec4 wa = smoothstep(0.8, 0.9, sa) * (1.0 - va);
+    return max(wa.x, max(wa.y, max(wa.z, wa.w)));
   }
  
-  return 1.0 / 0.000000000001;
+  return 0;
 }
 
 vec3 snake(vec2 p) {
   float d = sd_snake(frag_grid);
-  d = 0.001 / abs(d);
+
+  // d = 0.001 / abs(d);
 
   return vec3(d);
 }
