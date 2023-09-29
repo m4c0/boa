@@ -14,6 +14,8 @@ struct upc {
   float time;
   float grid_width;
   float grid_height;
+  float food_x;
+  float food_y;
 };
 
 struct quad {
@@ -145,8 +147,8 @@ public:
               buf[p] = 1;
             }
             auto [x, y, p] = m_g->food();
-            if (p < max_cells)
-              buf[p] = 2;
+            m_pc.food_x = x;
+            m_pc.food_y = y;
 
             m_pc.grid_width = m_g->grid_width();
             m_pc.grid_height = m_g->grid_height();

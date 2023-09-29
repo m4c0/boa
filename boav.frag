@@ -6,6 +6,7 @@ layout(push_constant) uniform upc {
   float aspect;
   float time;
   vec2 grid;
+  vec2 food;
 } pc;
 layout(set = 0, binding = 0) readonly buffer usb {
   float grid[];
@@ -116,8 +117,9 @@ vec3 snake(vec2 p) {
 }
 
 vec3 food(vec2 p) {
-  float i = grid(p) == 2.0 ? 1.0 : 0.0;
-  return vec3(i);
+  float d = sd_box(p - pc.food - 0.5, vec2(0.5));
+  d = 0.01 / abs(d);
+  return vec3(d);
 }
 
 void main() { 
