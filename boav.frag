@@ -61,13 +61,37 @@ vec3 background(vec2 p) {
   return hsv2rgb(vec3(hue, sat, val)) * 0.025;
 }
 
+// b = half size
+float sd_box(vec2 p, vec2 b) {
+  vec2 d = abs(p) - b;
+  return length(max(d, 0)) + min(max(d.x, d.y), 0);
+}
+
+float grid(vec2 p) {
+  ivec2 idx = ivec2(p);
+  return sb.grid[idx.y * int(pc.grid.x) + idx.x];
+}
+float sd_snake(vec2 p) {
+  float i = grid(p);
+
+  if (i > 0) {
+    return sd_box(fract(p) - 0.5, vec2(0.5));
+  }
+ 
+  return 1.0 / 0.000000000001;
+}
+
+vec3 snake(vec2 p) {
+  float d = sd_snake(frag_grid);
+  d = 0.001 / abs(d);
+
+  return vec3(d);
+}
+
 void main() { 
   vec2 p = frag_coord;
 
-  ivec2 idx = ivec2(frag_grid);
-  float i = sb.grid[idx.y * int(pc.grid.x) + idx.x];
-
-  vec3 rgb = background(p) + vec3(i);
+  vec3 rgb = background(p) + snake(frag_grid);
 
   frag_colour = vec4(rgb, 1); 
 }
