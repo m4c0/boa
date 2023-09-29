@@ -108,15 +108,16 @@ float edge_snake(vec2 p) {
   return 0;
 }
 
-vec3 snake(vec2 p) {
-  float val = edge_snake(p);
+vec4 snake(vec2 p) {
+  float e = edge_snake(p);
+  float val = 1.0 - e;
 
   vec2 pp = fract(p * 0.5) - 0.5;
   float hue = step(pp.x * pp.y, 0.0);
 
   float sat = 1.0;
 
-  return hsv2rgb(vec3(hue, sat, val));
+  return vec4(hsv2rgb(vec3(hue, sat, val)), e);
 }
 
 vec3 food(vec2 p) {
@@ -126,9 +127,11 @@ vec3 food(vec2 p) {
 }
 
 void main() { 
-  vec2 p = frag_coord;
+  vec3 bg = background(frag_coord);
+  vec4 sn = snake(frag_grid);
+  vec3 fd = food(frag_grid);
 
-  vec3 rgb = background(p) + snake(frag_grid) + food(frag_grid);
+  vec3 rgb = mix(bg, sn.rgb, sn.a) + fd;
 
   frag_colour = vec4(rgb, 1); 
 }
