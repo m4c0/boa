@@ -22,10 +22,10 @@ struct quad {
 };
 
 class thread : public sith::thread {
-  boa::game *m_g{};
   casein::native_handle_t m_nptr;
   upc m_pc;
   volatile float m_resized;
+  boa::game *volatile m_g{};
 
 public:
   void render(boa::game *g) { m_g = g; }
@@ -150,6 +150,8 @@ public:
             auto [x, y, p] = m_g->food();
             if (p < max_cells)
               buf[p] = 2;
+
+            m_g = nullptr;
           }
 
           // Flip
@@ -193,8 +195,6 @@ public:
               .wait_semaphore = *rnd_finished_sema,
               .image_index = idx,
           });
-
-          m_g = nullptr;
         }
 
         vee::device_wait_idle();
@@ -279,6 +279,10 @@ extern "C" void casein_handle(const casein::event &e) {
     };
     res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
     res[casein::KEY_DOWN] = [](auto e) { k_map.handle(e); };
+    res[casein::REPAINT] = [](auto) {
+      if (g && g->tick())
+        t.render(&*g);
+    };
     res[casein::QUIT] = [](auto) { t.stop(); };
     return res;
   }();
