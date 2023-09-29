@@ -170,6 +170,54 @@ extern "C" void casein_handle(const casein::event &e) {
   static thread t{};
   static hai::uptr<boa::game> g{};
 
+  static constexpr auto g_map = [] {
+    casein::subevent_map<casein::events::gesture, casein::G_MAX> res{};
+    res[casein::G_SWIPE_UP] = [](auto) {
+      g->up();
+      t.render(&*g);
+    };
+    res[casein::G_SWIPE_DOWN] = [](auto) {
+      g->down();
+      t.render(&*g);
+    };
+    res[casein::G_SWIPE_LEFT] = [](auto) {
+      g->left();
+      t.render(&*g);
+    };
+    res[casein::G_SWIPE_RIGHT] = [](auto) {
+      g->right();
+      t.render(&*g);
+    };
+    res[casein::G_SHAKE] = [](auto) {
+      g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
+      t.render(&*g);
+    };
+    return res;
+  }();
+  static constexpr auto k_map = [] {
+    casein::subevent_map<casein::events::key_down, casein::K_MAX> res{};
+    res[casein::K_UP] = [](auto) {
+      g->up();
+      t.render(&*g);
+    };
+    res[casein::K_DOWN] = [](auto) {
+      g->down();
+      t.render(&*g);
+    };
+    res[casein::K_LEFT] = [](auto) {
+      g->left();
+      t.render(&*g);
+    };
+    res[casein::K_RIGHT] = [](auto) {
+      g->right();
+      t.render(&*g);
+    };
+    res[casein::K_SPACE] = [](auto) {
+      g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
+      t.render(&*g);
+    };
+    return res;
+  }();
   static constexpr auto map = [] {
     casein::event_map res{};
     res[casein::CREATE_WINDOW] = [](const casein::event &e) {
@@ -191,6 +239,8 @@ extern "C" void casein_handle(const casein::event &e) {
                                      static_cast<unsigned>(grid_h));
       t.render(&*g);
     };
+    res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
+    res[casein::KEY_DOWN] = [](auto e) { k_map.handle(e); };
     res[casein::QUIT] = [](auto) { t.stop(); };
     return res;
   }();
