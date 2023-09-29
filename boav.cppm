@@ -37,7 +37,7 @@ public:
   void resize(float w, float h) {
     m_pc.aspect = w / h;
     m_pc.grid_width = w;
-    m_pc.grid_width = h;
+    m_pc.grid_height = h;
     m_resized = true;
   }
 
