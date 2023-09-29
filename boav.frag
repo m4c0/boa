@@ -89,7 +89,7 @@ float edge_snake(vec2 p) {
       is_snake(p, 0.0, 1.0),
       is_snake(p, 0.0, -1.0)
     );
-    vec4 wa = smoothstep(0.8, 0.9, sa) * (1.0 - va);
+    vec4 wa = smoothstep(0.0, 1.0, sa) * (1.0 - va);
     float ma = max(wa.x, max(wa.y, max(wa.z, wa.w)));
 
     vec4 sb = vec4(uv.x * uv.y, st.x * uv.y, st.x * st.y, uv.x * st.y);
@@ -99,7 +99,7 @@ float edge_snake(vec2 p) {
       is_snake(p, -1.0, -1.0),
       is_snake(p, 1.0, -1.0)
     );
-    vec4 wb = smoothstep(0.8, 0.9, sb) * (1.0 - vb);
+    vec4 wb = smoothstep(0.0, 1.0, sb) * (1.0 - vb);
     float mb = max(wb.x, max(wb.y, max(wb.z, wb.w)));
 
     return max(ma, mb);
@@ -109,11 +109,14 @@ float edge_snake(vec2 p) {
 }
 
 vec3 snake(vec2 p) {
-  float d = edge_snake(frag_grid);
+  float val = edge_snake(p);
 
-  // d = 0.001 / abs(d);
+  vec2 pp = fract(p * 0.5) - 0.5;
+  float hue = step(pp.x * pp.y, 0.0);
 
-  return vec3(d);
+  float sat = 1.0;
+
+  return hsv2rgb(vec3(hue, sat, val));
 }
 
 vec3 food(vec2 p) {
