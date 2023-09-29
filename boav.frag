@@ -7,7 +7,7 @@ layout(push_constant) uniform upc {
   float time;
   vec2 grid;
 } pc;
-layout(std140, set = 0, binding = 0) readonly buffer usb {
+layout(set = 0, binding = 0) readonly buffer usb {
   float grid[];
 } sb;
 

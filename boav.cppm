@@ -33,10 +33,8 @@ public:
     m_nptr = n;
     sith::thread::start();
   }
-  void resize(float w, float h) {
-    m_pc.aspect = w / h;
-    m_pc.grid_width = w;
-    m_pc.grid_height = h;
+  void resize(float aspect) {
+    m_pc.aspect = aspect;
     m_resized = true;
   }
 
@@ -150,6 +148,8 @@ public:
             if (p < max_cells)
               buf[p] = 2;
 
+            m_pc.grid_width = m_g->grid_width();
+            m_pc.grid_height = m_g->grid_height();
             m_g = nullptr;
           }
 
@@ -273,7 +273,7 @@ extern "C" void casein_handle(const casein::event &e) {
 
       g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w),
                                      static_cast<unsigned>(grid_h));
-      t.resize(grid_w, grid_h);
+      t.resize(grid_w / grid_h);
       t.render(&*g);
     };
     res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
