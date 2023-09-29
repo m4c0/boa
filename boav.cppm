@@ -172,6 +172,7 @@ extern "C" void casein_handle(const casein::event &e) {
       auto [w, h, _, __] = *e.as<casein::events::resize_window>();
       t.resize(w, h);
     };
+    res[casein::QUIT] = [](auto) { t.stop(); };
     return res;
   }();
 
