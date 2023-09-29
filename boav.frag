@@ -8,6 +8,9 @@ layout(push_constant) uniform upc {
   float grid_w;
   float grid_h;
 } pc;
+layout(std140, set = 0, binding = 0) readonly buffer usb {
+  float grid[];
+} sb;
 
 layout(location = 0) in vec2 frag_coord;
 

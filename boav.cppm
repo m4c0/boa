@@ -6,6 +6,9 @@ import sith;
 import sitime;
 import vee;
 
+// Covers a 4:1 screen, as if such thing will ever exist
+static constexpr const auto max_cells = 24 * (24 * 4);
+
 struct upc {
   float aspect{1.0f};
   float time;
@@ -77,8 +80,23 @@ public:
         vee::bind_buffer_memory(*qv_buf, *qv_mem);
         { *static_cast<quad *>(*vee::mapmem{*qv_mem}) = {}; }
 
+        // Game grid buffer
+        constexpr const auto gg_buf_size = max_cells * sizeof(float);
+        vee::buffer gg_buf = vee::create_storage_buffer(gg_buf_size);
+        vee::device_memory gg_mem = vee::create_host_buffer_memory(pd, *gg_buf);
+        vee::bind_buffer_memory(*gg_buf, *gg_mem);
+
         vee::extent ext = vee::get_surface_capabilities(pd, *s).currentExtent;
         vee::render_pass rp = vee::create_render_pass(pd, *s);
+
+        // Descriptor set layout + pool + set
+        vee::descriptor_set_layout dsl = vee::create_descriptor_set_layout({
+            vee::dsl_fragment_storage(),
+        });
+        vee::descriptor_pool dp =
+            vee::create_descriptor_pool(1, {vee::storage_buffer()});
+        vee::descriptor_set dset = vee::allocate_descriptor_set(*dp, *dsl);
+        vee::update_descriptor_set_with_storage(dset, 0, *gg_buf);
 
         // Pipeline
         vee::shader_module vert =
@@ -86,7 +104,7 @@ public:
         vee::shader_module frag =
             vee::create_shader_module_from_resource("boav.frag.spv");
         vee::pipeline_layout pl = vee::create_pipeline_layout(
-            {vee::vert_frag_push_constant_range<upc>()});
+            {*dsl}, {vee::vert_frag_push_constant_range<upc>()});
         vee::gr_pipeline gp = vee::create_graphics_pipeline(
             *pl, *rp,
             {
@@ -140,6 +158,7 @@ public:
           vee::cmd_push_vert_frag_constants(cb, *pl, &m_pc);
           vee::cmd_bind_gr_pipeline(cb, *gp);
           vee::cmd_bind_vertex_buffers(cb, 0, *qv_buf);
+          vee::cmd_bind_descriptor_set(cb, *pl, 0, dset);
           vee::cmd_draw(cb, 6);
 
           vee::cmd_end_render_pass(cb);
