@@ -119,9 +119,20 @@ vec4 snake(vec2 p) {
 }
 
 vec3 food(vec2 p) {
-  float d = sd_circle(p - pc.food - 0.5, 0.2);
-  d = 0.01 / abs(d);
-  return vec3(d);
+  p = p - pc.food - 0.5;
+
+  float r1 = 0.2 + 0.05 * sin(-2.0 * pc.time);
+  float d1 = sd_circle(p, r1);
+
+  float t0 = smoothstep(7.0, 8.0, 8.0 * fract(pc.time / 8.0));
+  float r0 = max(r1, 3.0 * pow(t0, 3.0));
+  float d0 = sd_circle(p, r0);
+
+  float d = min(abs(d0), abs(d1));
+  d = 0.01 / d;
+
+  float a = 1.0 - smoothstep(0.0, 3.0, length(p));
+  return vec3(d) * a;
 }
 
 void main() { 
