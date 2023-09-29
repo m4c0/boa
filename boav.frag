@@ -5,6 +5,8 @@
 layout(push_constant) uniform upc {
   float aspect;
   float time;
+  float grid_w;
+  float grid_h;
 } pc;
 
 layout(location = 0) in vec2 frag_coord;

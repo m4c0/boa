@@ -9,6 +9,8 @@ import vee;
 struct upc {
   float aspect{1.0f};
   float time;
+  float grid_width;
+  float grid_height;
 };
 
 struct quad {
@@ -31,6 +33,8 @@ public:
   }
   void resize(float w, float h) {
     m_pc.aspect = w / h;
+    m_pc.grid_width = w;
+    m_pc.grid_width = h;
     m_resized = true;
   }
 
@@ -225,7 +229,6 @@ extern "C" void casein_handle(const casein::event &e) {
     };
     res[casein::RESIZE_WINDOW] = [](const casein::event &e) {
       auto [w, h, _, __] = *e.as<casein::events::resize_window>();
-      t.resize(w, h);
 
       auto grid_h = 24.0f;
       auto grid_w = grid_h;
@@ -237,6 +240,7 @@ extern "C" void casein_handle(const casein::event &e) {
 
       g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w),
                                      static_cast<unsigned>(grid_h));
+      t.resize(grid_w, grid_h);
       t.render(&*g);
     };
     res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
