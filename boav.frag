@@ -77,16 +77,28 @@ float sd_snake(vec2 p) {
   if (i > 0) {
     vec2 uv = fract(p);
     vec2 st = 1.0 - uv;
+
+    vec4 sa = vec4(uv.x, st.x, uv.y, st.y);
     vec4 va = vec4(
       grid(p + vec2(1.0, 0.0)),
       grid(p + vec2(-1.0, 0.0)),
       grid(p + vec2(0.0, 1.0)),
       grid(p + vec2(0.0, -1.0))
     );
-
-    vec4 sa = vec4(uv.x, st.x, uv.y, st.y);
     vec4 wa = smoothstep(0.8, 0.9, sa) * (1.0 - va);
-    return max(wa.x, max(wa.y, max(wa.z, wa.w)));
+    float ma = max(wa.x, max(wa.y, max(wa.z, wa.w)));
+
+    vec4 sb = vec4(uv.x * uv.y, st.x * uv.y, st.x * st.y, uv.x * st.y);
+    vec4 vb = vec4(
+      grid(p + vec2(1.0, 1.0)),
+      grid(p + vec2(-1.0, 1.0)),
+      grid(p + vec2(-1.0, -1.0)),
+      grid(p + vec2(1.0, -1.0))
+    );
+    vec4 wb = smoothstep(0.8, 0.9, sb) * (1.0 - vb);
+    float mb = max(wb.x, max(wb.y, max(wb.z, wb.w)));
+
+    return max(ma, mb);
   }
  
   return 0;
