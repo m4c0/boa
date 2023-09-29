@@ -3,8 +3,7 @@
 layout(push_constant) uniform upc {
   float aspect;
   float time;
-  float grid_w;
-  float grid_h;
+  vec2 grid;
 } pc;
 
 layout(location = 0) in vec2 position;
@@ -16,5 +15,5 @@ void main() {
   vec2 p = position * 2.0 - 1.0;
   gl_Position = vec4(p, 0.0, 1.0);
   frag_coord = p * vec2(pc.aspect, 1.0);
-  frag_grid = position * vec2(pc.grid_w, pc.grid_h);
+  frag_grid = position * pc.grid;
 }

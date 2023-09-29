@@ -5,8 +5,7 @@
 layout(push_constant) uniform upc {
   float aspect;
   float time;
-  float grid_w;
-  float grid_h;
+  vec2 grid;
 } pc;
 layout(std140, set = 0, binding = 0) readonly buffer usb {
   float grid[];
@@ -66,7 +65,7 @@ void main() {
   vec2 p = frag_coord;
 
   ivec2 idx = ivec2(frag_grid);
-  float i = sb.grid[idx.y * int(pc.grid_w) + idx.x];
+  float i = sb.grid[idx.y * int(pc.grid.x) + idx.x];
 
   vec3 rgb = background(p) + vec3(i);
 
