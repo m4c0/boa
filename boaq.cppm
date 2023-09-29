@@ -49,11 +49,11 @@ public:
         *ms++ = {1, 1, 1, 1};
         count++;
       };
-      for (auto [x, y] : m_g) {
+      for (auto [x, y, _] : m_g) {
         paint(x, y);
         *cs++ = {1, 1, 0, 1};
       }
-      auto [x, y] = m_g.food();
+      auto [x, y, _] = m_g.food();
       paint(x, y);
       *cs++ = {1, 0, 1, 1};
     });

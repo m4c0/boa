@@ -6,8 +6,11 @@ namespace boa {
 export struct point {
   unsigned x;
   unsigned y;
+  unsigned idx;
 };
-constexpr auto p2point(unsigned p, unsigned w) { return point{p % w, p / w}; }
+constexpr auto p2point(unsigned p, unsigned w) {
+  return point{p % w, p / w, p};
+}
 
 class snake_iter {
   xor_ll_iter m_it;

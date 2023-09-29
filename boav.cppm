@@ -137,6 +137,21 @@ public:
           // Passing time in seconds
           m_pc.time = 0.001 * watch.millis();
 
+          // Fill grid
+          if (m_g != nullptr) {
+            vee::mapmem mm{*gg_mem};
+            float *buf = static_cast<float *>(*mm);
+            for (auto i = 0; i < max_cells; i++) {
+              buf[i] = 0;
+            }
+            for (auto [x, y, p] : *m_g) {
+              buf[p] = 1;
+            }
+            auto [x, y, p] = m_g->food();
+            if (p < max_cells)
+              buf[p] = 2;
+          }
+
           // Flip
           vee::wait_and_reset_fence(*f);
           auto idx = vee::acquire_next_image(*swc, *img_available_sema);
