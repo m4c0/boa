@@ -126,7 +126,10 @@ vec4 snake(vec2 p) {
   vec2 dd = sin(mod(p * 3.14, 3.14)) * 0.5;
     
   float c = dd.x * dd.y * dt;
-  return vec4(12.0, 4.0, 2.0, is_snake(p, 0.0, 0.0)) * c;
+
+  vec3 rgb = vec3(12.0, 4.0, 2.0) * c;
+  float a = is_snake(p, 0.0, 0.0) * pow(c, 0.8);
+  return vec4(rgb, a);
 }
 
 vec3 food(vec2 p) {
