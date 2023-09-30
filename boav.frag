@@ -127,7 +127,7 @@ vec4 snake(vec2 p) {
     
   float c = dd.x * dd.y * dt;
 
-  vec3 rgb = vec3(12.0, 4.0, 2.0) * c;
+  vec3 rgb = vec3(4.0, 12.0, 2.0) * c;
   float a = is_snake(p, 0.0, 0.0) * pow(c, 0.8);
   return vec4(rgb, a);
 }
