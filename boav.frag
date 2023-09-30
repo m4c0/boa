@@ -106,7 +106,7 @@ float edge_snake(vec2 p) {
   return 0;
 }
 
-vec4 snake(vec2 p) {
+vec4 snake2(vec2 p) {
   float e = edge_snake(p);
   float val = 1.0 - e;
 
@@ -118,6 +118,15 @@ vec4 snake(vec2 p) {
   vec3 rgb = hsv2rgb(vec3(hue, sat, val));
   rgb = pow(rgb, vec3(0.7));
   return vec4(rgb, e);
+}
+
+vec4 snake(vec2 p) {
+  float dt = 2.0; //1.0 - sin(0.0 * p.y + pc.time);
+    
+  vec2 dd = sin(mod(p * 3.14, 3.14)) * 0.5;
+    
+  float c = dd.x * dd.y * dt;
+  return vec4(12.0, 4.0, 2.0, is_snake(p, 0.0, 0.0)) * c;
 }
 
 vec3 food(vec2 p) {
