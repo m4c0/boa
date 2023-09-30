@@ -9,7 +9,7 @@ layout(push_constant) uniform upc {
   vec2 food;
 } pc;
 layout(set = 0, binding = 0) readonly buffer usb {
-  float grid[];
+  vec2 grid[];
 } sb;
 
 layout(location = 0) in vec2 frag_coord;
@@ -66,12 +66,13 @@ float sd_circle(vec2 p, float b) {
   return length(p) - b;
 }
 
-float grid(vec2 p) {
+vec2 grid(vec2 p) {
   ivec2 idx = ivec2(p);
   return sb.grid[idx.y * int(pc.grid.x) + idx.x];
 }
 float is_snake(vec2 p, float dx, float dy) {
-  return grid(p + vec2(dx, dy)) == 1.0 ? 1.0 : 0.0;
+  vec2 g = grid(p + vec2(dx, dy));
+  return step(0.0001, g.y);
 }
 float edge_snake(vec2 p) {
   float i = is_snake(p, 0.0, 0.0);
@@ -121,7 +122,11 @@ vec4 snake2(vec2 p) {
 }
 
 vec4 snake(vec2 p) {
-  float dt = 2.0; //1.0 - sin(0.0 * p.y + pc.time);
+  float dt = pc.time - grid(p).x;
+  dt = smoothstep(0.0, 1.0, dt * 5.0);
+  dt = 2.0 * dt; // TODO: curve over direction, like "l"
+
+  //float l = 1.0 - sin(0.0 * p.y + pc.time);
     
   vec2 dd = sin(mod(p * 3.14, 3.14)) * 0.5;
     

@@ -18,6 +18,11 @@ struct upc {
   float food_y;
 };
 
+struct storage {
+  float first_seen;
+  float seen;
+};
+
 struct quad {
   float points[12]{0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0};
 };
@@ -80,7 +85,7 @@ public:
         { *static_cast<quad *>(*vee::mapmem{*qv_mem}) = {}; }
 
         // Game grid buffer
-        constexpr const auto gg_buf_size = max_cells * sizeof(float);
+        constexpr const auto gg_buf_size = max_cells * sizeof(storage);
         vee::buffer gg_buf = vee::create_storage_buffer(gg_buf_size);
         vee::device_memory gg_mem = vee::create_host_buffer_memory(pd, *gg_buf);
         vee::bind_buffer_memory(*gg_buf, *gg_mem);
@@ -138,13 +143,18 @@ public:
 
           // Fill grid
           if (m_g != nullptr) {
+            float t = watch.millis() / 1000.0;
+
             vee::mapmem mm{*gg_mem};
-            float *buf = static_cast<float *>(*mm);
+            auto *buf = static_cast<storage *>(*mm);
             for (auto i = 0; i < max_cells; i++) {
-              buf[i] = 0;
+              buf[i].seen = 0;
             }
             for (auto [x, y, p] : *m_g) {
-              buf[p] = 1;
+              if (buf[p].first_seen == 0) {
+                buf[p].first_seen = t;
+              }
+              buf[p].seen = 1.0;
             }
             auto [x, y, p] = m_g->food();
             m_pc.food_x = x;
