@@ -143,6 +143,10 @@ public:
     return p2point(m_food, grid_w);
   }
 
+  [[nodiscard]] constexpr auto is_game_over() const noexcept {
+    return m_dir == E;
+  }
+
   [[nodiscard]] bool tick() {
     m_ticks++;
     if (m_ticks % m_tpm > 0)

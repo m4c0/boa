@@ -242,8 +242,10 @@ extern "C" void casein_handle(const casein::event &e) {
       t.render(&*g);
     };
     res[casein::G_SHAKE] = [](auto) {
-      g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
-      t.render(&*g);
+      if (g->is_game_over()) {
+        g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
+        t.render(&*g);
+      }
     };
     return res;
   }();
@@ -294,6 +296,12 @@ extern "C" void casein_handle(const casein::event &e) {
     };
     res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
     res[casein::KEY_DOWN] = [](auto e) { k_map.handle(e); };
+    res[casein::TOUCH_DOWN] = [](auto) {
+      if (g->is_game_over()) {
+        g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
+        t.render(&*g);
+      }
+    };
     res[casein::REPAINT] = [](auto) {
       if (g && g->tick())
         t.render(&*g);
