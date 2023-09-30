@@ -128,15 +128,17 @@ vec4 snake(vec2 p) {
   tail = 0.7 * tail + 0.3;
 
   float dt = pc.time - gp.x;
-  dt = smoothstep(0.0, 1.0, dt * 5.0);
-  dt = dt * mix(0.0, tail, step(0.0, gp.y));
-  dt = 2.0 * dt; // TODO: curve over direction, like "l"
+
+  float i = smoothstep(0.0, 1.0, dt * 5.0);
+  i = i * mix(0.0, tail, step(0.0, gp.y));
+  i = i * (1.0 + 0.4 * sin((pc.time + gp.y) * 5.0));
+  i = 2.0 * i; // TODO: curve over direction, like "l"
 
   //float l = 1.0 - sin(0.0 * p.y + pc.time);
     
   vec2 dd = sin(mod(p * 3.14, 3.14)) * 0.5;
     
-  float c = dd.x * dd.y * dt;
+  float c = dd.x * dd.y * i;
 
   vec3 rgb = vec3(4.0, 12.0, 2.0) * c;
   float a = is_snake(p, 0.0, 0.0) * pow(c, 0.8);
