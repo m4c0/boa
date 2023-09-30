@@ -124,9 +124,12 @@ vec4 snake2(vec2 p) {
 vec4 snake(vec2 p) {
   vec2 gp = grid(p);
 
+  float tail = smoothstep(0.0, 0.6, gp.y);
+  tail = 0.7 * tail + 0.3;
+
   float dt = pc.time - gp.x;
   dt = smoothstep(0.0, 1.0, dt * 5.0);
-  dt = dt * gp.y;
+  dt = dt * mix(0.0, tail, step(0.0, gp.y));
   dt = 2.0 * dt; // TODO: curve over direction, like "l"
 
   //float l = 1.0 - sin(0.0 * p.y + pc.time);
