@@ -138,6 +138,7 @@ public:
   [[nodiscard]] constexpr auto end() const noexcept {
     return snake_iter{m_snake.end(), grid_w};
   }
+  [[nodiscard]] constexpr auto size() const noexcept { return m_snake.size(); }
   [[nodiscard]] constexpr auto food() const noexcept {
     return p2point(m_food, grid_w);
   }

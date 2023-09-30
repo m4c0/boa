@@ -150,11 +150,15 @@ public:
             for (auto i = 0; i < max_cells; i++) {
               buf[i].seen = 0;
             }
+            auto s = m_g->size();
             for (auto [x, y, p] : *m_g) {
-              if (buf[p].first_seen == 0) {
+              if (buf[p].first_seen == 0)
                 buf[p].first_seen = t;
-              }
-              buf[p].seen = 1.0;
+              buf[p].seen = s-- / static_cast<float>(m_g->size());
+            }
+            for (auto i = 0; i < max_cells; i++) {
+              if (buf[i].seen == 0)
+                buf[i].first_seen = 0;
             }
             auto [x, y, p] = m_g->food();
             m_pc.food_x = x;
