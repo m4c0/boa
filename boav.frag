@@ -149,9 +149,14 @@ vec4 snake(vec2 p) {
 vec3 food(vec2 p) {
   p = p - pc.food - 0.5;
 
+  float da = mix(0.0, pc.time - pc.dead_at, step(0.0001, pc.dead_at));
+  da = clamp(da, 0.0, 1.0);
+
+  // Breathe
   float r1 = 0.2 + 0.05 * sin(-2.0 * pc.time);
   float d1 = sd_circle(p, r1);
 
+  // Blip
   float t0 = smoothstep(7.0, 8.0, 8.0 * fract(pc.time / 8.0));
   float r0 = max(r1, 3.0 * pow(t0, 3.0));
   float d0 = sd_circle(p, r0);
@@ -161,6 +166,7 @@ vec3 food(vec2 p) {
   float val = min(abs(d0), abs(d1));
   val = 0.1 / val;
   val = mix(val, 0.5, step(d1, 0));
+  val = val * (1.0 - da);
 
   float a = 1.0 - smoothstep(0.0, 3.0, length(p));
   return hsv2rgb(vec3(hue, 1.0, val)) * a;

@@ -13,6 +13,7 @@ struct upc {
   float aspect{1.0f};
   float time;
   float dead_at;
+  float pad{};
   float grid_width;
   float grid_height;
   float food_x;
