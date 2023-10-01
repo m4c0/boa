@@ -108,6 +108,12 @@ float edge_snake(vec2 p) {
   return 0;
 }
 
+// [0;1] from the start of the death
+float death_factor() {
+  float da = mix(0.0, pc.time - pc.dead_at, step(0.0001, pc.dead_at));
+  return clamp(da, 0.0, 1.0);
+}
+
 vec4 snake2(vec2 p) {
   float e = edge_snake(p);
   float val = 1.0 - e;
@@ -124,15 +130,19 @@ vec4 snake2(vec2 p) {
 
 vec4 snake(vec2 p) {
   vec2 gp = grid(p);
+  float da = death_factor();
 
   float tail = smoothstep(0.0, 0.6, gp.y);
   tail = 0.7 * tail + 0.3;
 
   float dt = pc.time - gp.x;
 
+  float squirm = sin((pc.time + gp.y) * 5.0);
+  squirm *= 1.0 - da;
+
   float i = smoothstep(0.0, 1.0, dt * 5.0);
   i = i * mix(0.0, tail, step(0.0, gp.y));
-  i = i * (1.0 + 0.4 * sin((pc.time + gp.y) * 5.0));
+  i = i * (1.0 + 0.4 * squirm);
   i = 2.0 * i; // TODO: curve over direction, like "l"
 
   //float l = 1.0 - sin(0.0 * p.y + pc.time);
@@ -141,16 +151,18 @@ vec4 snake(vec2 p) {
     
   float c = dd.x * dd.y * i;
 
-  vec3 rgb = vec3(4.0, 12.0, 2.0) * c;
+  vec3 alive_c = vec3(4.0, 12.0, 2.0);
+  vec3 dead_c = vec3(0.4, 0.6, 0.2);
+  vec3 base_c = mix(alive_c, dead_c, pow(da, 0.3));
+
+  vec3 rgb = base_c * c;
   float a = is_snake(p, 0.0, 0.0) * pow(c, 0.8);
+  a = a * pow(1.0 - da, 0.3);
   return vec4(rgb, a);
 }
 
 vec3 food(vec2 p) {
   p = p - pc.food - 0.5;
-
-  float da = mix(0.0, pc.time - pc.dead_at, step(0.0001, pc.dead_at));
-  da = clamp(da, 0.0, 1.0);
 
   // Breathe
   float r1 = 0.2 + 0.05 * sin(-2.0 * pc.time);
@@ -166,7 +178,7 @@ vec3 food(vec2 p) {
   float val = min(abs(d0), abs(d1));
   val = 0.1 / val;
   val = mix(val, 0.5, step(d1, 0));
-  val = val * (1.0 - da);
+  val = val * (1.0 - death_factor());
 
   float a = 1.0 - smoothstep(0.0, 3.0, length(p));
   return hsv2rgb(vec3(hue, 1.0, val)) * a;
