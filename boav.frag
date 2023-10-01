@@ -5,6 +5,7 @@
 layout(push_constant) uniform upc {
   float aspect;
   float time;
+  float dead_at;
   vec2 grid;
   vec2 food;
 } pc;

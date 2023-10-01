@@ -12,6 +12,7 @@ static constexpr const auto max_cells = 24 * (24 * 4);
 struct upc {
   float aspect{1.0f};
   float time;
+  float dead_at;
   float grid_width;
   float grid_height;
   float food_x;
@@ -163,6 +164,8 @@ public:
             auto [x, y, p] = m_g->food();
             m_pc.food_x = x;
             m_pc.food_y = y;
+
+            m_pc.dead_at = m_g->is_game_over() ? t : 0;
 
             m_pc.grid_width = m_g->grid_width();
             m_pc.grid_height = m_g->grid_height();
