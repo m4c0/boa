@@ -43,7 +43,7 @@ vec2 op_rot(vec2 p, float a) {
   return mat2(cos(a), -sin(a), sin(a), cos(a)) * p;
 }
 
-vec3 background(vec2 p) {
+vec3 raw_background(vec2 p) {
   p = p * 5.0;
   p = op_rot(p, PI + 0.3 * sin(pc.time * 0.025));
 
@@ -61,6 +61,9 @@ vec3 background(vec2 p) {
   val = val * smoothstep(0.0, 0.1, min(fract(p.y), fract(p.x)));
 
   return hsv2rgb(vec3(hue, sat, val)) * 0.025;
+}
+vec3 background(vec2 p) {
+  return raw_background(op_rot(p, length(p)));
 }
 
 float sd_circle(vec2 p, float b) {
