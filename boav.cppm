@@ -32,7 +32,7 @@ struct quad {
 class thread : public sith::thread {
   casein::native_handle_t m_nptr;
   upc m_pc;
-  volatile float m_resized;
+  volatile bool m_resized;
   boa::game *volatile m_g{};
 
 public:
