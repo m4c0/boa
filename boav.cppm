@@ -9,6 +9,20 @@ import vee;
 // Covers a 4:1 screen, as if such thing will ever exist
 static constexpr const auto max_cells = 24 * (24 * 4);
 
+class vec2 {
+  float m_x = 0.0;
+  float m_y = 0.0;
+
+public:
+  constexpr vec2() = default;
+  constexpr vec2(auto x, auto y)
+      : m_x{static_cast<float>(x)}, m_y{static_cast<float>(y)} {}
+
+  constexpr bool operator==(const vec2 &o) const noexcept {
+    // Only works because they are always rounded (i.e. came from ints)
+    return m_x == o.m_x && m_y == o.m_y;
+  }
+};
 struct upc {
   float aspect{1.0f};
   float time;
@@ -16,8 +30,7 @@ struct upc {
   float pad{};
   float grid_width;
   float grid_height;
-  float food_x;
-  float food_y;
+  vec2 food;
 };
 
 struct storage {
@@ -163,8 +176,9 @@ public:
                 buf[i].first_seen = 0;
             }
             auto [x, y, p] = m_g->food();
-            m_pc.food_x = x;
-            m_pc.food_y = y;
+            if (m_pc.food != vec2{x, y}) {
+              m_pc.food = vec2{x, y};
+            }
 
             if (m_pc.dead_at == 0.0)
               m_pc.dead_at = m_g->is_game_over() ? t : 0;
