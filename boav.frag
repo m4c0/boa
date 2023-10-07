@@ -193,16 +193,16 @@ vec3 food(vec2 p) {
   return hsv2rgb(vec3(hue, 1.0, val)) * a;
 }
 
-vec4 party(vec2 p) {
+vec4 party_part(vec2 p, float n, float r) {
   vec2 q = p - pc.party - 0.5;
   float t = pc.time - pc.party_start;
   t = clamp(t * 2.0, 0.0, 1.0);
   q = op_rot(q, t * 2.0);
 
-  const float ssz = 3.14 * 2.0 / 7.0;
+  const float ssz = 3.14 * 2.0 / n;
   float sec = ssz * round(polar(q).y / ssz);
   vec2 qs = op_rot(q, sec);
-  qs -= vec2(t * 2.0, 0);
+  qs -= vec2(t * 2.0 * r, 0);
 
   float d = sd_circle(qs, 0.7 * sin(t * 3.1415));
   vec3 ca0 = vec3(2.0, 0.0, 0.0);
@@ -212,7 +212,10 @@ vec4 party(vec2 p) {
   vec4 cb = vec4(2.0, 0.0, 0.0, 0.01 / abs(d));
   vec4 c = mix(ca, cb, smoothstep(-0.1, 0.0, d));
 
-  return vec4(c.rgb, (1.0 - t) * c.a);
+  return vec4(c.rgb, (1.0 - t) * c.a * 0.8);
+}
+vec4 party(vec2 p) {
+  return party_part(p, 7.0, 1.0) + party_part(p, 23.0, 1.5);
 }
 
 void main() { 
