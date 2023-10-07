@@ -193,22 +193,29 @@ vec3 food(vec2 p) {
   return hsv2rgb(vec3(hue, 1.0, val)) * a;
 }
 
-vec3 party(vec2 p) {
+vec4 party(vec2 p) {
   vec2 q = p - pc.party - 0.5;
   float t = pc.time - pc.party_start;
-  t = clamp(t * 3.0, 0.0, 1.0);
+  t = clamp(t * 2.0, 0.0, 1.0);
+  q = op_rot(q, t * 2.0);
 
-  float d = sd_circle(q, t);
-  return vec3(step(d, 0));
+  const float ssz = 3.14 * 2.0 / 7.0;
+  float sec = ssz * round(polar(q).y / ssz);
+  vec2 qs = op_rot(q, sec);
+  qs -= vec2(t * 2.0, 0);
+
+  float d = 0.01 / abs(sd_circle(qs, 1.0 - t));
+  return vec4(2.0, 0.0, 0.0, d * (1.0 - t));
 }
 
 void main() { 
   vec3 bg = background(frag_coord);
   vec4 sn = snake(frag_grid);
   vec3 fd = food(frag_grid);
-  vec3 pt = party(frag_grid);
+  vec4 pt = party(frag_grid);
 
-  vec3 rgb = mix(bg, sn.rgb, sn.a) + fd + pt;
+  vec3 rgb = mix(bg, sn.rgb, sn.a) + fd;
+  rgb = mix(rgb, pt.rgb, pt.a);
 
   frag_colour = vec4(rgb, 1); 
 }
