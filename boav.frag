@@ -222,14 +222,27 @@ vec4 party(vec2 p) {
   return party_part(p, 7.0, 1.0) + party_part(p, 23.0, 1.5);
 }
 
+vec4 play_btn(vec2 p) {
+  const float ssz = 3.14 * 2.0 / 3.0;
+  float sec = ssz * round(polar(p).y / ssz);
+  vec2 q = op_rot(p, sec);
+
+  float d = abs(q.x - 0.2);
+  d = 0.01 / d;
+
+  return vec4(d, d, d, 1.0);
+}
+
 void main() { 
   vec3 bg = background(frag_coord);
   vec4 sn = snake(frag_grid);
   vec3 fd = food(frag_grid);
   vec4 pt = party(frag_grid);
+  vec4 pl = play_btn(frag_coord);
 
   vec3 rgb = mix(bg, sn.rgb, sn.a) + fd;
   rgb = mix(rgb, pt.rgb, pt.a);
+  rgb = mix(rgb, pl.rgb, pl.a);
 
   frag_colour = vec4(rgb, 1); 
 }
