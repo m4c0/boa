@@ -154,7 +154,6 @@ public:
         }
 
         upc m_pc{};
-        m_pc.food = {1000, 1000};
 
         m_resized = false;
         while (!interrupted() && !m_resized) {
@@ -191,6 +190,9 @@ public:
 
             if (m_pc.dead_at == 0.0)
               m_pc.dead_at = m_g->is_game_over() ? t : 0;
+
+            if (m_g->is_new_game())
+              m_pc.party = {1000, 1000};
 
             m_pc.grid_width = m_g->grid_width();
             m_pc.grid_height = m_g->grid_height();
@@ -269,7 +271,7 @@ extern "C" void casein_handle(const casein::event &e) {
       g->right();
       t.render(&*g);
     };
-    res[casein::G_SHAKE] = [](auto) {
+    res[casein::G_TAP_1] = res[casein::G_SHAKE] = [](auto) {
       if (g->is_game_over()) {
         g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
         t.render(&*g);

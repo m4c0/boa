@@ -143,6 +143,9 @@ public:
     return p2point(m_food, grid_w);
   }
 
+  [[nodiscard]] constexpr auto is_new_game() const noexcept {
+    return m_dir == O;
+  }
   [[nodiscard]] constexpr auto is_game_over() const noexcept {
     return m_dir == E;
   }
