@@ -253,6 +253,13 @@ extern "C" void casein_handle(const casein::event &e) {
   static thread t{};
   static hai::uptr<boa::game> g{};
 
+  static constexpr auto reset = [](auto) {
+    if (g->is_game_over()) {
+      g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
+      t.render(&*g);
+    }
+  };
+
   static constexpr auto g_map = [] {
     casein::subevent_map<casein::events::gesture, casein::G_MAX> res{};
     res[casein::G_SWIPE_UP] = [](auto) {
@@ -271,12 +278,8 @@ extern "C" void casein_handle(const casein::event &e) {
       g->right();
       t.render(&*g);
     };
-    res[casein::G_TAP_1] = res[casein::G_SHAKE] = [](auto) {
-      if (g->is_game_over()) {
-        g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
-        t.render(&*g);
-      }
-    };
+    res[casein::G_TAP_1] = reset;
+    res[casein::G_SHAKE] = reset;
     return res;
   }();
   static constexpr auto k_map = [] {
@@ -297,10 +300,7 @@ extern "C" void casein_handle(const casein::event &e) {
       g->right();
       t.render(&*g);
     };
-    res[casein::K_SPACE] = [](auto) {
-      g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
-      t.render(&*g);
-    };
+    res[casein::K_SPACE] = reset;
     return res;
   }();
   static constexpr auto map = [] {
@@ -326,12 +326,7 @@ extern "C" void casein_handle(const casein::event &e) {
     };
     res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
     res[casein::KEY_DOWN] = [](auto e) { k_map.handle(e); };
-    res[casein::TOUCH_UP] = [](auto) {
-      if (g->is_game_over()) {
-        g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
-        t.render(&*g);
-      }
-    };
+    res[casein::TOUCH_UP] = reset;
     res[casein::REPAINT] = [](auto) {
       if (g && g->tick())
         t.render(&*g);
