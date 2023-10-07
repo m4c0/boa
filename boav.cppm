@@ -120,24 +120,27 @@ public:
         vee::update_descriptor_set_with_storage(dset, 0, *gg_buf);
 
         // Pipeline
-        vee::shader_module vert =
-            vee::create_shader_module_from_resource("boav.vert.spv");
-        vee::shader_module frag =
-            vee::create_shader_module_from_resource("boav.frag.spv");
         vee::pipeline_layout pl = vee::create_pipeline_layout(
             {*dsl}, {vee::vert_frag_push_constant_range<upc>()});
-        vee::gr_pipeline gp = vee::create_graphics_pipeline(
-            *pl, *rp,
-            {
-                vee::pipeline_vert_stage(*vert, "main"),
-                vee::pipeline_frag_stage(*frag, "main"),
-            },
-            {
-                vee::vertex_input_bind(2 * sizeof(float)),
-            },
-            {
-                vee::vertex_attribute_vec2(0, 0),
-            });
+        const auto create_gp = [&] {
+          vee::shader_module vert =
+              vee::create_shader_module_from_resource("boav.vert.spv");
+          vee::shader_module frag =
+              vee::create_shader_module_from_resource("boav.frag.spv");
+          return vee::create_graphics_pipeline(
+              *pl, *rp,
+              {
+                  vee::pipeline_vert_stage(*vert, "main"),
+                  vee::pipeline_frag_stage(*frag, "main"),
+              },
+              {
+                  vee::vertex_input_bind(2 * sizeof(float)),
+              },
+              {
+                  vee::vertex_attribute_vec2(0, 0),
+              });
+        };
+        vee::gr_pipeline gp = create_gp();
 
         // Frame buffers
         hai::array<vee::image_view> c_ivs{swc_imgs.size()};
