@@ -76,7 +76,7 @@ vec3 raw_background(vec2 p) {
   return hsv2rgb(vec3(hue, sat, val)) * 0.025;
 }
 vec3 background(vec2 p) {
-  return raw_background(op_rot(p, length(p)));
+  return raw_background(op_rot(p, length(p) / 9.0));
 }
 
 vec2 grid(vec2 p) {
