@@ -160,12 +160,10 @@ public:
           m_pc.aspect = m_aspect;
 
           // Passing time in seconds
-          m_pc.time = 0.001 * watch.millis();
+          float t = m_pc.time = 0.001 * watch.millis();
 
           // Fill grid
           if (m_g != nullptr) {
-            float t = watch.millis() / 1000.0;
-
             vee::mapmem mm{*gg_mem};
             auto *buf = static_cast<storage *>(*mm);
             for (auto i = 0; i < max_cells; i++) {
@@ -187,12 +185,12 @@ public:
               m_pc.party = m_pc.food;
               m_pc.food = vec2{x, y};
             }
-
-            if (m_pc.dead_at == 0.0)
-              m_pc.dead_at = m_g->is_game_over() ? t : 0;
-
-            if (m_g->is_new_game())
+            if (m_g->is_new_game()) {
               m_pc.party = {1000, 1000};
+              m_pc.party_start = 0;
+              m_pc.dead_at = 0.0;
+            } else if (m_pc.dead_at == 0.0)
+              m_pc.dead_at = m_g->is_game_over() ? t : 0;
 
             m_pc.grid_width = m_g->grid_width();
             m_pc.grid_height = m_g->grid_height();
