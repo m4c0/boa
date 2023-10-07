@@ -204,8 +204,11 @@ vec4 party(vec2 p) {
   vec2 qs = op_rot(q, sec);
   qs -= vec2(t * 2.0, 0);
 
-  float d = sd_circle(qs, 1.0 - t);
-  vec4 ca = vec4(2.0, 0.0, 0.0, 0.8);
+  float d = sd_circle(qs, 0.7 * sin(t * 3.1415));
+  vec3 ca0 = vec3(2.0, 0.0, 0.0);
+  vec3 ca1 = vec3(2.4, 2.0, 0.0);
+  vec3 cam = mix(ca0, ca1, cos(d * 2.0) * 0.5 + 0.5);
+  vec4 ca = vec4(cam, 0.8 + sin(d * 5.0) * 0.3);
   vec4 cb = vec4(2.0, 0.0, 0.0, 0.01 / abs(d));
   vec4 c = mix(ca, cb, smoothstep(-0.1, 0.0, d));
 
