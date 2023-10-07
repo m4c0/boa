@@ -227,7 +227,7 @@ vec4 play_btn(vec2 p) {
   float sec = ssz * round((3.14 + polar(p).y) / ssz);
   vec2 q = op_rot(p, sec);
 
-  float d = abs(q.x + 0.2);
+  float d = abs(q.x + 0.1);
   d = 0.01 / d;
 
   return vec4(d, d, d, d * death_factor());
