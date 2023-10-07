@@ -54,6 +54,9 @@ vec2 op_rot(vec2 p, float a) {
 }
 
 vec3 raw_background(vec2 p) {
+  float t = pc.time - pc.party_start;
+  t = clamp(t * 2.0, 0.0, 1.0);
+
   p = p * 5.0;
   p = op_rot(p, PI + 0.3 * sin(pc.time * 0.025));
 
@@ -62,7 +65,7 @@ vec3 raw_background(vec2 p) {
 
   float rp = rand(floor(p));
 
-  float hue = 1.8 + rp * 0.8;
+  float hue = 1.8 + rp * 0.8 - sin(t * 3.14);
 
   float sat = 0.5 + rp * 0.5;
 
