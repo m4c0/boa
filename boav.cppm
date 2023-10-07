@@ -2,6 +2,8 @@ export module boav;
 import boa;
 import casein;
 import hai;
+import silog;
+import sires;
 import sith;
 import sitime;
 import vee;
@@ -43,6 +45,13 @@ struct storage {
 struct quad {
   float points[12]{0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0};
 };
+
+auto frag_mod() {
+  return sires::stat("boav.frag.spv").take([](auto err) {
+    silog::log(silog::error, "Failed to stat shader: %s", err);
+    return 0;
+  });
+}
 
 class thread : public sith::thread {
   casein::native_handle_t m_nptr;
@@ -122,7 +131,9 @@ public:
         // Pipeline
         vee::pipeline_layout pl = vee::create_pipeline_layout(
             {*dsl}, {vee::vert_frag_push_constant_range<upc>()});
+        long frag_ts{};
         const auto create_gp = [&] {
+          frag_ts = frag_mod();
           vee::shader_module vert =
               vee::create_shader_module_from_resource("boav.vert.spv");
           vee::shader_module frag =
@@ -161,6 +172,9 @@ public:
         m_resized = false;
         while (!interrupted() && !m_resized) {
           m_pc.aspect = m_aspect;
+
+          if (frag_mod() != frag_ts)
+            gp = create_gp();
 
           // Passing time in seconds
           float t = m_pc.time = 0.001 * watch.millis();
