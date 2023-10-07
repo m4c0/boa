@@ -224,10 +224,10 @@ vec4 party(vec2 p) {
 
 vec4 play_btn(vec2 p) {
   const float ssz = 3.14 * 2.0 / 3.0;
-  float sec = ssz * round(polar(p).y / ssz);
+  float sec = ssz * round((3.14 + polar(p).y) / ssz);
   vec2 q = op_rot(p, sec);
 
-  float d = abs(q.x - 0.2);
+  float d = abs(q.x + 0.2);
   d = 0.01 / d;
 
   return vec4(d, d, d, 1.0);
