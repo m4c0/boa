@@ -182,11 +182,12 @@ vec3 food(vec2 p) {
   float r0 = max(r1, 3.0 * pow(t0, 3.0));
   float d0 = sd_circle(p, r0);
 
-  float hue = mix(2.9, 3.0, smoothstep(-0.5, -0.2, d1));
+  float h = smoothstep(-r0, 0.0, d1);
+  float hue = mix(0.0, 1.0, 0.5 + 0.5 * sin(d1));
 
   float val = min(abs(d0), abs(d1));
   val = 0.1 / val;
-  val = mix(val, 0.5, step(d1, 0));
+  val = mix(val, 0.9, step(d1, 0));
   val = val * (1.0 - death_factor());
 
   float a = 1.0 - smoothstep(0.0, 3.0, length(p));
