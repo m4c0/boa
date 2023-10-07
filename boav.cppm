@@ -24,13 +24,15 @@ public:
   }
 };
 struct upc {
-  float aspect{1.0f};
+  float aspect;
   float time;
   float dead_at;
   float pad{};
   float grid_width;
   float grid_height;
   vec2 food;
+  vec2 party;
+  float party_start;
 };
 
 struct storage {
@@ -44,7 +46,7 @@ struct quad {
 
 class thread : public sith::thread {
   casein::native_handle_t m_nptr;
-  upc m_pc;
+  volatile float m_aspect;
   volatile bool m_resized;
   boa::game *volatile m_g{};
 
@@ -56,7 +58,7 @@ public:
     sith::thread::start();
   }
   void resize(float aspect) {
-    m_pc.aspect = aspect;
+    m_aspect = aspect;
     m_resized = true;
   }
 
@@ -151,8 +153,13 @@ public:
           });
         }
 
+        upc m_pc{};
+        m_pc.food = {1000, 1000};
+
         m_resized = false;
         while (!interrupted() && !m_resized) {
+          m_pc.aspect = m_aspect;
+
           // Passing time in seconds
           m_pc.time = 0.001 * watch.millis();
 
@@ -177,6 +184,8 @@ public:
             }
             auto [x, y, p] = m_g->food();
             if (m_pc.food != vec2{x, y}) {
+              m_pc.party_start = t;
+              m_pc.party = m_pc.food;
               m_pc.food = vec2{x, y};
             }
 

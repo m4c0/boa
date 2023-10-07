@@ -8,6 +8,8 @@ layout(push_constant) uniform upc {
   float dead_at;
   vec2 grid;
   vec2 food;
+  vec2 party;
+  float party_start;
 } pc;
 layout(set = 0, binding = 0) readonly buffer usb {
   vec2 grid[];
@@ -191,12 +193,22 @@ vec3 food(vec2 p) {
   return hsv2rgb(vec3(hue, 1.0, val)) * a;
 }
 
+vec3 party(vec2 p) {
+  vec2 q = p - pc.party - 0.5;
+  float t = pc.time - pc.party_start;
+  t = clamp(t * 3.0, 0.0, 1.0);
+
+  float d = sd_circle(q, t);
+  return vec3(step(d, 0));
+}
+
 void main() { 
   vec3 bg = background(frag_coord);
   vec4 sn = snake(frag_grid);
   vec3 fd = food(frag_grid);
+  vec3 pt = party(frag_grid);
 
-  vec3 rgb = mix(bg, sn.rgb, sn.a) + fd;
+  vec3 rgb = mix(bg, sn.rgb, sn.a) + fd + pt;
 
   frag_colour = vec4(rgb, 1); 
 }
