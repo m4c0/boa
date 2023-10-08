@@ -1,4 +1,5 @@
 export module boav;
+import :offscreen;
 import boa;
 import casein;
 import hai;
@@ -57,6 +58,7 @@ class thread : public sith::thread {
   casein::native_handle_t m_nptr;
   volatile float m_aspect;
   volatile bool m_resized;
+  volatile bool m_shots;
   boa::game *volatile m_g{};
 
 public:
@@ -70,6 +72,7 @@ public:
     m_aspect = aspect;
     m_resized = true;
   }
+  void take_shots() { m_shots = true; }
 
   void run() override {
     sitime::stopwatch watch{};
@@ -132,8 +135,7 @@ public:
         vee::pipeline_layout pl = vee::create_pipeline_layout(
             {*dsl}, {vee::vert_frag_push_constant_range<upc>()});
         long frag_ts{};
-        const auto create_gp = [&] {
-          frag_ts = frag_mod();
+        const auto create_gp = [&](const vee::render_pass &rp) {
           vee::shader_module vert =
               vee::create_shader_module_from_resource("boav.vert.spv");
           vee::shader_module frag =
@@ -151,7 +153,7 @@ public:
                   vee::vertex_attribute_vec2(0, 0),
               });
         };
-        vee::gr_pipeline gp = create_gp();
+        vee::gr_pipeline gp = create_gp(rp);
 
         // Frame buffers
         hai::array<vee::image_view> c_ivs{swc_imgs.size()};
@@ -167,14 +169,18 @@ public:
           });
         }
 
+        offscreen ofs{pd};
+
         upc m_pc{};
 
         m_resized = false;
         while (!interrupted() && !m_resized) {
           m_pc.aspect = m_aspect;
 
-          if (frag_mod() != frag_ts)
-            gp = create_gp();
+          if (frag_mod() != frag_ts) {
+            gp = create_gp(rp);
+            frag_ts = frag_mod();
+          }
 
           // Passing time in seconds
           float t = m_pc.time = 0.001 * watch.millis();
@@ -239,6 +245,10 @@ public:
           vee::cmd_draw(cb, 6);
 
           vee::cmd_end_render_pass(cb);
+
+          if (m_shots) {
+            m_shots = false;
+          }
           vee::end_cmd_buf(cb);
 
           // Submit and present
@@ -316,6 +326,7 @@ extern "C" void casein_handle(const casein::event &e) {
       t.render(&*g);
     };
     res[casein::K_SPACE] = reset;
+    res[casein::K_R] = [](auto) { t.take_shots(); };
     return res;
   }();
   static constexpr auto map = [] {
