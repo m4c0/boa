@@ -1,7 +1,9 @@
 export module boav:offscreen;
+import hai;
 import vee;
 
-constexpr const vee::extent sizes[]{
+constexpr const auto sizes_len = 12;
+constexpr const vee::extent sizes[sizes_len]{
     {1290, 2796}, {1284, 2778}, {1179, 2556}, {1170, 2532},
     {1242, 2208}, {750, 1334},  {640, 1136},  {640, 960},
     {2048, 2732}, {1668, 2388}, {1668, 2224}, {1536, 2048},
@@ -9,7 +11,6 @@ constexpr const vee::extent sizes[]{
 
 class ofs_ext {
   vee::physical_device pd;
-  vee::render_pass::type rp;
   vee::extent ext;
 
   // Colour buffer
@@ -33,27 +34,47 @@ class ofs_ext {
   [[maybe_unused]] decltype(nullptr) o_bind =
       vee::bind_buffer_memory(*o_buf, *o_mem);
 
-  // Framebuffer
+  // Render pass + Framebuffer + Pipeline
+  vee::render_pass rp = vee::create_render_pass(pd, nullptr);
   vee::framebuffer fb = vee::create_framebuffer({
       .physical_device = pd,
-      .render_pass = rp,
+      .render_pass = *rp,
       .image_buffer = *t_iv,
       .depth_buffer = *d_iv,
       .extent = ext,
   });
-
-public:
-  ofs_ext(vee::physical_device pd, const vee::render_pass &rp, vee::extent ext)
-      : pd{pd}, rp{*rp}, ext{ext} {}
-};
-
-class offscreen {
-  vee::physical_device pd;
-
-  vee::render_pass rp = vee::create_render_pass(pd, nullptr);
   vee::gr_pipeline gp{};
 
 public:
-  explicit offscreen(vee::physical_device pd) : pd{pd} {}
-  void cmd_begin_render_pass(vee::command_buffer cb) {}
+  ofs_ext(vee::physical_device pd, vee::extent ext) : pd{pd}, ext{ext} {}
+
+  void cmd_render_pass(vee::command_buffer cb, auto &blk) {
+    vee::cmd_begin_render_pass({
+        .command_buffer = cb,
+        .render_pass = *rp,
+        .framebuffer = *fb,
+        .extent = ext,
+        .clear_color = {{0.01, 0.02, 0.05, 1.0}},
+        .use_secondary_cmd_buf = false,
+    });
+    vee::cmd_bind_gr_pipeline(cb, *gp);
+    blk(ext);
+    vee::cmd_end_render_pass(cb);
+
+    vee::cmd_pipeline_barrier(cb, *t_img, vee::from_pipeline_to_host);
+    vee::cmd_copy_image_to_buffer(cb, ext, *t_img, *o_buf);
+  }
+};
+
+class offscreen {
+  hai::uptr<ofs_ext> m_oe[sizes_len];
+
+public:
+  explicit offscreen(vee::physical_device pd) {
+    for (auto i = 0; i < sizes_len; i++) {
+      m_oe[i] = hai::uptr<ofs_ext>::make(pd, sizes[i]);
+    }
+  }
+
+  void cmd_render_pass(vee::command_buffer cb, auto &blk) {}
 };
