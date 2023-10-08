@@ -83,16 +83,36 @@ export class game {
     case O:
       return false;
     case U:
-      y = (y - 1 + grid_h) % grid_h;
+      if (y == 0) {
+        m_dir = E;
+        return true;
+      } else {
+        --y;
+      }
       break;
     case D:
-      y = (y + 1 + grid_h) % grid_h;
+      if (y == grid_h - 1) {
+        m_dir = E;
+        return true;
+      } else {
+        ++y;
+      }
       break;
     case L:
-      x = (x - 1 + grid_w) % grid_w;
+      if (x == 0) {
+        m_dir = E;
+        return true;
+      } else {
+        --x;
+      }
       break;
     case R:
-      x = (x + 1 + grid_w) % grid_w;
+      if (x == grid_w - 1) {
+        m_dir = E;
+        return true;
+      } else {
+        ++x;
+      }
       break;
     }
 
