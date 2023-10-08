@@ -230,7 +230,7 @@ vec4 play_btn(vec2 p) {
   float d = abs(q.x + 0.1);
   d = 0.01 / d;
 
-  return vec4(d, d, d, d * death_factor());
+  return vec4(d, d, d, d * death_factor() * (0.5 + sin(pc.time) * 0.5));
 }
 
 void main() { 
