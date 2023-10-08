@@ -1,5 +1,9 @@
+module;
+#include <stdio.h>
+
 export module boav:offscreen;
 import hai;
+import stubby;
 import vee;
 
 constexpr const auto sizes_len = 12;
@@ -46,9 +50,12 @@ class ofs_ext {
   vee::gr_pipeline gp{};
 
 public:
-  ofs_ext(vee::physical_device pd, vee::extent ext) : pd{pd}, ext{ext} {}
+  ofs_ext(vee::physical_device pd, vee::extent ext, auto &&create_gp)
+      : pd{pd}, ext{ext} {
+    gp = create_gp(rp);
+  }
 
-  void cmd_render_pass(vee::command_buffer cb, auto &blk) {
+  void cmd_render_pass(vee::command_buffer cb, auto &&blk) {
     vee::cmd_begin_render_pass({
         .command_buffer = cb,
         .render_pass = *rp,
@@ -64,17 +71,38 @@ public:
     vee::cmd_pipeline_barrier(cb, *t_img, vee::from_pipeline_to_host);
     vee::cmd_copy_image_to_buffer(cb, ext, *t_img, *o_buf);
   }
+
+  void write() {
+    char filename[1024];
+    snprintf(filename, 1024, "out/shot-%dx%d.jpg", ext.width, ext.height);
+
+    vee::mapmem mem{*o_mem};
+    auto *data = static_cast<stbi::pixel *>(*mem);
+    stbi::write_rgba_unsafe(filename, ext.width, ext.height, data);
+  }
 };
 
 class offscreen {
   hai::uptr<ofs_ext> m_oe[sizes_len];
 
 public:
-  explicit offscreen(vee::physical_device pd) {
+  explicit offscreen(vee::physical_device pd, auto &&create_gp) {
     for (auto i = 0; i < sizes_len; i++) {
-      m_oe[i] = hai::uptr<ofs_ext>::make(pd, sizes[i]);
+      m_oe[i] = hai::uptr<ofs_ext>::make(pd, sizes[i], create_gp);
     }
   }
 
-  void cmd_render_pass(vee::command_buffer cb, auto &blk) {}
+  void cmd_render_pass(vee::command_buffer cb, auto &&blk) {
+    for (auto &oe : m_oe) {
+      oe->cmd_render_pass(cb, blk);
+    }
+  }
+
+  void write() {
+    // Sync CPU+GPU
+    vee::device_wait_idle();
+    for (auto &oe : m_oe) {
+      oe->write();
+    }
+  }
 };

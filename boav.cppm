@@ -169,7 +169,7 @@ public:
           });
         }
 
-        offscreen ofs{pd};
+        offscreen ofs{pd, create_gp};
 
         upc m_pc{};
 
@@ -246,7 +246,18 @@ public:
 
           vee::cmd_end_render_pass(cb);
 
+          bool write = false;
           if (m_shots) {
+            ofs.cmd_render_pass(cb, [&](auto ext) {
+              vee::cmd_set_scissor(cb, ext);
+              vee::cmd_set_viewport(cb, ext);
+
+              vee::cmd_push_vert_frag_constants(cb, *pl, &m_pc);
+              vee::cmd_bind_vertex_buffers(cb, 0, *qv_buf);
+              vee::cmd_bind_descriptor_set(cb, *pl, 0, dset);
+              vee::cmd_draw(cb, 6);
+            });
+            write = true;
             m_shots = false;
           }
           vee::end_cmd_buf(cb);
@@ -265,6 +276,9 @@ public:
               .wait_semaphore = *rnd_finished_sema,
               .image_index = idx,
           });
+
+          if (write)
+            ofs.write();
         }
 
         vee::device_wait_idle();
@@ -326,7 +340,10 @@ extern "C" void casein_handle(const casein::event &e) {
       t.render(&*g);
     };
     res[casein::K_SPACE] = reset;
-    res[casein::K_R] = [](auto) { t.take_shots(); };
+    res[casein::K_R] = [](auto) {
+      t.take_shots();
+      t.render(&*g); // just to bring the game back
+    };
     return res;
   }();
   static constexpr auto map = [] {
