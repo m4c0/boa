@@ -41,20 +41,22 @@ public:
     auto count = 0;
     m_il->map_all([&](auto p) {
       auto &[cs, ms, ps, us] = p;
-      const auto paint = [&](auto x, auto y) {
+      for (auto [x, y, _] : m_g) {
         auto xf = static_cast<float>(x);
         auto yf = static_cast<float>(y);
         *ps++ = {{xf, yf}, {1, 1}};
         *us++ = {};
         *ms++ = {1, 1, 1, 1};
         count++;
-      };
-      for (auto [x, y, _] : m_g) {
-        paint(x, y);
         *cs++ = {1, 1, 0, 1};
       }
       auto [x, y, _] = m_g.food();
-      paint(x, y);
+      auto xf = static_cast<float>(x);
+      auto yf = static_cast<float>(y);
+      *ps++ = {{xf, yf}, {1, 1}};
+      *us++ = {};
+      *ms++ = {1, 1, 1, 1};
+      count++;
       *cs++ = {1, 0, 1, 1};
     });
     m_il->set_count(count);
