@@ -1,6 +1,7 @@
 export module boa;
 import :xorll;
 import hai;
+import rng;
 
 namespace boa {
 export struct point {
@@ -32,7 +33,6 @@ export class game {
   static constexpr const auto food_per_decrement = 4;
   static constexpr const auto initial_size = 3;
   static constexpr const auto size_increment = 3;
-  static constexpr const auto random_prime = 5393;
 
   unsigned grid_w;
   unsigned grid_h;
@@ -48,7 +48,7 @@ export class game {
   unsigned y{grid_h / 2};
 
   void reset_food(unsigned n = 0) {
-    m_food = (m_ticks * random_prime) % grid_cells;
+    m_food = rng::rand(grid_cells);
     if (m_snake.is_empty(m_food))
       return;
     if (n < 100) {
@@ -141,6 +141,7 @@ export class game {
 
 public:
   constexpr game(unsigned w, unsigned h) : grid_w{w}, grid_h{h} {
+    rng::seed();
     m_snake.push_front(y * grid_w + x);
   }
 
