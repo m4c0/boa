@@ -249,6 +249,9 @@ public:
           bool write = false;
           if (m_shots) {
             ofs.cmd_render_pass(cb, [&](auto ext) {
+              m_pc.aspect = static_cast<float>(ext.width) /
+                            static_cast<float>(ext.height);
+
               vee::cmd_set_scissor(cb, ext);
               vee::cmd_set_viewport(cb, ext);
 
