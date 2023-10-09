@@ -16,5 +16,10 @@ void main() {
   vec2 p = position * 2.0 - 1.0;
   gl_Position = vec4(p, 0.0, 1.0);
   frag_coord = p * vec2(pc.aspect, 1.0);
-  frag_grid = position * pc.grid;
+
+  p = position;
+  p.x *= pc.aspect < 1.0 ? pc.grid.x : (pc.grid.y * pc.aspect);
+  p.y *= pc.aspect < 1.0 ? (pc.grid.x / pc.aspect) : pc.grid.y;
+  
+  frag_grid = p;
 }
