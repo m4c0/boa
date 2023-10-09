@@ -1,5 +1,7 @@
 export module boav;
+#ifndef LECO_TARGET_IPHONEOS
 import :offscreen;
+#endif
 import boa;
 import casein;
 import hai;
@@ -8,6 +10,15 @@ import sires;
 import sith;
 import sitime;
 import vee;
+
+#ifdef LECO_TARGET_IPHONEOS
+class offscreen {
+public:
+  constexpr offscreen(auto, auto) {}
+  constexpr void cmd_render_pass(auto, auto) {}
+  constexpr void write() {}
+};
+#endif
 
 // Covers a 4:1 screen, as if such thing will ever exist
 static constexpr const auto max_cells = 24 * (24 * 4);
