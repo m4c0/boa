@@ -80,7 +80,7 @@ vec3 background(vec2 p) {
 }
 
 vec2 grid(vec2 p) {
-  ivec2 idx = ivec2(p);
+  ivec2 idx = clamp(ivec2(p), ivec2(0), ivec2(pc.grid));
   return sb.grid[idx.y * int(pc.grid.x) + idx.x];
 }
 float is_snake(vec2 p, float dx, float dy) {
