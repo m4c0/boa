@@ -383,11 +383,11 @@ extern "C" void casein_handle(const casein::event &e) {
     };
     res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
     res[casein::KEY_DOWN] = [](auto e) { k_map.handle(e); };
-    res[casein::TOUCH_UP] = reset;
-    res[casein::REPAINT] = [](auto) {
+    res[casein::TIMER] = [](auto) {
       if (g && g->tick())
         t.render(&*g);
     };
+    res[casein::TOUCH_UP] = reset;
     res[casein::QUIT] = [](auto) { t.stop(); };
     return res;
   }();
