@@ -98,4 +98,18 @@ extern "C" int main() {
   s.play(3, D6, MUTE);
   s.play(4, F6, MUTE);
   s.play(5, D6, MUTE);
+
+  s.play(0, F5, MUTE);
+  s.play(1, D5, MUTE);
+  s.play(2, D5, MUTE);
+  s.play(3, E5, MUTE);
+  s.play(4, E5, MUTE);
+  s.play(5, G5, MUTE);
+
+  s.play(0, F5, MUTE);
+  s.play(1, D4, MUTE);
+  s.play(2, D4, MUTE);
+  s.play(3, E4, MUTE);
+  s.play(4, E4, MUTE);
+  s.play(5, G4, MUTE);
 }
