@@ -5,20 +5,27 @@ import nessa;
 using namespace nessa::midi;
 
 export struct song : nessa::midi::player {
+  constexpr auto clamp(float b) const noexcept { return b > 1.0f ? 1.0 : b; }
+  constexpr float nenv(float tb) const noexcept {
+    return 1.0 - clamp(tb * 8.0f);
+  }
+
   constexpr float vol_at(float t) const noexcept override {
     constexpr const auto volume = 0.125f;
+
+    float tb = t * bps();
 
     float vsq1 = nessa::gen::square(t * note_freq(0));
     float vsq2 = nessa::gen::square(t * note_freq(1));
     float vtri = nessa::gen::triangle(t * note_freq(2));
-    float vnoi = nessa::gen::noise(t * note_freq(3));
+    float vnoi = 0.5 * nenv(tb) * nessa::gen::noise(t * note_freq(3));
 
     return (vsq1 + vsq2 + vtri + vnoi) * volume;
   }
 
   void play(unsigned i, note a, note b) {
     note r = i % 2 == 0 ? G4 : G5;
-    play_notes({a, b, r, MUTE});
+    play_notes({a, b, MUTE, r});
   }
 };
 
