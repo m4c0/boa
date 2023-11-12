@@ -46,6 +46,8 @@ extern "C" int main() {
   song s{};
   s.set_bpm(140);
 
+  //
+
   s.p0();
   s.p0();
 
@@ -67,6 +69,8 @@ extern "C" int main() {
   s.play(6, C5, MUTE);
   s.play(7, A5, MUTE);
 
+  //
+
   s.play(0, C5, MUTE);
   s.play(1, EXTEND, EXTEND);
   s.play(2, EXTEND, G5);
@@ -83,6 +87,27 @@ extern "C" int main() {
   s.ps(C5, D4, C5, B5, C5, B5, F6, EXTEND);
   s.ps(F6, D6, F6, D6, F6, D6, F5, D5);
   s.ps(F6, D6, F6, D6, F6, D6);
+
+  //
+
   s.ps(F5, D5, D5, E5, E5, G5);
-  s.ps(F5, D4, D4, E4, D4, G4);
+  s.ps(F5, D4, D4, E4, E4, G4);
+  s.ps(F4, D4, MUTE, G4, F4, D4, MUTE, G4);
+  s.ps(F4, E4, C4, G4, F4, C4, A3, G4);
+
+  //
+
+  s.ps(F4, E4, B3, A3, G3, A3, B3, MUTE);
+  s.ps(D4, C4, B3, MUTE, D4, C4, B3, MUTE);
+
+  s.play(0, D4, MUTE);
+  s.play(1, C4, MUTE);
+  s.play_notes({B3, MUTE, MUTE, MUTE});
+  s.play_notes({A3, MUTE, MUTE, MUTE});
+  s.play_notes({G3, MUTE, MUTE, MUTE});
+  s.play_notes({A3, MUTE, MUTE, MUTE});
+  s.play_notes({B3, MUTE, MUTE, MUTE});
+  s.play_notes({C4, MUTE, MUTE, MUTE});
+
+  //
 }
