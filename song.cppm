@@ -28,20 +28,26 @@ export struct song : nessa::midi::player {
     note r = i % 2 == 0 ? G4 : G5;
     play_notes({a, b, MUTE, r});
   }
-};
 
-void p0(song &s) {
-  for (auto i = 0; i < 8; i++) {
-    s.play(i, MUTE, MUTE);
+  void p0() {
+    for (auto i = 0; i < 8; i++) {
+      play(i, MUTE, MUTE);
+    }
   }
-}
+
+  void ps(auto... ns) {
+    static_assert(sizeof...(ns) == 6 || sizeof...(ns) == 8);
+    auto i = 0;
+    (play(i++, ns, MUTE), ...);
+  }
+};
 
 extern "C" int main() {
   song s{};
   s.set_bpm(140);
 
-  p0(s);
-  p0(s);
+  s.p0();
+  s.p0();
 
   s.play(0, C5, MUTE);
   s.play(1, EXTEND, EXTEND);
@@ -74,42 +80,9 @@ extern "C" int main() {
   s.play(10, F6, MUTE);
   s.play(11, EXTEND, MUTE);
 
-  s.play(0, C5, MUTE);
-  s.play(1, D4, MUTE);
-  s.play(2, C5, MUTE);
-  s.play(3, B5, MUTE);
-  s.play(4, C5, MUTE);
-  s.play(5, B5, MUTE);
-  s.play(6, F6, MUTE);
-  s.play(7, EXTEND, MUTE);
-
-  s.play(0, F6, MUTE);
-  s.play(1, D6, MUTE);
-  s.play(2, F6, MUTE);
-  s.play(3, D6, MUTE);
-  s.play(4, F6, MUTE);
-  s.play(5, D6, MUTE);
-  s.play(6, F5, MUTE);
-  s.play(7, D5, MUTE);
-
-  s.play(0, F6, MUTE);
-  s.play(1, D6, MUTE);
-  s.play(2, F6, MUTE);
-  s.play(3, D6, MUTE);
-  s.play(4, F6, MUTE);
-  s.play(5, D6, MUTE);
-
-  s.play(0, F5, MUTE);
-  s.play(1, D5, MUTE);
-  s.play(2, D5, MUTE);
-  s.play(3, E5, MUTE);
-  s.play(4, E5, MUTE);
-  s.play(5, G5, MUTE);
-
-  s.play(0, F5, MUTE);
-  s.play(1, D4, MUTE);
-  s.play(2, D4, MUTE);
-  s.play(3, E4, MUTE);
-  s.play(4, E4, MUTE);
-  s.play(5, G4, MUTE);
+  s.ps(C5, D4, C5, B5, C5, B5, F6, EXTEND);
+  s.ps(F6, D6, F6, D6, F6, D6, F5, D5);
+  s.ps(F6, D6, F6, D6, F6, D6);
+  s.ps(F5, D5, D5, E5, E5, G5);
+  s.ps(F5, D4, D4, E4, D4, G4);
 }
