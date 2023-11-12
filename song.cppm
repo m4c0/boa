@@ -9,18 +9,19 @@ export struct song : nessa::midi::player {
   constexpr float nenv(float tb) const noexcept {
     return 1.0 - clamp(tb * 8.0f);
   }
+  constexpr float senv(float tb) const noexcept {
+    return 0.9 - clamp(tb * 2.0f) * 0.4;
+  }
 
   constexpr float vol_at(float t) const noexcept override {
-    constexpr const auto volume = 0.125f;
-
     float tb = t * bps();
 
-    float vsq1 = nessa::gen::square(t * note_freq(0));
-    float vsq2 = nessa::gen::square(t * note_freq(1));
+    float vsq1 = 0.5 * senv(tb) * nessa::gen::square(t * note_freq(0));
+    float vsq2 = 0.5 * senv(tb) * nessa::gen::square(t * note_freq(1));
     float vtri = nessa::gen::triangle(t * note_freq(2));
-    float vnoi = 0.5 * nenv(tb) * nessa::gen::noise(t * note_freq(3));
+    float vnoi = nenv(tb) * nessa::gen::noise(t * note_freq(3));
 
-    return (vsq1 + vsq2 + vtri + vnoi) * volume;
+    return 0.02 * (vsq1 + vsq2 + vtri + vnoi);
   }
 
   void play(unsigned i, note a, note b) {
