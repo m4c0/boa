@@ -2,6 +2,7 @@ export module boav;
 #ifndef LECO_TARGET_IPHONEOS
 import :offscreen;
 #endif
+import beeps;
 import boa;
 import casein;
 import hai;
@@ -9,7 +10,6 @@ import silog;
 import sires;
 import sith;
 import sitime;
-import song;
 import vee;
 
 #ifdef LECO_TARGET_IPHONEOS
@@ -68,7 +68,6 @@ auto frag_mod() {
 
 class thread : public sith::thread {
   casein::native_handle_t m_nptr;
-  sith::stateless_thread m_song{song::play};
   volatile float m_aspect;
   volatile bool m_resized;
   volatile bool m_shots;
@@ -89,7 +88,7 @@ public:
 
   void run() override {
     sitime::stopwatch watch{};
-    m_song.start();
+    beeps beep{};
 
     // Instance
     vee::instance i = vee::create_instance("boas");
@@ -220,11 +219,13 @@ public:
             }
             auto [x, y, p] = m_g->food();
             if (m_pc.food != vec2{x, y}) {
+              beep.eat();
               m_pc.party_start = t;
               m_pc.party = m_pc.food;
               m_pc.food = vec2{x, y};
             }
             if (m_g->is_new_game()) {
+              beep.reset();
               m_pc.party = {1000, 1000};
               m_pc.party_start = 0;
               m_pc.dead_at = 0.0;
