@@ -1,6 +1,7 @@
-#pragma leco tool
 export module song;
 import nessa;
+import sith;
+import sitime;
 
 using namespace nessa::midi;
 
@@ -40,9 +41,11 @@ export struct song : nessa::midi::player {
     auto i = 0;
     (play(i++, ns, MUTE), ...);
   }
+
+  static void play(sith::thread *);
 };
 
-extern "C" int main() {
+void song::play(sith::thread *) {
   song s{};
   s.set_bpm(140);
 

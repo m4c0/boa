@@ -9,6 +9,7 @@ import silog;
 import sires;
 import sith;
 import sitime;
+import song;
 import vee;
 
 #ifdef LECO_TARGET_IPHONEOS
@@ -67,6 +68,7 @@ auto frag_mod() {
 
 class thread : public sith::thread {
   casein::native_handle_t m_nptr;
+  sith::stateless_thread m_song{song::play};
   volatile float m_aspect;
   volatile bool m_resized;
   volatile bool m_shots;
@@ -87,6 +89,7 @@ public:
 
   void run() override {
     sitime::stopwatch watch{};
+    m_song.start();
 
     // Instance
     vee::instance i = vee::create_instance("boas");
