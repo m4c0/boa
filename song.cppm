@@ -5,7 +5,9 @@ import sitime;
 
 using namespace nessa::midi;
 
-export struct song : nessa::midi::player {
+export class song : nessa::midi::player {
+  sith::thread *m_thread;
+
   constexpr auto clamp(float b) const noexcept { return b > 1.0f ? 1.0 : b; }
   constexpr float nenv(float tb) const noexcept {
     return 1.0 - clamp(tb * 8.0f);
@@ -25,6 +27,11 @@ export struct song : nessa::midi::player {
     return 0.02 * (vsq1 + vsq2 + vtri + vnoi);
   }
 
+  void play_notes(const note (&n)[4]) noexcept {
+    if (!m_thread->interrupted())
+      player::play_notes(n);
+  }
+
   void play(unsigned i, note a, note b) {
     note r = i % 2 == 0 ? G4 : G5;
     play_notes({a, b, MUTE, r});
@@ -42,11 +49,13 @@ export struct song : nessa::midi::player {
     (play(i++, ns, MUTE), ...);
   }
 
+public:
   static void play(sith::thread *);
 };
 
-void song::play(sith::thread *) {
+void song::play(sith::thread *t) {
   song s{};
+  s.m_thread = t;
   s.set_bpm(140);
 
   //
