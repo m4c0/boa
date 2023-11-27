@@ -223,9 +223,11 @@ public:
             }
             auto [x, y, p] = m_g->food();
             if (m_pc.food != vec2{x, y}) {
-              beep.eat();
-              m_pc.party_start = t;
-              m_pc.party = m_pc.food;
+              if (m_outcome == boa::outcome::eat_food) {
+                beep.eat();
+                m_pc.party_start = t;
+                m_pc.party = m_pc.food;
+              }
               m_pc.food = vec2{x, y};
             }
             if (m_g->is_new_game()) {
