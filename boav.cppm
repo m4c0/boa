@@ -72,9 +72,13 @@ class thread : public sith::thread {
   volatile bool m_resized;
   volatile bool m_shots;
   boa::game *volatile m_g{};
+  boa::outcome volatile m_outcome{};
 
 public:
-  void render(boa::game *g) { m_g = g; }
+  void render(boa::game *g, boa::outcome o) {
+    m_outcome = o;
+    m_g = g;
+  }
 
   void start(casein::native_handle_t n) {
     m_nptr = n;
@@ -315,54 +319,30 @@ extern "C" void casein_handle(const casein::event &e) {
   static constexpr auto reset = [](auto) {
     if (g->is_game_over()) {
       g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
-      t.render(&*g);
+      t.render(&*g, {});
     }
   };
 
   static constexpr auto g_map = [] {
     casein::subevent_map<casein::events::gesture, casein::G_MAX> res{};
-    res[casein::G_SWIPE_UP] = [](auto) {
-      g->up();
-      t.render(&*g);
-    };
-    res[casein::G_SWIPE_DOWN] = [](auto) {
-      g->down();
-      t.render(&*g);
-    };
-    res[casein::G_SWIPE_LEFT] = [](auto) {
-      g->left();
-      t.render(&*g);
-    };
-    res[casein::G_SWIPE_RIGHT] = [](auto) {
-      g->right();
-      t.render(&*g);
-    };
+    res[casein::G_SWIPE_UP] = [](auto) { t.render(&*g, g->up()); };
+    res[casein::G_SWIPE_DOWN] = [](auto) { t.render(&*g, g->down()); };
+    res[casein::G_SWIPE_LEFT] = [](auto) { t.render(&*g, g->left()); };
+    res[casein::G_SWIPE_RIGHT] = [](auto) { t.render(&*g, g->right()); };
     res[casein::G_TAP_1] = reset;
     res[casein::G_SHAKE] = reset;
     return res;
   }();
   static constexpr auto k_map = [] {
     casein::subevent_map<casein::events::key_down, casein::K_MAX> res{};
-    res[casein::K_UP] = [](auto) {
-      g->up();
-      t.render(&*g);
-    };
-    res[casein::K_DOWN] = [](auto) {
-      g->down();
-      t.render(&*g);
-    };
-    res[casein::K_LEFT] = [](auto) {
-      g->left();
-      t.render(&*g);
-    };
-    res[casein::K_RIGHT] = [](auto) {
-      g->right();
-      t.render(&*g);
-    };
+    res[casein::K_UP] = [](auto) { t.render(&*g, g->up()); };
+    res[casein::K_DOWN] = [](auto) { t.render(&*g, g->down()); };
+    res[casein::K_LEFT] = [](auto) { t.render(&*g, g->left()); };
+    res[casein::K_RIGHT] = [](auto) { t.render(&*g, g->right()); };
     res[casein::K_SPACE] = reset;
     res[casein::K_R] = [](auto) {
       t.take_shots();
-      t.render(&*g); // just to bring the game back
+      t.render(&*g, {}); // just to bring the game back
     };
     return res;
   }();
@@ -385,13 +365,14 @@ extern "C" void casein_handle(const casein::event &e) {
       g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w),
                                      static_cast<unsigned>(grid_h));
       t.resize(grid_w / grid_h);
-      t.render(&*g);
+      t.render(&*g, {});
     };
     res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
     res[casein::KEY_DOWN] = [](auto e) { k_map.handle(e); };
     res[casein::TIMER] = [](auto) {
-      if (g && g->tick())
-        t.render(&*g);
+      auto o = g->tick();
+      if (g && o != boa::outcome::none)
+        t.render(&*g, o);
     };
     res[casein::TOUCH_UP] = reset;
     res[casein::QUIT] = [](auto) { t.stop(); };

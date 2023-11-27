@@ -13,6 +13,8 @@ constexpr auto p2point(unsigned p, unsigned w) {
   return point{p % w, p / w, p};
 }
 
+export enum class outcome { none, move, eat_food, death, game_over, new_game };
+
 class snake_iter {
   xor_ll_iter m_it;
   unsigned m_w;
@@ -63,29 +65,35 @@ export class game {
     } while (wtf != m_food);
   }
 
-  void update_dir(decltype(m_dir) n, decltype(m_dir) opp) {
+  void grow() {
+    m_snake.push_front(y * grid_w + x);
+    if (m_snake.size() > m_target)
+      m_snake.pop_back();
+  }
+
+  [[nodiscard]] outcome update_dir(decltype(m_dir) n, decltype(m_dir) opp) {
     if (m_dir == n)
-      return;
+      return outcome::none;
     if (m_dir == opp)
-      return;
+      return outcome::none;
     if (m_dir == E)
-      return;
+      return outcome::none;
 
     m_dir = n;
     m_ticks = ((m_ticks / m_tpm) + 1) * m_tpm;
-    [[maybe_unused]] auto _ = run_tick();
+    return run_tick();
   }
 
-  [[nodiscard]] bool run_tick() {
+  [[nodiscard]] outcome run_tick() {
     switch (m_dir) {
     case E:
-      return false;
+      return outcome::game_over;
     case O:
-      return false;
+      return outcome::new_game;
     case U:
       if (y == 0) {
         m_dir = E;
-        return true;
+        return outcome::death;
       } else {
         --y;
       }
@@ -93,7 +101,7 @@ export class game {
     case D:
       if (y == grid_h - 1) {
         m_dir = E;
-        return true;
+        return outcome::death;
       } else {
         ++y;
       }
@@ -101,7 +109,7 @@ export class game {
     case L:
       if (x == 0) {
         m_dir = E;
-        return true;
+        return outcome::death;
       } else {
         --x;
       }
@@ -109,7 +117,7 @@ export class game {
     case R:
       if (x == grid_w - 1) {
         m_dir = E;
-        return true;
+        return outcome::death;
       } else {
         ++x;
       }
@@ -122,7 +130,7 @@ export class game {
     const auto p = y * grid_w + x;
     if (!m_snake.is_empty(p)) {
       m_dir = E;
-      return true;
+      return outcome::death;
     }
     if (m_food == p) {
       if (m_tpm > min_ticks_per_move && --m_fpd == 0) {
@@ -131,12 +139,12 @@ export class game {
       }
       m_target += size_increment;
       reset_food();
+      grow();
+      return outcome::eat_food;
     }
 
-    m_snake.push_front(y * grid_w + x);
-    if (m_snake.size() > m_target)
-      m_snake.pop_back();
-    return true;
+    grow();
+    return outcome::move;
   }
 
 public:
@@ -148,10 +156,10 @@ public:
   [[nodiscard]] constexpr auto grid_width() const noexcept { return grid_w; }
   [[nodiscard]] constexpr auto grid_height() const noexcept { return grid_h; }
 
-  void up() { update_dir(U, D); }
-  void down() { update_dir(D, U); }
-  void left() { update_dir(L, R); }
-  void right() { update_dir(R, L); }
+  [[nodiscard]] auto up() { return update_dir(U, D); }
+  [[nodiscard]] auto down() { return update_dir(D, U); }
+  [[nodiscard]] auto left() { return update_dir(L, R); }
+  [[nodiscard]] auto right() { return update_dir(R, L); }
 
   [[nodiscard]] constexpr auto begin() const noexcept {
     return snake_iter{m_snake.begin(), grid_w};
@@ -171,10 +179,10 @@ public:
     return m_dir == E;
   }
 
-  [[nodiscard]] bool tick() {
+  [[nodiscard]] outcome tick() {
     m_ticks++;
     if (m_ticks % m_tpm > 0)
-      return false;
+      return outcome::none;
 
     return run_tick();
   }
