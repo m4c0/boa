@@ -1,5 +1,6 @@
 export module beeps;
 import nessa;
+import rng;
 import siaudio;
 import sitime;
 
@@ -11,6 +12,7 @@ export class beeps : siaudio::os_streamer {
   sitime::stopwatch m_watch;
   float m_walk{-1};
   float m_eat{-1};
+  float m_eat_dt{1};
 
   float now() noexcept { return m_watch.millis() / 1000.0f; }
 
@@ -26,10 +28,10 @@ export class beeps : siaudio::os_streamer {
     n = -4 * n * n + 4 * n;
     n = clamp(n);
     n = n * 0.3;
-    return n;
+    return n * nessa::gen::triangle(m_eat_dt * t * nessa::midi::note_freq(C4));
   }
   constexpr float vol_at(float t) const noexcept {
-    auto e = eat(t) * nessa::gen::triangle(t * nessa::midi::note_freq(C4));
+    auto e = eat(t);
     return e;
   }
 
@@ -46,6 +48,9 @@ public:
     m_walk = -1;
   }
 
-  void eat() { m_eat = now(); }
+  void eat() {
+    m_eat = now();
+    m_eat_dt = 1.0 + 0.1 * rng::randf();
+  }
   void walk() { m_walk = now(); }
 };
