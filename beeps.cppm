@@ -40,7 +40,7 @@ export class beeps : siaudio::os_streamer {
     n = n * 6.0;
     n = 1.0 / (10.0 * n);
     n = clamp(n);
-    n = n * 0.05;
+    n = n * 0.01;
     return n * nessa::gen::noise(m_walk_dt * t * nessa::midi::note_freq(C6));
   }
   constexpr float death(float t) const noexcept {
@@ -55,7 +55,7 @@ export class beeps : siaudio::os_streamer {
     return n * nessa::gen::noise(t * nessa::midi::note_freq(C3));
   }
   constexpr float vol_at(float t) const noexcept {
-    const auto global_vol = 1.0;
+    const auto global_vol = 0.5;
     auto e = eat(t);
     auto w = walk(t);
     auto d = death(t);
