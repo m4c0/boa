@@ -238,6 +238,10 @@ public:
             } else if (m_pc.dead_at == 0.0)
               m_pc.dead_at = m_g->is_game_over() ? t : 0;
 
+            if (m_outcome == boa::outcome::move) {
+              beep.walk();
+            }
+
             m_pc.grid_width = m_g->grid_width();
             m_pc.grid_height = m_g->grid_height();
             m_g = nullptr;
