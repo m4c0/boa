@@ -241,6 +241,9 @@ public:
             if (m_outcome == boa::outcome::move) {
               beep.walk();
             }
+            if (m_outcome == boa::outcome::death) {
+              beep.death();
+            }
 
             m_pc.grid_width = m_g->grid_width();
             m_pc.grid_height = m_g->grid_height();

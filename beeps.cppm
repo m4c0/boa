@@ -14,6 +14,7 @@ export class beeps : siaudio::os_streamer {
   float m_walk_dt{-1};
   float m_eat{-1};
   float m_eat_dt{1};
+  float m_death{-1};
 
   float now() noexcept { return m_watch.millis() / 1000.0f; }
 
@@ -42,10 +43,23 @@ export class beeps : siaudio::os_streamer {
     n = n * 0.05;
     return n * nessa::gen::noise(m_walk_dt * t * nessa::midi::note_freq(C6));
   }
+  constexpr float death(float t) const noexcept {
+    if (m_death < 0)
+      return 0;
+
+    float n = t - m_death;
+    n = n * 2.0;
+    n = 1.0 / (10.0 * n);
+    n = clamp(n);
+    n = n * 0.2;
+    return n * nessa::gen::noise(t * nessa::midi::note_freq(C3));
+  }
   constexpr float vol_at(float t) const noexcept {
+    const auto global_vol = 1.0;
     auto e = eat(t);
     auto w = walk(t);
-    return (e + w) / 2.0;
+    auto d = death(t);
+    return (e + w + d) * global_vol;
   }
 
   void fill_buffer(float *buf, unsigned len) override {
@@ -65,6 +79,7 @@ public:
     m_eat = now();
     m_eat_dt = 1.0 + 0.1 * rng::randf();
   }
+  void death() { m_death = now(); }
   void walk() {
     m_walk = now();
     m_walk_dt = 1.0 + 0.1 * rng::randf();
