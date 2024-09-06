@@ -7,6 +7,7 @@ import boa;
 import casein;
 import dotz;
 import hai;
+import siaudio;
 import silog;
 import sires;
 import sith;
@@ -258,6 +259,9 @@ struct init {
     });
 
     handle(TOUCH_UP, reset);
+
+    siaudio::filler([](float * f, unsigned n) { beep.fill_buffer(f, n); });
+    siaudio::rate(44100);
   }
 } i;
 

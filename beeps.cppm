@@ -62,13 +62,6 @@ export class beeps {
     return (e + w + d) * global_vol;
   }
 
-  void fill_buffer(float *buf, unsigned len) {
-    auto ref = now();
-    for (auto i = 0; i < len; ++i) {
-      *buf++ = vol_at(ref + i / frate);
-    }
-  }
-
 public:
   void reset() {
     m_eat = -1;
@@ -83,5 +76,12 @@ public:
   void walk() {
     m_walk = now();
     m_walk_dt = 1.0 + 0.1 * rng::randf();
+  }
+
+  void fill_buffer(float *buf, unsigned len) {
+    auto ref = now();
+    for (auto i = 0; i < len; ++i) {
+      *buf++ = vol_at(ref + i / frate);
+    }
   }
 };
