@@ -46,6 +46,7 @@ hai::uptr<boa::game> g_g {};
 upc g_pc{};
 boa::outcome volatile g_outcome{};
 beeps beep{};
+voo::updater<voo::h2l_buffer> * g_buffer {};
 
 auto frag_mod() {
   return sires::stat("boav.frag.spv").take([](auto err) {
@@ -143,7 +144,7 @@ public:
     };
     vee::gr_pipeline gp = create_gp(dq.render_pass());
 
-    offscreen ofs { dq.physical_device(), create_gp };
+    // offscreen ofs { dq.physical_device(), create_gp };
 
     while (!interrupted()) {
       voo::swapchain_and_stuff sw { dq };
@@ -152,6 +153,7 @@ public:
       constexpr const unsigned gg_buf_size = max_cells * sizeof(storage);
       voo::updater gg_buf { dq.queue(), &update_grid, dq, gg_buf_size };
       vee::update_descriptor_set_with_storage(dset, 0, gg_buf.data().local_buffer());
+      g_buffer = &gg_buf;
 
       extent_loop(dq.queue(), sw, [&] {
         g_pc.aspect = sw.aspect();;
@@ -165,16 +167,16 @@ public:
         g_pc.time = 0.001 * watch.millis();
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
-          auto cb = sw.cmd_render_pass(pcb);
+          auto scb = sw.cmd_render_pass(pcb);
           auto ext = sw.extent();
 
-          vee::cmd_set_scissor(pcb, ext);
-          vee::cmd_set_viewport(cb, ext);
+          vee::cmd_set_scissor(*scb, ext);
+          vee::cmd_set_viewport(*scb, ext);
 
-          vee::cmd_push_vert_frag_constants(cb, *pl, &g_pc);
-          vee::cmd_bind_gr_pipeline(cb, *gp);
-          vee::cmd_bind_descriptor_set(cb, *pl, 0, dset);
-          quad.run(cb, 0, 1);
+          vee::cmd_push_vert_frag_constants(*scb, *pl, &g_pc);
+          vee::cmd_bind_gr_pipeline(*scb, *gp);
+          vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
+          quad.run(*scb, 0, 1);
         });
 
         /*
@@ -200,47 +202,44 @@ public:
       });
     }
   }
-} i;
+} t;
 
-extern "C" void casein_handle(const casein::event &e) {
-  static thread t{};
-  static hai::uptr<boa::game> g{};
-
-  static constexpr auto reset = [](auto) {
-    if (g->is_game_over()) {
-      g = hai::uptr<boa::game>::make(g->grid_width(), g->grid_height());
-      t.render(&*g, {});
-    }
+static void reset() {
+  if (g_g->is_game_over()) {
+    g_g = hai::uptr<boa::game>::make(g_g->grid_width(), g_g->grid_height());
+    g_buffer->run_once();
+  }
+}
+static constexpr auto render(boa::outcome (boa::game::*m)(void)) {
+  return [=] {
+    g_outcome = ((*g_g).*m)();
+    g_buffer->run_once();
   };
+}
 
-  static constexpr auto g_map = [] {
-    casein::subevent_map<casein::events::gesture, casein::G_MAX> res{};
-    res[casein::G_SWIPE_UP] = [](auto) { t.render(&*g, g->up()); };
-    res[casein::G_SWIPE_DOWN] = [](auto) { t.render(&*g, g->down()); };
-    res[casein::G_SWIPE_LEFT] = [](auto) { t.render(&*g, g->left()); };
-    res[casein::G_SWIPE_RIGHT] = [](auto) { t.render(&*g, g->right()); };
-    res[casein::G_TAP_1] = reset;
-    res[casein::G_SHAKE] = reset;
-    return res;
-  }();
-  static constexpr auto k_map = [] {
-    casein::subevent_map<casein::events::key_down, casein::K_MAX> res{};
-    res[casein::K_UP] = [](auto) { t.render(&*g, g->up()); };
-    res[casein::K_DOWN] = [](auto) { t.render(&*g, g->down()); };
-    res[casein::K_LEFT] = [](auto) { t.render(&*g, g->left()); };
-    res[casein::K_RIGHT] = [](auto) { t.render(&*g, g->right()); };
-    res[casein::K_SPACE] = reset;
-    res[casein::K_R] = [](auto) {
-      t.take_shots();
-      t.render(&*g, {}); // just to bring the game back
-    };
-    return res;
-  }();
-  static constexpr auto map = [] {
-    casein::event_map res{};
-    res[casein::RESIZE_WINDOW] = [](const casein::event &e) {
-      auto [w, h, _, __] = *e.as<casein::events::resize_window>();
+struct init {
+  init() {
+    using namespace casein;
 
+    handle(GESTURE, G_SWIPE_UP, render(&boa::game::up));
+    handle(GESTURE, G_SWIPE_DOWN, render(&boa::game::down));
+    handle(GESTURE, G_SWIPE_LEFT, render(&boa::game::left));
+    handle(GESTURE, G_SWIPE_RIGHT, render(&boa::game::right));
+    handle(GESTURE, G_TAP_1, reset);
+    handle(GESTURE, G_SHAKE, reset);
+
+    handle(KEY_DOWN, K_UP, render(&boa::game::up));
+    handle(KEY_DOWN, K_DOWN, render(&boa::game::down));
+    handle(KEY_DOWN, K_LEFT, render(&boa::game::left));
+    handle(KEY_DOWN, K_RIGHT, render(&boa::game::right));
+    handle(KEY_DOWN, K_SPACE, reset);
+    // handle(KEY_DOWN, K_R, [] {
+    //   t.take_shots();
+    //   t.render(&*g, {}); // just to bring the game back
+    // });
+
+    handle(RESIZE_WINDOW, [] {
+      auto [w, h] = casein::window_size;
       auto grid_h = 24.0f;
       auto grid_w = grid_h;
       if (w > h) {
@@ -249,24 +248,18 @@ extern "C" void casein_handle(const casein::event &e) {
         grid_h = grid_h * h / w;
       }
 
-      g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w),
-                                     static_cast<unsigned>(grid_h));
-      t.resize(grid_w / grid_h);
-      t.render(&*g, {});
-    };
-    res[casein::GESTURE] = [](auto e) { g_map.handle(e); };
-    res[casein::KEY_DOWN] = [](auto e) { k_map.handle(e); };
-    res[casein::TIMER] = [](auto) {
-      auto o = g->tick();
-      if (g && o != boa::outcome::none)
-        t.render(&*g, o);
-    };
-    res[casein::TOUCH_UP] = reset;
-    return res;
-  }();
+      g_g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w), static_cast<unsigned>(grid_h));
+      if (g_buffer) g_buffer->run_once();
+    });
 
-  map.handle(e);
-}
+    handle(TIMER, [] {
+      g_outcome = g_g->tick();
+      if (g_outcome != boa::outcome::none) g_buffer->run_once();
+    });
+
+    handle(TOUCH_UP, reset);
+  }
+} i;
 
 #pragma leco add_shader "boav.vert"
 #pragma leco add_shader "boav.frag"
