@@ -7,8 +7,8 @@ layout(push_constant) uniform upc {
   float time;
   float dead_at;
   vec2 grid;
-  vec2 food;
-  vec2 party;
+  ivec2 food;
+  ivec2 party;
   float party_start;
 } pc;
 layout(set = 0, binding = 0) readonly buffer usb {
