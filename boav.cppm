@@ -11,6 +11,7 @@ import sires;
 import sith;
 import sitime;
 import vee;
+import voo;
 
 #ifdef LECO_TARGET_IPHONEOS
 class offscreen {
@@ -72,11 +73,11 @@ static void setup_qv(const vee::device_memory & mem) {
   vee::unmap_memory(*mem);
 }
 
-class thread : public sith::thread {
+class thread : public voo::casein_thread {
+  hai::uptr<boa::game> m_g {};
   volatile float m_aspect;
   volatile bool m_resized;
   volatile bool m_shots;
-  boa::game *volatile m_g{};
   boa::outcome volatile m_outcome{};
 
 public:
@@ -322,7 +323,7 @@ public:
       }
     }
   }
-};
+} i;
 
 extern "C" void casein_handle(const casein::event &e) {
   static thread t{};
@@ -360,9 +361,6 @@ extern "C" void casein_handle(const casein::event &e) {
   }();
   static constexpr auto map = [] {
     casein::event_map res{};
-    res[casein::CREATE_WINDOW] = [](const casein::event &e) {
-      t.start(*e.as<casein::events::create_window>());
-    };
     res[casein::RESIZE_WINDOW] = [](const casein::event &e) {
       auto [w, h, _, __] = *e.as<casein::events::resize_window>();
 
@@ -387,7 +385,6 @@ extern "C" void casein_handle(const casein::event &e) {
         t.render(&*g, o);
     };
     res[casein::TOUCH_UP] = reset;
-    res[casein::QUIT] = [](auto) { t.stop(); };
     return res;
   }();
 
