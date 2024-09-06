@@ -61,13 +61,18 @@ struct quad {
 
 auto frag_mod() {
   return sires::stat("boav.frag.spv").take([](auto err) {
-    silog::log(silog::error, "Failed to stat shader: %s", err);
+    silog::log(silog::error, "Failed to stat shader: %s", err.cstr().begin());
     return 0;
   });
 }
 
+static void setup_qv(const vee::device_memory & mem) {
+  auto ptr = vee::map_memory(*mem);
+  *static_cast<quad *>(ptr) = {};
+  vee::unmap_memory(*mem);
+}
+
 class thread : public sith::thread {
-  casein::native_handle_t m_nptr;
   volatile float m_aspect;
   volatile bool m_resized;
   volatile bool m_shots;
@@ -80,10 +85,6 @@ public:
     m_g = g;
   }
 
-  void start(casein::native_handle_t n) {
-    m_nptr = n;
-    sith::thread::start();
-  }
   void resize(float aspect) {
     m_aspect = aspect;
     m_resized = true;
@@ -97,7 +98,7 @@ public:
     // Instance
     vee::instance i = vee::create_instance("boas");
     vee::debug_utils_messenger dbg = vee::create_debug_utils_messenger();
-    vee::surface s = vee::create_surface(m_nptr);
+    vee::surface s = vee::create_surface(casein::native_ptr);
     auto [pd, qf] = vee::find_physical_device_with_universal_queue(*s);
 
     // Device
@@ -128,7 +129,7 @@ public:
         vee::buffer qv_buf = vee::create_vertex_buffer(sizeof(quad));
         vee::device_memory qv_mem = vee::create_host_buffer_memory(pd, *qv_buf);
         vee::bind_buffer_memory(*qv_buf, *qv_mem);
-        { *static_cast<quad *>(*vee::mapmem{*qv_mem}) = {}; }
+        setup_qv(qv_mem);
 
         // Game grid buffer
         constexpr const auto gg_buf_size = max_cells * sizeof(storage);
@@ -206,8 +207,8 @@ public:
 
           // Fill grid
           if (m_g != nullptr) {
-            vee::mapmem mm{*gg_mem};
-            auto *buf = static_cast<storage *>(*mm);
+            auto * mm = vee::map_memory(*gg_mem);
+            auto *buf = static_cast<storage *>(mm);
             for (auto i = 0; i < max_cells; i++) {
               buf[i].seen = 0;
             }
@@ -221,6 +222,8 @@ public:
               if (buf[i].seen == 0)
                 buf[i].first_seen = 0;
             }
+            vee::unmap_memory(*gg_mem);
+
             auto [x, y, p] = m_g->food();
             if (m_pc.food != vec2{x, y}) {
               if (m_outcome == boa::outcome::eat_food) {
