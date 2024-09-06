@@ -76,9 +76,10 @@ public:
     char filename[1024];
     snprintf(filename, 1024, "out/shot-%dx%d.jpg", ext.width, ext.height);
 
-    vee::mapmem mem{*o_mem};
-    auto *data = static_cast<stbi::pixel *>(*mem);
+    auto mem = vee::map_memory(*o_mem);
+    auto *data = static_cast<stbi::pixel *>(mem);
     stbi::write_rgba_unsafe(filename, ext.width, ext.height, data);
+    vee::unmap_memory(*o_mem);
   }
 };
 
