@@ -6,8 +6,8 @@ import sitime;
 
 using namespace nessa::midi;
 
-export class beeps : siaudio::os_streamer {
-  static constexpr const auto frate = static_cast<float>(rate);
+export class beeps {
+  static constexpr const auto frate = static_cast<float>(44100);
 
   sitime::stopwatch m_watch;
   float m_walk{-1};
@@ -62,7 +62,7 @@ export class beeps : siaudio::os_streamer {
     return (e + w + d) * global_vol;
   }
 
-  void fill_buffer(float *buf, unsigned len) override {
+  void fill_buffer(float *buf, unsigned len) {
     auto ref = now();
     for (auto i = 0; i < len; ++i) {
       *buf++ = vol_at(ref + i / frate);
