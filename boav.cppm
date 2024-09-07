@@ -1,6 +1,6 @@
 export module boav;
 #ifndef LECO_TARGET_IPHONEOS
-import :offscreen;
+// import :offscreen;
 #endif
 import beeps;
 import boa;
