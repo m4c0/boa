@@ -32,11 +32,11 @@ struct upc {
   float time;
   float dead_at;
   float pad{};
-  float grid_width;
-  float grid_height;
-  dotz::ivec2 food;
-  dotz::ivec2 party;
-  float party_start;
+  float grid_width = 24;
+  float grid_height = 24;
+  dotz::ivec2 food = { 10000 };
+  dotz::ivec2 party = { 10000 };
+  float party_start = -1;
 };
 
 struct v_buffer {
