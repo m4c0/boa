@@ -39,6 +39,18 @@ struct upc {
   float party_start;
 };
 
+struct v_buffer {
+  vee::buffer buf {};
+  vee::device_memory mem {};
+
+  constexpr v_buffer() = default;
+  v_buffer(const voo::device_and_queue & dq, unsigned sz) {
+    buf = vee::create_storage_buffer(sz);
+    mem = vee::create_host_buffer_memory(dq.physical_device(), sz);
+    vee::bind_buffer_memory(*buf, *mem);
+  }
+};
+
 struct storage {
   float first_seen;
   float seen;
@@ -47,57 +59,13 @@ hai::uptr<boa::game> g_g {};
 upc g_pc{};
 boa::outcome volatile g_outcome{};
 beeps beep{};
-voo::updater<voo::h2l_buffer> * g_buffer {};
+v_buffer * g_buffer {};
 
 auto frag_mod() {
   return sires::stat("boav.frag.spv").take([](auto err) {
     silog::log(silog::error, "Failed to stat shader: %s", err.cstr().begin());
     return 0;
   });
-}
-
-static void update_grid(voo::h2l_buffer * gg) {
-  voo::mapmem m { gg->host_memory() };
-  auto buf = static_cast<storage *>(*m);
-
-  for (auto i = 0; i < max_cells; i++) buf[i].seen = 0;
-
-  auto s = g_g->size();
-  for (auto [x, y, p] : *g_g) {
-    if (buf[p].first_seen == 0) buf[p].first_seen = g_pc.time;
-    buf[p].seen = s-- / static_cast<float>(g_g->size());
-  }
-
-  for (auto i = 0; i < max_cells; i++) {
-    if (buf[i].seen == 0) buf[i].first_seen = 0;
-  }
-
-  auto [x, y, p] = g_g->food();
-  if (g_pc.food != dotz::ivec2 { x, y }) {
-    if (g_outcome == boa::outcome::eat_food) {
-      beep.eat();
-      g_pc.party_start = g_pc.time;
-      g_pc.party = g_pc.food;
-    }
-    g_pc.food = { x, y };
-  }
-  if (g_g->is_new_game()) {
-    beep.reset();
-    g_pc.party = {1000, 1000};
-    g_pc.party_start = 0;
-    g_pc.dead_at = 0.0;
-  } else if (g_pc.dead_at == 0.0)
-    g_pc.dead_at = g_g->is_game_over() ? g_pc.time : 0;
-
-  if (g_outcome == boa::outcome::move) {
-    beep.walk();
-  }
-  if (g_outcome == boa::outcome::death) {
-    beep.death();
-  }
-
-  g_pc.grid_width = g_g->grid_width();
-  g_pc.grid_height = g_g->grid_height();
 }
 
 class thread : public voo::casein_thread {
@@ -147,14 +115,15 @@ public:
 
     // offscreen ofs { dq.physical_device(), create_gp };
 
+    // Game grid buffer
+    constexpr const unsigned gg_buf_size = max_cells * sizeof(storage);
+    v_buffer gg_buf { dq, gg_buf_size };
+    vee::update_descriptor_set_with_storage(dset, 0, *gg_buf.buf);
+    g_buffer = &gg_buf;
+    release_init_lock();
+
     while (!interrupted()) {
       voo::swapchain_and_stuff sw { dq };
-
-      // Game grid buffer
-      constexpr const unsigned gg_buf_size = max_cells * sizeof(storage);
-      voo::updater gg_buf { dq.queue(), &update_grid, dq, gg_buf_size };
-      vee::update_descriptor_set_with_storage(dset, 0, gg_buf.data().local_buffer());
-      g_buffer = &gg_buf;
 
       extent_loop(dq.queue(), sw, [&] {
         g_pc.aspect = sw.aspect();;
@@ -203,29 +172,77 @@ public:
       });
     }
   }
+
+  using casein_thread::wait_init;
 } t;
+
+static void update_grid() {
+  t.wait_init();
+
+  voo::mapmem m { *g_buffer->mem };
+  auto buf = static_cast<storage *>(*m);
+
+  for (auto i = 0; i < max_cells; i++) buf[i].seen = 0;
+
+  auto s = g_g->size();
+  for (auto [x, y, p] : *g_g) {
+    if (buf[p].first_seen == 0) buf[p].first_seen = g_pc.time;
+    buf[p].seen = s-- / static_cast<float>(g_g->size());
+  }
+
+  for (auto i = 0; i < max_cells; i++) {
+    if (buf[i].seen == 0) buf[i].first_seen = 0;
+  }
+
+  auto [x, y, p] = g_g->food();
+  if (g_pc.food != dotz::ivec2 { x, y }) {
+    if (g_outcome == boa::outcome::eat_food) {
+      beep.eat();
+      g_pc.party_start = g_pc.time;
+      g_pc.party = g_pc.food;
+    }
+    g_pc.food = { x, y };
+  }
+  if (g_g->is_new_game()) {
+    beep.reset();
+    g_pc.party = {1000, 1000};
+    g_pc.party_start = 0;
+    g_pc.dead_at = 0.0;
+  } else if (g_pc.dead_at == 0.0)
+    g_pc.dead_at = g_g->is_game_over() ? g_pc.time : 0;
+
+  if (g_outcome == boa::outcome::move) {
+    beep.walk();
+  }
+  if (g_outcome == boa::outcome::death) {
+    beep.death();
+  }
+
+  g_pc.grid_width = g_g->grid_width();
+  g_pc.grid_height = g_g->grid_height();
+}
 
 static void reset() {
   if (g_g->is_game_over()) {
     g_g = hai::uptr<boa::game>::make(g_g->grid_width(), g_g->grid_height());
-    g_buffer->run_once();
+    update_grid();
   }
 }
 static void up() {
   g_outcome = g_g->up();
-  g_buffer->run_once();
+  update_grid();
 }
 static void down() {
   g_outcome = g_g->down();
-  g_buffer->run_once();
+  update_grid();
 }
 static void left() {
   g_outcome = g_g->left();
-  g_buffer->run_once();
+  update_grid();
 }
 static void right() {
   g_outcome = g_g->right();
-  g_buffer->run_once();
+  update_grid();
 }
 
 struct init {
@@ -260,12 +277,12 @@ struct init {
       }
 
       g_g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w), static_cast<unsigned>(grid_h));
-      if (g_buffer) g_buffer->run_once();
+      if (g_buffer) update_grid();
     });
 
     handle(TIMER, [] {
       g_outcome = g_g->tick();
-      if (g_outcome != boa::outcome::none) g_buffer->run_once();
+      if (g_outcome != boa::outcome::none) update_grid();
     });
 
     handle(TOUCH_UP, reset);
