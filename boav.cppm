@@ -211,28 +211,38 @@ static void reset() {
     g_buffer->run_once();
   }
 }
-static constexpr auto render(boa::outcome (boa::game::*m)(void)) {
-  return [=] {
-    g_outcome = ((*g_g).*m)();
-    g_buffer->run_once();
-  };
+static void up() {
+  g_outcome = g_g->up();
+  g_buffer->run_once();
+}
+static void down() {
+  g_outcome = g_g->down();
+  g_buffer->run_once();
+}
+static void left() {
+  g_outcome = g_g->left();
+  g_buffer->run_once();
+}
+static void right() {
+  g_outcome = g_g->right();
+  g_buffer->run_once();
 }
 
 struct init {
   init() {
     using namespace casein;
 
-    handle(GESTURE, G_SWIPE_UP, render(&boa::game::up));
-    handle(GESTURE, G_SWIPE_DOWN, render(&boa::game::down));
-    handle(GESTURE, G_SWIPE_LEFT, render(&boa::game::left));
-    handle(GESTURE, G_SWIPE_RIGHT, render(&boa::game::right));
+    handle(GESTURE, G_SWIPE_UP, up);
+    handle(GESTURE, G_SWIPE_DOWN, down);
+    handle(GESTURE, G_SWIPE_LEFT, left);
+    handle(GESTURE, G_SWIPE_RIGHT, right);
     handle(GESTURE, G_TAP_1, reset);
     handle(GESTURE, G_SHAKE, reset);
 
-    handle(KEY_DOWN, K_UP, render(&boa::game::up));
-    handle(KEY_DOWN, K_DOWN, render(&boa::game::down));
-    handle(KEY_DOWN, K_LEFT, render(&boa::game::left));
-    handle(KEY_DOWN, K_RIGHT, render(&boa::game::right));
+    handle(KEY_DOWN, K_UP, up);
+    handle(KEY_DOWN, K_DOWN, down);
+    handle(KEY_DOWN, K_LEFT, left);
+    handle(KEY_DOWN, K_RIGHT, right);
     handle(KEY_DOWN, K_SPACE, reset);
     // handle(KEY_DOWN, K_R, [] {
     //   t.take_shots();
