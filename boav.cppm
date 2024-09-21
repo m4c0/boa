@@ -94,14 +94,12 @@ public:
     );
     long frag_ts{};
     const auto create_gp = [&](vee::render_pass::type rp) {
-      vee::shader_module vert = vee::create_shader_module_from_resource("boav.vert.spv");
-      vee::shader_module frag = vee::create_shader_module_from_resource("boav.frag.spv");
       return vee::create_graphics_pipeline({
         .pipeline_layout = *pl,
         .render_pass = rp,
         .shaders {
-          vee::pipeline_vert_stage(*vert, "main"),
-          vee::pipeline_frag_stage(*frag, "main"),
+          voo::shader("boav.vert.spv").pipeline_vert_stage(),
+          voo::shader("boav.frag.spv").pipeline_frag_stage(),
         },
         .bindings { quad.vertex_input_bind() },
         .attributes { quad.vertex_attribute(0) },
