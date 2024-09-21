@@ -103,12 +103,8 @@ public:
           vee::pipeline_vert_stage(*vert, "main"),
           vee::pipeline_frag_stage(*frag, "main"),
         },
-        .bindings {
-          vee::vertex_input_bind(2 * sizeof(float)),
-        },
-        .attributes{
-          vee::vertex_attribute_vec2(0, 0),
-        },
+        .bindings { quad.vertex_input_bind() },
+        .attributes { quad.vertex_attribute(0) },
       });
     };
     vee::gr_pipeline gp = create_gp(dq.render_pass());
