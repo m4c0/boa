@@ -120,7 +120,7 @@ public:
       voo::swapchain_and_stuff sw { dq };
 
       extent_loop(dq.queue(), sw, [&] {
-        g_pc.aspect = sw.aspect();;
+        g_pc.aspect = sw.aspect();
 
         if (frag_mod() != frag_ts) {
           gp = create_gp(dq.render_pass());
