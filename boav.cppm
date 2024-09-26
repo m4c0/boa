@@ -68,6 +68,8 @@ auto frag_mod() {
   });
 }
 
+static void tick();
+
 class thread : public voo::casein_thread {
   volatile bool m_shots;
 
@@ -126,6 +128,8 @@ public:
           gp = create_gp(dq.render_pass());
           frag_ts = frag_mod();
         }
+
+        tick();
 
         // Passing time in seconds
         g_pc.time = 0.001 * watch.millis();
@@ -239,6 +243,11 @@ static void right() {
   update_grid();
 }
 
+static void tick() {
+  g_outcome = g_g->tick();
+  if (g_outcome != boa::outcome::none) update_grid();
+}
+
 struct init {
   init() {
     using namespace casein;
@@ -272,11 +281,6 @@ struct init {
 
       g_g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w), static_cast<unsigned>(grid_h));
       if (g_buffer) update_grid();
-    });
-
-    handle(TIMER, [] {
-      g_outcome = g_g->tick();
-      if (g_outcome != boa::outcome::none) update_grid();
     });
 
     handle(TOUCH_UP, reset);
