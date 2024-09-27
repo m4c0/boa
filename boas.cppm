@@ -1,4 +1,5 @@
 #pragma leco app
+#pragma leco display_name Snake
 export module boas;
 import boav;
 
