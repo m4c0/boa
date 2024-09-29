@@ -6,6 +6,7 @@ import beeps;
 import boa;
 import casein;
 import dotz;
+import fff;
 import hai;
 import siaudio;
 import silog;
@@ -68,8 +69,6 @@ auto frag_mod() {
   });
 }
 
-static void tick();
-
 class thread : public voo::casein_thread {
   volatile bool m_shots;
 
@@ -128,8 +127,6 @@ public:
           gp = create_gp(dq.render_pass());
           frag_ts = frag_mod();
         }
-
-        tick();
 
         // Passing time in seconds
         g_pc.time = 0.001 * watch.millis();
@@ -244,11 +241,14 @@ static void right() {
 }
 
 static void tick() {
+  if (!g_g) return;
   g_outcome = g_g->tick();
   if (g_outcome != boa::outcome::none) update_grid();
 }
 
 struct init {
+  fff::timer ticker { 25, tick };
+
   init() {
     using namespace casein;
 
