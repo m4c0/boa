@@ -1,6 +1,6 @@
 export module boav;
 #ifndef LECO_TARGET_IPHONEOS
-// import :offscreen;
+import :offscreen;
 #endif
 import beeps;
 import boa;
@@ -108,7 +108,9 @@ public:
     };
     vee::gr_pipeline gp = create_gp(dq.render_pass());
 
-    // offscreen ofs { dq.physical_device(), create_gp };
+#ifndef LECO_TARGET_IPHONEOS
+    offscreen ofs { dq.physical_device(), create_gp };
+#endif
 
     // Game grid buffer
     constexpr const unsigned gg_buf_size = max_cells * sizeof(storage);
@@ -131,39 +133,35 @@ public:
         // Passing time in seconds
         g_pc.time = 0.001 * watch.millis();
 
+        const auto render = [&](auto cb, auto ext) {
+          vee::cmd_set_scissor(cb, ext);
+          vee::cmd_set_viewport(cb, ext);
+
+          vee::cmd_push_vert_frag_constants(cb, *pl, &g_pc);
+          vee::cmd_bind_gr_pipeline(cb, *gp);
+          vee::cmd_bind_descriptor_set(cb, *pl, 0, dset);
+          quad.run(cb, 0, 1);
+        };
+
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           auto scb = sw.cmd_render_pass(pcb);
           auto ext = sw.extent();
-
-          vee::cmd_set_scissor(*scb, ext);
-          vee::cmd_set_viewport(*scb, ext);
-
-          vee::cmd_push_vert_frag_constants(*scb, *pl, &g_pc);
-          vee::cmd_bind_gr_pipeline(*scb, *gp);
-          vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
-          quad.run(*scb, 0, 1);
+          render(*scb, ext);
         });
 
-        /*
+#ifndef LECO_TARGET_IPHONEOS
         bool write = false;
         if (m_shots) {
           ofs.cmd_render_pass(cb, [&](auto ext) {
             g_pc.aspect = static_cast<float>(ext.width) /
                           static_cast<float>(ext.height);
-
-            vee::cmd_set_scissor(cb, ext);
-            vee::cmd_set_viewport(cb, ext);
-
-            vee::cmd_push_vert_frag_constants(cb, *pl, &m_pc);
-            vee::cmd_bind_vertex_buffers(cb, 0, *qv_buf);
-            vee::cmd_bind_descriptor_set(cb, *pl, 0, dset);
-            vee::cmd_draw(cb, 6);
+            render(cb, ext);
           });
           write = true;
           m_shots = false;
         }
         if (write) ofs.write();
-        */
+#endif
       });
     }
   }

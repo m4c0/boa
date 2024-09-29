@@ -52,7 +52,7 @@ class ofs_ext {
 public:
   ofs_ext(vee::physical_device pd, vee::extent ext, auto &&create_gp)
       : pd{pd}, ext{ext} {
-    gp = create_gp(rp);
+    gp = create_gp(*rp);
   }
 
   void cmd_render_pass(vee::command_buffer cb, auto &&blk) {
