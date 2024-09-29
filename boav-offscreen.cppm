@@ -5,6 +5,7 @@ export module boav:offscreen;
 import hai;
 import stubby;
 import vee;
+import voo;
 
 constexpr const auto sizes_len = 12;
 constexpr const vee::extent sizes[sizes_len]{
@@ -65,7 +66,7 @@ public:
         .use_secondary_cmd_buf = false,
     });
     vee::cmd_bind_gr_pipeline(cb, *gp);
-    blk(ext);
+    blk(cb, ext);
     vee::cmd_end_render_pass(cb);
 
     vee::cmd_pipeline_barrier(cb, *t_img, vee::from_pipeline_to_host);
@@ -83,27 +84,28 @@ public:
   }
 };
 
-class offscreen {
+class offscreen : voo::update_thread {
   hai::uptr<ofs_ext> m_oe[sizes_len];
+  hai::fn<void, vee::command_buffer, vee::extent> m_fn;
+
+  void build_cmd_buf(vee::command_buffer cb) override {
+    voo::cmd_buf_one_time_submit pcb{cb};
+    for (auto &oe : m_oe) oe->cmd_render_pass(cb, m_fn);
+  }
 
 public:
-  explicit offscreen(vee::physical_device pd, auto &&create_gp) {
+  explicit offscreen(vee::physical_device pd, voo::queue * q, auto &&create_gp) : update_thread { q } {
     for (auto i = 0; i < sizes_len; i++) {
       m_oe[i] = hai::uptr<ofs_ext>::make(pd, sizes[i], create_gp);
     }
   }
 
-  void cmd_render_pass(vee::command_buffer cb, auto &&blk) {
-    for (auto &oe : m_oe) {
-      oe->cmd_render_pass(cb, blk);
-    }
-  }
+  void do_it(hai::fn<void, vee::command_buffer, vee::extent> fn) {
+    m_fn = fn;
+    run_once();
 
-  void write() {
     // Sync CPU+GPU
     vee::device_wait_idle();
-    for (auto &oe : m_oe) {
-      oe->write();
-    }
+    for (auto &oe : m_oe) oe->write();
   }
 };

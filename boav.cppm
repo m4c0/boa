@@ -109,7 +109,7 @@ public:
     vee::gr_pipeline gp = create_gp(dq.render_pass());
 
 #ifndef LECO_TARGET_IPHONEOS
-    offscreen ofs { dq.physical_device(), create_gp };
+    offscreen ofs { dq.physical_device(), dq.queue(), create_gp };
 #endif
 
     // Game grid buffer
@@ -134,6 +134,9 @@ public:
         g_pc.time = 0.001 * watch.millis();
 
         const auto render = [&](auto cb, auto ext) {
+          g_pc.aspect = static_cast<float>(ext.width) /
+                        static_cast<float>(ext.height);
+
           vee::cmd_set_scissor(cb, ext);
           vee::cmd_set_viewport(cb, ext);
 
@@ -150,17 +153,10 @@ public:
         });
 
 #ifndef LECO_TARGET_IPHONEOS
-        bool write = false;
         if (m_shots) {
-          ofs.cmd_render_pass(cb, [&](auto ext) {
-            g_pc.aspect = static_cast<float>(ext.width) /
-                          static_cast<float>(ext.height);
-            render(cb, ext);
-          });
-          write = true;
+          ofs.do_it(render);
           m_shots = false;
         }
-        if (write) ofs.write();
 #endif
       });
     }
@@ -262,10 +258,13 @@ struct init {
     handle(KEY_DOWN, K_LEFT, left);
     handle(KEY_DOWN, K_RIGHT, right);
     handle(KEY_DOWN, K_SPACE, reset);
-    // handle(KEY_DOWN, K_R, [] {
-    //   t.take_shots();
-    //   t.render(&*g, {}); // just to bring the game back
-    // });
+    
+#ifndef LECO_TARGET_IPHONEOS
+    handle(KEY_DOWN, K_R, [] {
+      t.take_shots();
+      // t.render(&*g, {}); // just to bring the game back
+    });
+#endif
 
     handle(RESIZE_WINDOW, [] {
       auto [w, h] = casein::window_size;
