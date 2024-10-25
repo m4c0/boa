@@ -15,53 +15,39 @@ constexpr const vee::extent sizes[sizes_len]{
 };
 
 class ofs_ext {
-  vee::physical_device pd;
-  vee::extent ext;
-
-  voo::offscreen::colour_buffer m_colour { pd, ext };
-  voo::offscreen::depth_buffer m_depth { pd, ext };
-  voo::offscreen::host_buffer m_host { pd, ext };
-
-  // Render pass + Framebuffer + Pipeline
-  vee::render_pass rp = vee::create_render_pass(pd, nullptr);
-  vee::framebuffer fb = vee::create_framebuffer({
-      .physical_device = pd,
-      .render_pass = *rp,
-      .attachments = {{ m_colour.image_view(), m_depth.image_view() }},
-      .extent = ext,
-  });
-  vee::gr_pipeline gp{};
+  voo::offscreen::buffers m_bufs;
+  vee::gr_pipeline m_gp;
 
 public:
   ofs_ext(vee::physical_device pd, vee::extent ext, auto &&create_gp)
-      : pd{pd}, ext{ext} {
-    gp = create_gp(*rp);
-  }
+      : m_bufs { pd, ext }
+      , m_gp { create_gp(m_bufs.render_pass()) } {}
 
   void cmd_render_pass(vee::command_buffer cb, auto &&blk) {
     vee::cmd_begin_render_pass({
         .command_buffer = cb,
-        .render_pass = *rp,
-        .framebuffer = *fb,
-        .extent = ext,
+        .render_pass = m_bufs.render_pass(),
+        .framebuffer = m_bufs.framebuffer(),
+        .extent = m_bufs.extent(),
         .clear_color = {{0.01, 0.02, 0.05, 1.0}},
         .use_secondary_cmd_buf = false,
     });
-    vee::cmd_bind_gr_pipeline(cb, *gp);
-    blk(cb, ext);
+    vee::cmd_bind_gr_pipeline(cb, *m_gp);
+    blk(cb, m_bufs.extent());
     vee::cmd_end_render_pass(cb);
 
-    vee::cmd_pipeline_barrier(cb, m_colour.image(), vee::from_pipeline_to_host);
-    vee::cmd_copy_image_to_buffer(cb, ext, m_colour.image(), m_host.buffer());
+    m_bufs.cmd_copy_to_host(cb);
   }
 
   void write() {
-    char filename[1024];
-    snprintf(filename, 1024, "out/shot-%dx%d.jpg", ext.width, ext.height);
+    auto [w, h] = m_bufs.extent();
 
-    auto mem = m_host.map();
+    char filename[1024];
+    snprintf(filename, 1024, "out/shot-%dx%d.jpg", w, h);
+
+    auto mem = m_bufs.map_host();
     auto *data = static_cast<stbi::pixel *>(*mem);
-    stbi::write_rgba_unsafe(filename, ext.width, ext.height, data);
+    stbi::write_rgba_unsafe(filename, w, h, data);
   }
 };
 
