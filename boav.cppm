@@ -147,7 +147,7 @@ public:
         };
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
-          auto scb = sw.cmd_render_pass(pcb);
+          auto scb = sw.cmd_render_pass({ *pcb });
           auto ext = sw.extent();
           render(*scb, ext);
         });

@@ -24,14 +24,11 @@ public:
       , m_gp { create_gp(m_bufs.render_pass()) } {}
 
   void cmd_render_pass(vee::command_buffer cb, auto &&blk) {
-    vee::cmd_begin_render_pass({
+    vee::cmd_begin_render_pass(m_bufs.render_pass_begin({
         .command_buffer = cb,
-        .render_pass = m_bufs.render_pass(),
-        .framebuffer = m_bufs.framebuffer(),
-        .extent = m_bufs.extent(),
         .clear_color = {{0.01, 0.02, 0.05, 1.0}},
         .use_secondary_cmd_buf = false,
-    });
+    }));
     vee::cmd_bind_gr_pipeline(cb, *m_gp);
     blk(cb, m_bufs.extent());
     vee::cmd_end_render_pass(cb);
