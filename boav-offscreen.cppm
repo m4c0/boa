@@ -27,8 +27,7 @@ class ofs_ext {
   vee::framebuffer fb = vee::create_framebuffer({
       .physical_device = pd,
       .render_pass = *rp,
-      .image_buffer = m_colour.image_view(),
-      .depth_buffer = m_depth.image_view(),
+      .attachments = {{ m_colour.image_view(), m_depth.image_view() }},
       .extent = ext,
   });
   vee::gr_pipeline gp{};
