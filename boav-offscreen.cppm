@@ -18,34 +18,17 @@ class ofs_ext {
   vee::physical_device pd;
   vee::extent ext;
 
-  // Colour buffer
-  vee::image t_img = vee::create_renderable_image(ext);
-  vee::device_memory t_mem = vee::create_local_image_memory(pd, *t_img);
-  [[maybe_unused]] decltype(nullptr) t_bind =
-      vee::bind_image_memory(*t_img, *t_mem);
-  vee::image_view t_iv = vee::create_srgba_image_view(*t_img);
-
-  // Depth buffer
-  vee::image d_img = vee::create_depth_image(ext);
-  vee::device_memory d_mem = vee::create_local_image_memory(pd, *d_img);
-  [[maybe_unused]] decltype(nullptr) d_bind =
-      vee::bind_image_memory(*d_img, *d_mem);
-  vee::image_view d_iv = vee::create_depth_image_view(*d_img);
-
-  // Host-readable output buffer
-  vee::buffer o_buf =
-      vee::create_transfer_dst_buffer(ext.width * ext.height * 4);
-  vee::device_memory o_mem = vee::create_host_buffer_memory(pd, *o_buf);
-  [[maybe_unused]] decltype(nullptr) o_bind =
-      vee::bind_buffer_memory(*o_buf, *o_mem);
+  voo::offscreen::colour_buffer m_colour { pd, ext };
+  voo::offscreen::depth_buffer m_depth { pd, ext };
+  voo::offscreen::host_buffer m_host { pd, ext };
 
   // Render pass + Framebuffer + Pipeline
   vee::render_pass rp = vee::create_render_pass(pd, nullptr);
   vee::framebuffer fb = vee::create_framebuffer({
       .physical_device = pd,
       .render_pass = *rp,
-      .image_buffer = *t_iv,
-      .depth_buffer = *d_iv,
+      .image_buffer = m_colour.image_view(),
+      .depth_buffer = m_depth.image_view(),
       .extent = ext,
   });
   vee::gr_pipeline gp{};
@@ -69,18 +52,17 @@ public:
     blk(cb, ext);
     vee::cmd_end_render_pass(cb);
 
-    vee::cmd_pipeline_barrier(cb, *t_img, vee::from_pipeline_to_host);
-    vee::cmd_copy_image_to_buffer(cb, ext, *t_img, *o_buf);
+    vee::cmd_pipeline_barrier(cb, m_colour.image(), vee::from_pipeline_to_host);
+    vee::cmd_copy_image_to_buffer(cb, ext, m_colour.image(), m_host.buffer());
   }
 
   void write() {
     char filename[1024];
     snprintf(filename, 1024, "out/shot-%dx%d.jpg", ext.width, ext.height);
 
-    auto mem = vee::map_memory(*o_mem);
-    auto *data = static_cast<stbi::pixel *>(mem);
+    auto mem = m_host.map();
+    auto *data = static_cast<stbi::pixel *>(*mem);
     stbi::write_rgba_unsafe(filename, ext.width, ext.height, data);
-    vee::unmap_memory(*o_mem);
   }
 };
 
