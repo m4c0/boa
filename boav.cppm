@@ -13,6 +13,7 @@ import silog;
 import sires;
 import sith;
 import sitime;
+import vapp;
 import vee;
 import voo;
 
@@ -69,7 +70,7 @@ auto frag_mod() {
   });
 }
 
-class thread : public voo::casein_thread {
+class thread : public vapp {
   volatile bool m_shots;
 
 public:
@@ -162,7 +163,7 @@ public:
     }
   }
 
-  using casein_thread::wait_init;
+  using vapp::wait_init;
 } t;
 
 static void update_grid() {
