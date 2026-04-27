@@ -1,2 +1,8 @@
 build
+build-ios
+export
+export.xcarchive
 out
+*.a
+*.plist
+*.o
