@@ -30,7 +30,7 @@
     <key>CFBundleIdentifier</key>
     <string>&IOS_BUNDLE_ID;</string>
     <key>CFBundleDisplayName</key>
-    <string>boas</string>
+    <string>Snake</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0.0</string>
     <key>CFBundleSupportedPlatforms</key>
@@ -67,5 +67,31 @@
     <array>
       <string>UIInterfaceOrientationPortrait</string>
     </array>
+
+    <key>CFBundleIcons</key>
+    <dict>
+      <key>CFBundlePrimaryIcon</key>
+      <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+          <string>AppIcon60x60</string>
+        </array>
+        <key>CFBundleIconName</key>
+        <string>AppIcon</string>
+      </dict>
+    </dict>
+    <key>CFBundleIcons~ipad</key>
+    <dict>
+      <key>CFBundlePrimaryIcon</key>
+      <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+          <string>AppIcon60x60</string>
+          <string>AppIcon76x76</string>
+        </array>
+        <key>CFBundleIconName</key>
+        <string>AppIcon</string>
+      </dict>
+    </dict>
   </dict>
 </plist>

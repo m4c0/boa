@@ -109,6 +109,30 @@ static int export() {
   return run(args);
 }
 
+static int actool() {
+  char * args[] = {
+    "actool",
+    "--notices", "--warnings", "--errors",
+    "--output-format", "human-readable-text",
+    "--app-icon", "AppIcon",
+    "--accent-color", "AccentColor",
+    "--compress-pngs",
+    "--enable-on-demand-resources", "YES",
+    "--target-device", "iphone",
+    "--target-device", "ipad",
+    "--platform", "iphoneos",
+    //"--filter-for-thinning-device-configuration", "iPhone16,1"
+    //"--filter-for-device-os-version", "17.0"
+    "--development-region", "en",
+    "--minimum-deployment-target", "17.5",
+    "--output-partial-info-plist", "icon-partial.plist",
+    "--compile", "export.xcarchive/Products/Applications/boas.app",
+    "Assets.xcassets",
+    0
+  };
+  return run(args);
+}
+
 static int install() {
   char * device = getenv("IOS_DEVICE");
   if (!device) {
@@ -179,6 +203,7 @@ int main(int argc, char ** argv) {
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;
   if (apply("app.plist.in",       "export.xcarchive/Products/Applications/boas.app/Info.plist")) return 1;
 
+  if (actool())   return 1;
   if (codesign()) return 1;
   if (export())   return 1;
   if (install())  return 1;
