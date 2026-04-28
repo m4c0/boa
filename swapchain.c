@@ -20,6 +20,37 @@
 #  include "Vulkan-Headers/include/vulkan/vulkan_metal.h"
 #endif
 
+// Covers a 4:1 screen, as if such thing will ever exist
+#define MAX_CELLS (24 * 24 * 4)
+
+#define VBUF_SIZE MAX_CELLS * sizeof(storage_t)
+
+typedef struct storage {
+  float first_seen;
+  float seen;
+} storage_t;
+
+typedef struct ivec2 {
+  int x, y;
+} ivec2_t;
+struct upc {
+  float aspect;
+  float time;
+  float dead_at;
+  float pad;
+  float grid_width;
+  float grid_height;
+  ivec2_t food;
+  ivec2_t party;
+  float party_start;
+} g_upc = {
+  .grid_width = 24,
+  .grid_height = 24,
+  .food = { 10000, 10000 },
+  .party = { 10000, 10000 },
+  .party_start = -1,
+};
+
 #define MAX_SWAPCHAIN_IMAGES 8
 typedef struct vlk_swc {
   VkFramebuffer   fb  [MAX_SWAPCHAIN_IMAGES];
@@ -39,17 +70,20 @@ static VkSemaphore vlk_sema_img     [MAX_INFLIGHTS];
 static VkSemaphore vlk_sema_present [MAX_INFLIGHTS];
 static unsigned    vlk_cur_inflight;
 
-static VkCommandPool vlk_cpool;
-static VkDevice vlk_dev;
-static VkExtent2D vlk_ext = { 300, 200 };
-static VkInstance vlk_ins;
-static VkPhysicalDevice vlk_pd;
-static VkQueue vlk_q;
-static VkRenderPass vlk_rp;
+static VkCommandPool      vlk_cpool;
+static VkDevice           vlk_dev;
+static VkExtent2D         vlk_ext = { 300, 300 };
+static VkInstance         vlk_ins;
+static VkPhysicalDevice   vlk_pd;
+static VkQueue            vlk_q;
+static VkRenderPass       vlk_rp;
 static VkSurfaceFormatKHR vlk_surf_fmt;
-static VkSurfaceKHR vlk_surf;
-static unsigned vlk_qf;
-static unsigned vlk_swc_count;
+static VkSurfaceKHR       vlk_surf;
+static unsigned           vlk_qf;
+static unsigned           vlk_swc_count;
+
+static VkBuffer       vlk_vbuf;
+static VkDeviceMemory vlk_vmem;
 
 #ifdef __APPLE__
 CAMetalLayer * vlk_metal_layer();
@@ -357,6 +391,20 @@ static void vlk_create_swc() {
   vlk_create_framebuffer();
 }
 
+#define F(x, y) (((x) & (y)) == (y))
+static int vlk_find_host_memory() {
+  VkPhysicalDeviceMemoryProperties props;
+  vkGetPhysicalDeviceMemoryProperties(vlk_pd, &props);
+
+  int host = -1;
+  for (int i = 0; i < props.memoryTypeCount; i++) {
+    VkMemoryPropertyFlags flags = props.memoryTypes[i].propertyFlags;
+    if (host == -1 && F(flags, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) host = i;
+  }
+  assert(host >= 0);
+  return host;
+}
+
 void vlk_init() {
 #ifndef TARGET_OS_IPHONE
   _(volkInitialize());
@@ -374,6 +422,21 @@ void vlk_init() {
   vlk_create_fence();
 
   vlk_create_swc();
+
+  VkBufferCreateInfo vbuf_info = {
+    .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+    .size = VBUF_SIZE,
+    .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+  };
+  _(vkCreateBuffer(vlk_dev, &vbuf_info, NULL, &vlk_vbuf));
+
+  VkMemoryAllocateInfo vmem_info = {
+    .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+    .allocationSize = VBUF_SIZE,
+    .memoryTypeIndex = vlk_find_host_memory(),
+  };
+  _(vkAllocateMemory(vlk_dev, &vmem_info, NULL, &vlk_vmem));
+  _(vkBindBufferMemory(vlk_dev, vlk_vbuf, vlk_vmem, 0));
 }
 
 void vlk_frame() {
@@ -443,6 +506,9 @@ void vlk_deinit() {
     vkDestroySemaphore(vlk_dev, vlk_sema_img    [i], NULL);
     vkDestroySemaphore(vlk_dev, vlk_sema_present[i], NULL);
   }
+
+  vkDestroyBuffer(vlk_dev, vlk_vbuf, NULL);
+  vkFreeMemory(vlk_dev, vlk_vmem, NULL);
 
   vkDestroyCommandPool(vlk_dev, vlk_cpool, NULL);
   vkDestroyRenderPass(vlk_dev, vlk_rp, NULL);

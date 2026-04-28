@@ -44,7 +44,7 @@ static int link_exe() {
     "-framework", "MetalKit",
     "-framework", "QuartzCore",
     "-o", "boas.app/Contents/MacOS/boas", 
-    "game.o", "swapchain.o", "swapchain-osx.o",
+    "swapchain.o", "swapchain-osx.o",
     "MoltenVK.xcframework/macos-arm64_x86_64/libMoltenVK.a",
     "-lc++",
     0 };
@@ -58,7 +58,6 @@ int main(int argc, char ** argv) {
   mkdir("boas.app/Contents", 0777);
   mkdir("boas.app/Contents/MacOS", 0777);
 
-  //if (cc("game.c",          "game.o"         )) return 1;
   if (cc("swapchain.c",     "swapchain.o"    )) return 1;
   if (cc("swapchain-osx.m", "swapchain-osx.o")) return 1;
   if (link_exe()) return 1;
