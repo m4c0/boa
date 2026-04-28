@@ -72,7 +72,7 @@ static unsigned    vlk_cur_inflight;
 
 static VkCommandPool      vlk_cpool;
 static VkDevice           vlk_dev;
-static VkExtent2D         vlk_ext = { 300, 300 };
+static VkExtent2D         vlk_ext = { 600, 800 };
 static VkInstance         vlk_ins;
 static VkPhysicalDevice   vlk_pd;
 static VkQueue            vlk_q;

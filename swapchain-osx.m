@@ -60,7 +60,7 @@ static void run() {
   w.contentView = v;
   w.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
 
-  NSRect crect = NSMakeRect(0, 0, 300, 200);
+  NSRect crect = NSMakeRect(0, 0, 600, 800);
   NSRect frect = [w frameRectForContentRect:crect];
   [w setFrame:frect display:YES];
   [w center];
