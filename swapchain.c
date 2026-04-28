@@ -391,6 +391,31 @@ static void vlk_create_swc() {
   vlk_create_framebuffer();
 }
 
+FILE * vlk_open(const char * name);
+static VkShaderModule vlk_create_shader_module(const char * name) {
+  FILE * f = vlk_open(name);
+  assert(f);
+  assert(0 == fseek(f, 0, SEEK_END));
+  long sz = ftell(f);
+  assert(sz && (sz % 4 == 0));
+  assert(0 == fseek(f, 0, SEEK_SET));
+  uint32_t * data = malloc(sz);
+  assert(1 == fread(data, sz, 1, f));
+  fclose(f);
+
+  VkShaderModuleCreateInfo info = {
+    .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+    .codeSize = sz,
+    .pCode = data,
+  };
+
+  VkShaderModule mod;
+  _(vkCreateShaderModule(vlk_dev, &info, NULL, &mod));
+
+  free(data);
+  return mod;
+}
+
 #define F(x, y) (((x) & (y)) == (y))
 static int vlk_find_host_memory() {
   VkPhysicalDeviceMemoryProperties props;
@@ -437,6 +462,11 @@ void vlk_init() {
   };
   _(vkAllocateMemory(vlk_dev, &vmem_info, NULL, &vlk_vmem));
   _(vkBindBufferMemory(vlk_dev, vlk_vbuf, vlk_vmem, 0));
+
+  VkShaderModule vert = vlk_create_shader_module("boav.vert");
+  VkShaderModule frag = vlk_create_shader_module("boav.frag");
+  (void) vert;
+  (void) frag;
 }
 
 void vlk_frame() {

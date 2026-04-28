@@ -67,12 +67,12 @@ int main(int argc, char ** argv) {
   mkdir("boas.app/Contents/MacOS", 0777);
   mkdir("boas.app/Contents/Resources", 0777);
 
-  if (shader("boav.frag")) return 1;
-  if (shader("boav.vert")) return 1;
-
   if (cc("swapchain.c",     "swapchain.o"    )) return 1;
   if (cc("swapchain-osx.m", "swapchain-osx.o")) return 1;
   if (link_exe()) return 1;
+
+  if (shader("boav.frag")) return 1;
+  if (shader("boav.vert")) return 1;
 
   return 0;
 }
