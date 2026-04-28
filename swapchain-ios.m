@@ -49,6 +49,12 @@ CAMetalLayer * g_layer;
 
 CAMetalLayer * vlk_metal_layer() { return g_layer; }
 
+FILE * vlk_open(const char * name) {
+  NSString * n = [NSString stringWithFormat:@"%s", name];
+  NSString * path = [[NSBundle mainBundle] pathForResource:n ofType:@"spv"];
+  return fopen(path.UTF8String, "rb");
+}
+
 void vlk_log(int r, const char * msg) {
   NSLog(@"Vulkan call failed (code=%d): %s\n", r, msg);
   exit(1);
