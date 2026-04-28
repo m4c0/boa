@@ -47,7 +47,7 @@ static int link_exe() {
     "-framework", "AppKit",
     "-framework", "MetalKit",
     "-o", "boas.app/Contents/MacOS/boas", 
-    "swapchain.o", "swapchain-osx.o",
+    "vulkan.o", "vulkan-osx.o",
     0 };
   return run(args);
 }
@@ -63,8 +63,8 @@ int main(int argc, char ** argv) {
   { char * args[] = { "cp", "libvulkan.dylib", "boas.app/Contents/MacOS/", 0 };
     if (run(args)) return 1; }
 
-  if (cc("swapchain.c",     "swapchain.o"    )) return 1;
-  if (cc("swapchain-osx.m", "swapchain-osx.o")) return 1;
+  if (cc("vulkan.c",     "vulkan.o"    )) return 1;
+  if (cc("vulkan-osx.m", "vulkan-osx.o")) return 1;
   if (link_exe()) return 1;
 
   if (shader("boav.frag")) return 1;
