@@ -5,6 +5,7 @@ export.xcarchive
 out
 *.a
 *.app
+*.dylib
 *.plist
 *.o
 *.xcframework

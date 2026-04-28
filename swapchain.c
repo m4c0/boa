@@ -8,7 +8,7 @@
 #  define VK_USE_PLATFORM_METAL_EXT
 #endif
 
-#ifndef TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE
 #  define VOLK_IMPLEMENTATION
 #  include "volk.h"
 #endif
@@ -125,7 +125,7 @@ static void vlk_create_instance() {
 #ifdef __APPLE__
   ext[0] = VK_EXT_METAL_SURFACE_EXTENSION_NAME;
 
-#ifndef TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE
   // MoltenVK kinda requires this extension/flag. It works without it, but the
   // validation layer will complain.
   info.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
@@ -135,7 +135,7 @@ static void vlk_create_instance() {
 
   _(vkCreateInstance(&info, NULL, &vlk_ins));
 
-#ifndef TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE
   volkLoadInstance(vlk_ins);
 #endif
 }
@@ -187,7 +187,7 @@ static void vlk_create_device() {
 #endif
 
   _(vkCreateDevice(vlk_pd, &info, NULL, &vlk_dev));
-#ifndef TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE
   volkLoadDevice(vlk_dev);
 #endif
 
@@ -436,7 +436,7 @@ static int vlk_find_host_memory() {
 }
 
 void vlk_init() {
-#ifndef TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE
   _(volkInitialize());
 #endif
 

@@ -45,16 +45,9 @@ static int link_exe() {
   char * args[] = {
     "clang", "-Wall",
     "-framework", "AppKit",
-    "-framework", "Foundation",
-    "-framework", "IOKit",
-    "-framework", "IOSurface",
-    "-framework", "Metal",
     "-framework", "MetalKit",
-    "-framework", "QuartzCore",
     "-o", "boas.app/Contents/MacOS/boas", 
     "swapchain.o", "swapchain-osx.o",
-    "MoltenVK.xcframework/macos-arm64_x86_64/libMoltenVK.a",
-    "-lc++",
     0 };
   return run(args);
 }
@@ -66,6 +59,9 @@ int main(int argc, char ** argv) {
   mkdir("boas.app/Contents", 0777);
   mkdir("boas.app/Contents/MacOS", 0777);
   mkdir("boas.app/Contents/Resources", 0777);
+
+  { char * args[] = { "cp", "libvulkan.dylib", "boas.app/Contents/MacOS/", 0 };
+    if (run(args)) return 1; }
 
   if (cc("swapchain.c",     "swapchain.o"    )) return 1;
   if (cc("swapchain-osx.m", "swapchain-osx.o")) return 1;
