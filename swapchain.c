@@ -575,10 +575,11 @@ void vlk_init() {
       .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
     }},
     .pColorBlendState = (VkPipelineColorBlendStateCreateInfo[]) {{
-      .sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-      .logicOp         = VK_LOGIC_OP_COPY,
-      .attachmentCount = 1,
-      .pAttachments    = (VkPipelineColorBlendAttachmentState[]) {{
+      .sType            = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+      .logicOp          = VK_LOGIC_OP_COPY,
+      .attachmentCount  = 1,
+      .pAttachments     = (VkPipelineColorBlendAttachmentState[]) {{
+        .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT,
       }},
     }},
     .pDynamicState = (VkPipelineDynamicStateCreateInfo[]) {{
