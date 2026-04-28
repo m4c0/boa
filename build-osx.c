@@ -25,6 +25,14 @@ static int run(char ** args) {
   return 1;
 }
 
+static int shader(char * name) {
+  char spv[1024];
+  sprintf(spv, "boas.app/Contents/Resources/%s.spv", name);
+
+  char * args[] = { "glslang", "-V", name, "-o", spv, 0 };
+  return run(args);
+}
+
 static int cc(char * src, char * o) {
   char * args[] = {
     "clang", "-Wall", "-g",
@@ -57,6 +65,10 @@ int main(int argc, char ** argv) {
   mkdir("boas.app", 0777);
   mkdir("boas.app/Contents", 0777);
   mkdir("boas.app/Contents/MacOS", 0777);
+  mkdir("boas.app/Contents/Resources", 0777);
+
+  if (shader("boav.frag")) return 1;
+  if (shader("boav.vert")) return 1;
 
   if (cc("swapchain.c",     "swapchain.o"    )) return 1;
   if (cc("swapchain-osx.m", "swapchain-osx.o")) return 1;

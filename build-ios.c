@@ -88,6 +88,14 @@ static int apply(char * src, char * tgt) {
   return 0;
 }
 
+static int shader(char * name) {
+  char spv[1024];
+  sprintf(spv, "export.xcarchive/Products/Applications/boas.app/%s.spv", name);
+
+  char * args[] = { "glslang", "-V", name, "-o", spv, 0 };
+  return run(args);
+}
+
 static int codesign() {
   char * team = getenv("IOS_TEAM");
   assert(team && "Missing IOS_TEAM environment variable");
@@ -199,6 +207,9 @@ int main(int argc, char ** argv) {
   if (cc("swapchain.c",     "swapchain.o"    )) return 1;
   if (cc("swapchain-ios.m", "swapchain-ios.o")) return 1;
   if (link_exe()) return 1;
+
+  if (shader("boav.frag")) return 1;
+  if (shader("boav.vert")) return 1;
 
   if (apply("export.plist.in",    "export.plist")) return 1;
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;
