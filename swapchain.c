@@ -499,6 +499,18 @@ void vlk_init() {
   };
   _(vkAllocateDescriptorSets(vlk_dev, &dset_info, &vlk_dset));
 
+  VkWriteDescriptorSet wds = {
+    .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+    .dstSet          = vlk_dset,
+    .descriptorCount = 1,
+    .descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+    .pBufferInfo     = (VkDescriptorBufferInfo[]) {{
+      .buffer        = vlk_vbuf,
+      .range         = VK_WHOLE_SIZE,
+    }},
+  };
+  vkUpdateDescriptorSets(vlk_dev, 1, &wds, 0, NULL);
+
   VkPipelineLayoutCreateInfo pl_info = {
     .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
     .setLayoutCount         = 1,
