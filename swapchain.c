@@ -500,9 +500,14 @@ void vlk_init() {
   _(vkAllocateDescriptorSets(vlk_dev, &dset_info, &vlk_dset));
 
   VkPipelineLayoutCreateInfo pl_info = {
-    .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-    .setLayoutCount = 1,
-    .pSetLayouts = &vlk_dsl,
+    .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+    .setLayoutCount         = 1,
+    .pSetLayouts            = &vlk_dsl,
+    .pushConstantRangeCount = 1,
+    .pPushConstantRanges    = (VkPushConstantRange[]) {{
+      .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+      .size       = sizeof(struct upc),
+    }},
   };
   _(vkCreatePipelineLayout(vlk_dev, &pl_info, NULL, &vlk_pl));
 
@@ -636,8 +641,12 @@ void vlk_deinit() {
     vkDestroySemaphore(vlk_dev, vlk_sema_present[i], NULL);
   }
 
-  vkDestroyBuffer(vlk_dev, vlk_vbuf, NULL);
-  vkFreeMemory(vlk_dev, vlk_vmem, NULL);
+  vkDestroyBuffer              (vlk_dev, vlk_vbuf,  NULL);
+  vkDestroyDescriptorSetLayout (vlk_dev, vlk_dsl,   NULL);
+  vkDestroyDescriptorPool      (vlk_dev, vlk_dpool, NULL);
+  vkDestroyPipeline            (vlk_dev, vlk_ppl,   NULL);
+  vkDestroyPipelineLayout      (vlk_dev, vlk_pl,    NULL);
+  vkFreeMemory                 (vlk_dev, vlk_vmem,  NULL);
 
   vkDestroyCommandPool(vlk_dev, vlk_cpool, NULL);
   vkDestroyRenderPass(vlk_dev, vlk_rp, NULL);

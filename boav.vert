@@ -7,13 +7,12 @@ layout(push_constant) uniform upc {
   vec2 grid;
 } pc;
 
-layout(location = 0) in vec2 position;
-
 layout(location = 0) out vec2 frag_coord;
 layout(location = 1) out vec2 frag_grid;
 
 void main() {
-  vec2 p = position * 2.0 - 1.0;
+  ivec2 position = ivec2(gl_VertexIndex % 2, gl_VertexIndex / 2);
+  vec2 p = position * 3 - 1;
   gl_Position = vec4(p, 0.0, 1.0);
   frag_coord = p * vec2(pc.aspect, 1.0);
 
