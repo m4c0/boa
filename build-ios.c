@@ -182,7 +182,8 @@ static int link_exe() {
     "-framework", "UIKit",
     "-o", "export.xcarchive/Products/Applications/boas.app/boas", 
     "game.o", "swapchain.o", "swapchain-ios.o",
-    "libMoltenVK.a", "-lc++",
+    "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
+    "-lc++",
     0 };
   return run(args);
 }

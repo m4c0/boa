@@ -1,8 +1,10 @@
-build
+build-osx
 build-ios
 export
 export.xcarchive
 out
 *.a
+*.app
 *.plist
 *.o
+*.xcframework

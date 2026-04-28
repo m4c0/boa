@@ -18,7 +18,6 @@ CAMetalLayer * g_layer;
   if (!self.ready) {
     g_layer = (CAMetalLayer *)view.layer;
 
-    NSLog(@"vlk_init");
     vlk_init();
     self.ready = YES;
   }
