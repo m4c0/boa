@@ -350,17 +350,14 @@ static void vlk_create_command_buffer() {
   _(vkAllocateCommandBuffers(vlk_dev, &info, vlk_cb));
 }
 
-static void vlk_begin_command_buffer(int i) {
-  VkCommandBufferBeginInfo info = {
+static void vlk_record_cmdbuf(int i) {
+  VkCommandBuffer cb = vlk_cb[i];
+
+  VkCommandBufferBeginInfo binfo = {
     .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
   };
-  vkBeginCommandBuffer(vlk_cb[i], &info);
-}
-static void vlk_end_command_buffer(int i) {
-  vkEndCommandBuffer(vlk_cb[i]);
-}
+  vkBeginCommandBuffer(cb, &binfo);
 
-static void vlk_cmd_begin_render_pass(int i) {
   VkClearValue clear = {
     .color = {{ 0.1, 0.2, 0.3, 1 }},
   };
@@ -370,12 +367,28 @@ static void vlk_cmd_begin_render_pass(int i) {
     .framebuffer     = vlk_swc.fb[i],
     .renderArea      = (VkRect2D) { .extent = vlk_ext },
     .clearValueCount = 1,
-    .pClearValues    = &clear
+    .pClearValues    = &clear,
   };
-  vkCmdBeginRenderPass(vlk_cb[i], &rp, VK_SUBPASS_CONTENTS_INLINE);
-}
-static void vlk_cmd_end_render_pass(int i) {
-  vkCmdEndRenderPass(vlk_cb[i]);
+  vkCmdBeginRenderPass(cb, &rp, VK_SUBPASS_CONTENTS_INLINE);
+
+  VkViewport vp = {
+    .width  = vlk_ext.width,
+    .height = vlk_ext.height,
+  };
+  vkCmdSetViewport(cb, 0, 1, &vp);
+
+  VkRect2D sci = {
+    .extent = vlk_ext,
+  };
+  vkCmdSetScissor(cb, 0, 1, &sci);
+
+  vkCmdPushConstants(cb, vlk_pl, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(struct upc), &g_upc);
+  vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vlk_ppl);
+  vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vlk_pl, 0, 1, &vlk_dset, 0, NULL);
+  vkCmdDraw(cb, 3, 1, 0, 0);
+
+  vkCmdEndRenderPass(cb);
+  vkEndCommandBuffer(cb);
 }
 
 static void vlk_destroy_swc(vlk_swc_t * swc) {
@@ -594,11 +607,10 @@ void vlk_frame() {
   unsigned idx;
   vkAcquireNextImageKHR(vlk_dev, vlk_swc.swc, ~0UL, vlk_sema_img[inf], VK_NULL_HANDLE, &idx);
 
-  vlk_begin_command_buffer(idx);
-  vlk_cmd_begin_render_pass(idx);
-  // Render pass is only used to draw something via its "clear value"
-  vlk_cmd_end_render_pass(idx);
-  vlk_end_command_buffer(idx);
+  // TODO: g_upc.time   = 0.001 * watch.millis();
+  g_upc.aspect = (float)vlk_ext.width / (float)vlk_ext.height;
+
+  vlk_record_cmdbuf(idx);
 
   // TODO: confirm if this is the best and document why
   VkPipelineStageFlags stage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
