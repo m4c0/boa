@@ -82,8 +82,13 @@ static VkSurfaceKHR       vlk_surf;
 static unsigned           vlk_qf;
 static unsigned           vlk_swc_count;
 
-static VkBuffer       vlk_vbuf;
-static VkDeviceMemory vlk_vmem;
+static VkBuffer              vlk_vbuf;
+static VkDescriptorPool      vlk_dpool;
+static VkDescriptorSetLayout vlk_dsl;
+static VkDescriptorSet       vlk_dset;
+static VkDeviceMemory        vlk_vmem;
+static VkPipelineLayout      vlk_pl;
+static VkPipeline            vlk_ppl;
 
 #ifdef __APPLE__
 CAMetalLayer * vlk_metal_layer();
@@ -463,10 +468,54 @@ void vlk_init() {
   _(vkAllocateMemory(vlk_dev, &vmem_info, NULL, &vlk_vmem));
   _(vkBindBufferMemory(vlk_dev, vlk_vbuf, vlk_vmem, 0));
 
+  VkDescriptorSetLayoutCreateInfo dsl_info = {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+    .bindingCount = 1,
+    .pBindings = (VkDescriptorSetLayoutBinding[]) {{
+      .binding = 0,
+      .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+      .descriptorCount = 1,
+      .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+    }},
+  };
+  _(vkCreateDescriptorSetLayout(vlk_dev, &dsl_info, NULL, &vlk_dsl));
+
+  VkDescriptorPoolCreateInfo dpool_info = {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+    .maxSets = 1,
+    .poolSizeCount = 1,
+    .pPoolSizes = (VkDescriptorPoolSize[]) {{
+      .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+      .descriptorCount = 1,
+    }},
+  };
+  _(vkCreateDescriptorPool(vlk_dev, &dpool_info, NULL, &vlk_dpool));
+
+  VkDescriptorSetAllocateInfo dset_info = {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+    .descriptorPool = vlk_dpool,
+    .descriptorSetCount = 1,
+    .pSetLayouts = &vlk_dsl,
+  };
+  _(vkAllocateDescriptorSets(vlk_dev, &dset_info, &vlk_dset));
+
+  VkPipelineLayoutCreateInfo pl_info = {
+    .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+    .setLayoutCount = 1,
+    .pSetLayouts = &vlk_dsl,
+  };
+  _(vkCreatePipelineLayout(vlk_dev, &pl_info, NULL, &vlk_pl));
+
   VkShaderModule vert = vlk_create_shader_module("boav.vert");
   VkShaderModule frag = vlk_create_shader_module("boav.frag");
-  (void) vert;
-  (void) frag;
+
+  VkGraphicsPipelineCreateInfo ppl_info = {
+    .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+  };
+  _(vkCreateGraphicsPipelines(vlk_dev, NULL, 1, &ppl_info, NULL, &vlk_ppl));
+
+  vkDestroyShaderModule(vlk_dev, vert, NULL);
+  vkDestroyShaderModule(vlk_dev, frag, NULL);
 }
 
 void vlk_frame() {
