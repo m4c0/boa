@@ -181,7 +181,7 @@ static int link_exe() {
     "-framework", "QuartzCore",
     "-framework", "UIKit",
     "-o", "export.xcarchive/Products/Applications/boas.app/boas", 
-    "swapchain.o", "swapchain-ios.o",
+    "game.o", "swapchain.o", "swapchain-ios.o",
     "libMoltenVK.a", "-lc++",
     0 };
   return run(args);
@@ -195,6 +195,7 @@ int main(int argc, char ** argv) {
   mkdir("export.xcarchive/Products/Applications", 0777);
   mkdir("export.xcarchive/Products/Applications/boas.app", 0777);
 
+  if (cc("game.c",          "game.o"         )) return 1;
   if (cc("swapchain.c",     "swapchain.o"    )) return 1;
   if (cc("swapchain-ios.m", "swapchain-ios.o")) return 1;
   if (link_exe()) return 1;
