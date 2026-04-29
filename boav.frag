@@ -244,5 +244,5 @@ void main() {
   rgb = mix(rgb, pt.rgb, pt.a);
   rgb = mix(rgb, pl.rgb, pl.a);
 
-  frag_colour = pow(vec4(bg, 1), vec4(1.0/2.2)); 
+  frag_colour = pow(vec4(rgb, 1), vec4(1.0/2.2)); 
 }
