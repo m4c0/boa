@@ -48,7 +48,6 @@ struct upc {
   .grid_height = 24,
   .food = { 10000, 10000 },
   .party = { 10000, 10000 },
-  .party_start = -1,
 };
 
 #define MAX_SWAPCHAIN_IMAGES 8
