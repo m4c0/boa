@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #ifdef __APPLE__
 #  include <TargetConditionals.h>
@@ -88,6 +89,8 @@ static VkDescriptorSet       vlk_dset;
 static VkDeviceMemory        vlk_vmem;
 static VkPipelineLayout      vlk_pl;
 static VkPipeline            vlk_ppl;
+
+struct timeval clk;
 
 #ifdef __APPLE__
 CAMetalLayer * vlk_metal_layer();
@@ -596,6 +599,8 @@ void vlk_init() {
 
   vkDestroyShaderModule(vlk_dev, vert, NULL);
   vkDestroyShaderModule(vlk_dev, frag, NULL);
+
+  gettimeofday(&clk, NULL);
 }
 
 void vlk_frame() {
@@ -607,7 +612,10 @@ void vlk_frame() {
   unsigned idx;
   vkAcquireNextImageKHR(vlk_dev, vlk_swc.swc, ~0UL, vlk_sema_img[inf], VK_NULL_HANDLE, &idx);
 
-  // TODO: g_upc.time   = 0.001 * watch.millis();
+  struct timeval now;
+  gettimeofday(&now, NULL);
+
+  g_upc.time   = (now.tv_sec - clk.tv_sec) + (now.tv_usec - clk.tv_usec) / 1.0e6; 
   g_upc.aspect = (float)vlk_ext.width / (float)vlk_ext.height;
 
   vlk_record_cmdbuf(idx);
