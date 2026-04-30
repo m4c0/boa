@@ -47,8 +47,8 @@ struct v_buffer {
 
   constexpr v_buffer() = default;
   v_buffer(const voo::device_and_queue & dq, unsigned sz) {
-    buf = vee::create_storage_buffer(sz);
-    mem = vee::create_host_buffer_memory(dq.physical_device(), sz);
+    buf = vee::create_buffer(sz, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+    mem = vee::create_host_buffer_memory(dq.physical_device(), *buf);
     vee::bind_buffer_memory(*buf, *mem);
   }
 };
@@ -63,13 +63,6 @@ boa::outcome volatile g_outcome{};
 beeps beep{};
 v_buffer * g_buffer {};
 
-auto frag_mod() {
-  return sires::stat("boav.frag.spv").take([](auto err) {
-    silog::log(silog::error, "Failed to stat shader: %s", err.cstr().begin());
-    return 0;
-  });
-}
-
 class thread : public vapp {
   volatile bool m_shots;
 
@@ -79,8 +72,9 @@ public:
   void run() override {
     sitime::stopwatch watch{};
 
-    voo::device_and_queue dq { "boas" };
-    voo::one_quad quad { dq };
+    voo::device_and_queue dq { "boas", casein::native_ptr };
+    voo::one_quad quad {};
+    auto rp = voo::single_att_render_pass(dq);
 
     // Descriptor set layout + pool + set
     vee::descriptor_set_layout dsl = vee::create_descriptor_set_layout({
@@ -91,23 +85,21 @@ public:
 
     // Pipeline
     vee::pipeline_layout pl = vee::create_pipeline_layout(
-      { *dsl },
-      { vee::vert_frag_push_constant_range<upc>() }
+      *dsl,
+      vee::vert_frag_push_constant_range<upc>()
     );
-    long frag_ts{};
     const auto create_gp = [&](vee::render_pass::type rp) {
       return vee::create_graphics_pipeline({
         .pipeline_layout = *pl,
         .render_pass = rp,
+        .back_face_cull = false,
         .shaders {
-          voo::shader("boav.vert.spv").pipeline_vert_stage(),
-          voo::shader("boav.frag.spv").pipeline_frag_stage(),
+          *voo::vert_shader("boav.vert.spv"),
+          *voo::frag_shader("boav.frag.spv"),
         },
-        .bindings { quad.vertex_input_bind() },
-        .attributes { quad.vertex_attribute(0) },
       });
     };
-    vee::gr_pipeline gp = create_gp(dq.render_pass());
+    vee::gr_pipeline gp = create_gp(*rp);
 
 #ifndef LECO_TARGET_IPHONEOS
     offscreen ofs { dq.physical_device(), dq.queue(), create_gp };
@@ -116,20 +108,20 @@ public:
     // Game grid buffer
     constexpr const unsigned gg_buf_size = max_cells * sizeof(storage);
     v_buffer gg_buf { dq, gg_buf_size };
-    vee::update_descriptor_set_with_storage(dset, 0, *gg_buf.buf);
+    auto bi = vee::descriptor_buffer_info(*gg_buf.buf);
+    vee::update_descriptor_set(vee::write_descriptor_set({
+      .dstSet = dset,
+      .descriptorCount = 1,
+      .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+      .pBufferInfo = &bi,
+    }));
     g_buffer = &gg_buf;
-    release_init_lock();
 
     while (!interrupted()) {
-      voo::swapchain_and_stuff sw { dq };
+      voo::swapchain_and_stuff sw { dq, *rp };
 
       extent_loop(dq.queue(), sw, [&] {
         g_pc.aspect = sw.aspect();
-
-        if (frag_mod() != frag_ts) {
-          gp = create_gp(dq.render_pass());
-          frag_ts = frag_mod();
-        }
 
         // Passing time in seconds
         g_pc.time = 0.001 * watch.millis();
@@ -144,13 +136,13 @@ public:
           vee::cmd_push_vert_frag_constants(cb, *pl, &g_pc);
           vee::cmd_bind_gr_pipeline(cb, *gp);
           vee::cmd_bind_descriptor_set(cb, *pl, 0, dset);
-          quad.run(cb, 0, 1);
+          vkCmdDraw(cb, 3, 1, 0, 0);
         };
 
-        sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
-          auto scb = sw.cmd_render_pass({ *pcb });
+        sw.queue_one_time_submit([&] {
+          auto scb = sw.cmd_render_pass({});
           auto ext = sw.extent();
-          render(*scb, ext);
+          render((VkCommandBuffer) scb, ext);
         });
 
 #ifndef LECO_TARGET_IPHONEOS
@@ -162,13 +154,9 @@ public:
       });
     }
   }
-
-  using vapp::wait_init;
 } t;
 
 static void update_grid() {
-  t.wait_init();
-
   voo::mapmem m { *g_buffer->mem };
   auto buf = static_cast<storage *>(*m);
 
