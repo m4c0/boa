@@ -1,3 +1,6 @@
+module;
+#include <CoreFoundation/CoreFoundation.h>
+
 export module boav;
 #ifndef LECO_TARGET_IPHONEOS
 import :offscreen;
@@ -223,17 +226,30 @@ static void right() {
   update_grid();
 }
 
-static void tick() {
+static CFRunLoopTimerRef tmr_h;
+static void tmr_callback(CFRunLoopTimerRef ref, void * info) {
   if (!g_g) return;
   g_outcome = g_g->tick();
   if (g_outcome != boa::outcome::none) update_grid();
 }
+static void tmr_init() {
+  CFRunLoopTimerContext ctx { .info = nullptr };
+
+  CFAbsoluteTime secs = 25.0f / 1000.0f;
+  CFAbsoluteTime when = CFAbsoluteTimeGetCurrent() + secs;
+
+  tmr_h = CFRunLoopTimerCreate(nullptr, when, secs, 0, 0, tmr_callback, &ctx);
+  CFRunLoopAddTimer(CFRunLoopGetMain(), tmr_h, kCFRunLoopCommonModes);
+}
+static void tmr_deinit() {
+  CFRelease(tmr_h);
+}
 
 struct init {
-  fff::timer ticker { 25, tick };
-
   init() {
     using namespace casein;
+
+    tmr_init();
 
     handle(GESTURE, G_SWIPE_UP, up);
     handle(GESTURE, G_SWIPE_DOWN, down);
@@ -273,6 +289,9 @@ struct init {
 
     siaudio::filler([](float * f, unsigned n) { beep.fill_buffer(f, n); });
     siaudio::rate(44100);
+  }
+  ~init() {
+    tmr_deinit();
   }
 } i;
 
