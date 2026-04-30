@@ -20,14 +20,13 @@ class ofs_ext {
 
 public:
   ofs_ext(vee::physical_device pd, vee::extent ext, auto &&create_gp)
-      : m_bufs { pd, ext }
+      : m_bufs { ext, VK_FORMAT_R8G8B8A8_SRGB }
       , m_gp { create_gp(m_bufs.render_pass()) } {}
 
   void cmd_render_pass(vee::command_buffer cb, auto &&blk) {
     vee::cmd_begin_render_pass(m_bufs.render_pass_begin({
         .command_buffer = cb,
-        .clear_color = {{0.01, 0.02, 0.05, 1.0}},
-        .use_secondary_cmd_buf = false,
+        .clear_colours = { vee::clear_colour(0.01, 0.02, 0.05, 1.0) },
     }));
     vee::cmd_bind_gr_pipeline(cb, *m_gp);
     blk(cb, m_bufs.extent());
@@ -48,25 +47,24 @@ public:
   }
 };
 
-class offscreen : voo::update_thread {
+class offscreen {
   hai::uptr<ofs_ext> m_oe[sizes_len];
-  hai::fn<void, vee::command_buffer, vee::extent> m_fn;
-
-  void build_cmd_buf(vee::command_buffer cb) override {
-    voo::cmd_buf_one_time_submit pcb{cb};
-    for (auto &oe : m_oe) oe->cmd_render_pass(cb, m_fn);
-  }
+  voo::single_cb m_cb {};
 
 public:
-  explicit offscreen(vee::physical_device pd, voo::queue * q, auto &&create_gp) : update_thread { q } {
+  explicit offscreen(vee::physical_device pd, auto && create_gp) {
     for (auto i = 0; i < sizes_len; i++) {
       m_oe[i] = hai::uptr<ofs_ext>::make(pd, sizes[i], create_gp);
     }
   }
 
   void do_it(hai::fn<void, vee::command_buffer, vee::extent> fn) {
-    m_fn = fn;
-    run_once();
+    auto cb = m_cb.cb();
+    {
+      voo::cmd_buf_one_time_submit pcb { cb };
+      for (auto &oe : m_oe) oe->cmd_render_pass(cb, fn);
+    }
+    voo::queue::universal()->queue_submit({ .command_buffer = cb });
 
     // Sync CPU+GPU
     vee::device_wait_idle();

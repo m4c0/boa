@@ -102,7 +102,7 @@ public:
     vee::gr_pipeline gp = create_gp(*rp);
 
 #ifndef LECO_TARGET_IPHONEOS
-    offscreen ofs { dq.physical_device(), dq.queue(), create_gp };
+    offscreen ofs { dq.physical_device(), create_gp };
 #endif
 
     // Game grid buffer
