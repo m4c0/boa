@@ -226,12 +226,15 @@ static void right() {
   update_grid();
 }
 
-static CFRunLoopTimerRef tmr_h;
-static void tmr_callback(CFRunLoopTimerRef ref, void * info) {
+static void tmr_fn() {
   if (!g_g) return;
   g_outcome = g_g->tick();
   if (g_outcome != boa::outcome::none) update_grid();
 }
+
+#ifdef __APPLE__
+static CFRunLoopTimerRef tmr_h;
+static void tmr_callback(CFRunLoopTimerRef, void *) { tmr_fn(); }
 static void tmr_init() {
   CFRunLoopTimerContext ctx { .info = nullptr };
 
@@ -244,6 +247,19 @@ static void tmr_init() {
 static void tmr_deinit() {
   CFRelease(tmr_h);
 }
+#elif _WIN32
+static HANDLE tmr_h;
+static void tmr_callback(void *, BOOLEAN) { tmr_fn(); }
+static void tmr_init() {
+  tmr_h = CreateTimerQueue();
+
+  HANDLE t;
+  CreateTimerQueueTimer(&t, tmr_h, tmr_callback, nullptr, 25, 25, 0);
+}
+static void tmr_deinit() {
+  DeleteTimerQueueEx(tmr_h, nullptr);
+}
+#endif
 
 struct init {
   init() {
