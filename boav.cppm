@@ -46,22 +46,24 @@ struct upc {
   float party_start = -1;
 };
 
+struct storage {
+  float first_seen;
+  float seen;
+};
 struct v_buffer {
   vee::buffer buf {};
   vee::device_memory mem {};
 
   constexpr v_buffer() = default;
-  v_buffer(const voo::device_and_queue & dq, unsigned sz) {
+  v_buffer(const voo::device_and_queue & dq) {
+    constexpr const unsigned sz = max_cells * sizeof(storage);
+
     buf = vee::create_buffer(sz, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
     mem = vee::create_host_buffer_memory(dq.physical_device(), *buf);
     vee::bind_buffer_memory(*buf, *mem);
   }
 };
 
-struct storage {
-  float first_seen;
-  float seen;
-};
 hai::uptr<boa::game> g_g {};
 upc g_pc{};
 boa::outcome volatile g_outcome{};
@@ -110,8 +112,7 @@ public:
 #endif
 
     // Game grid buffer
-    constexpr const unsigned gg_buf_size = max_cells * sizeof(storage);
-    v_buffer gg_buf { dq, gg_buf_size };
+    v_buffer gg_buf { dq };
     auto bi = vee::descriptor_buffer_info(*gg_buf.buf);
     vee::update_descriptor_set(vee::write_descriptor_set({
       .dstSet = dset,
