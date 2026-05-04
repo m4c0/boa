@@ -1,15 +1,14 @@
 module;
-#include <CoreFoundation/CoreFoundation.h>
+#include "sfx.h"
+#include "tmr.h"
 
 export module boav;
 #ifndef LECO_TARGET_IPHONEOS
 import :offscreen;
 #endif
-import beeps;
 import boa;
 import casein;
 import dotz;
-import fff;
 import hai;
 import siaudio;
 import silog;
@@ -63,7 +62,6 @@ struct storage {
 hai::uptr<boa::game> g_g {};
 upc g_pc{};
 boa::outcome volatile g_outcome{};
-beeps beep{};
 v_buffer * g_buffer {};
 
 class thread : public vapp {
@@ -178,14 +176,14 @@ static void update_grid() {
   auto [x, y, p] = g_g->food();
   if (g_pc.food != dotz::ivec2 { x, y }) {
     if (g_outcome == boa::outcome::eat_food) {
-      beep.eat();
+      sfx_eat();
       g_pc.party_start = g_pc.time;
       g_pc.party = g_pc.food;
     }
     g_pc.food = { x, y };
   }
   if (g_g->is_new_game()) {
-    beep.reset();
+    sfx_reset();
     g_pc.party = {1000, 1000};
     g_pc.party_start = 0;
     g_pc.dead_at = 0.0;
@@ -193,10 +191,10 @@ static void update_grid() {
     g_pc.dead_at = g_g->is_game_over() ? g_pc.time : 0;
 
   if (g_outcome == boa::outcome::move) {
-    beep.walk();
+    sfx_walk();
   }
   if (g_outcome == boa::outcome::death) {
-    beep.death();
+    sfx_death();
   }
 
   g_pc.grid_width = g_g->grid_width();
@@ -226,46 +224,18 @@ static void right() {
   update_grid();
 }
 
-static void tmr_fn() {
+static void tick() {
   if (!g_g) return;
   g_outcome = g_g->tick();
   if (g_outcome != boa::outcome::none) update_grid();
 }
 
-#ifdef __APPLE__
-static CFRunLoopTimerRef tmr_h;
-static void tmr_callback(CFRunLoopTimerRef, void *) { tmr_fn(); }
-static void tmr_init() {
-  CFRunLoopTimerContext ctx { .info = nullptr };
-
-  CFAbsoluteTime secs = 25.0f / 1000.0f;
-  CFAbsoluteTime when = CFAbsoluteTimeGetCurrent() + secs;
-
-  tmr_h = CFRunLoopTimerCreate(nullptr, when, secs, 0, 0, tmr_callback, &ctx);
-  CFRunLoopAddTimer(CFRunLoopGetMain(), tmr_h, kCFRunLoopCommonModes);
-}
-static void tmr_deinit() {
-  CFRelease(tmr_h);
-}
-#elif _WIN32
-static HANDLE tmr_h;
-static void tmr_callback(void *, BOOLEAN) { tmr_fn(); }
-static void tmr_init() {
-  tmr_h = CreateTimerQueue();
-
-  HANDLE t;
-  CreateTimerQueueTimer(&t, tmr_h, tmr_callback, nullptr, 25, 25, 0);
-}
-static void tmr_deinit() {
-  DeleteTimerQueueEx(tmr_h, nullptr);
-}
-#endif
-
 struct init {
   init() {
     using namespace casein;
 
-    tmr_init();
+    sfx_init();
+    tmr_init(&tick);
 
     handle(GESTURE, G_SWIPE_UP, up);
     handle(GESTURE, G_SWIPE_DOWN, down);
@@ -303,7 +273,7 @@ struct init {
 
     handle(TOUCH_UP, reset);
 
-    siaudio::filler([](float * f, unsigned n) { beep.fill_buffer(f, n); });
+    siaudio::filler([](float * f, unsigned n) { sfx_fill(f, n); });
     siaudio::rate(44100);
   }
   ~init() {

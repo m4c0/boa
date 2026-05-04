@@ -1,4 +1,5 @@
-module;
+#pragma once
+
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
@@ -6,8 +7,6 @@ module;
 #include <sys/time.h>
 #endif
 #include <stdlib.h>
-
-export module beeps;
 
 static timeval sfx_tv = {0};
 
@@ -132,15 +131,3 @@ static void sfx_fill(float * buf, unsigned len) {
     *buf++ = (d + e + w) * 0.5; // global volume
   }
 }
-
-export class beeps {
-public:
-  beeps() { sfx_init(); }
-  void reset() { sfx_reset(); }
-
-  void eat() { sfx_eat(); }
-  void death() { sfx_death(); }
-  void walk() { sfx_walk(); }
-
-  void fill_buffer(float *buf, unsigned len) { sfx_fill(buf, len); }
-};
