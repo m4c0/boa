@@ -66,7 +66,6 @@ public:
     sitime::stopwatch watch{};
 
     voo::device_and_queue dq { "boas", casein::native_ptr };
-    voo::one_quad quad {};
     auto rp = voo::single_att_render_pass(dq);
 
     // Descriptor set layout + pool + set
