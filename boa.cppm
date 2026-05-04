@@ -15,17 +15,24 @@ constexpr auto p2point(unsigned p, unsigned w) {
 
 export enum class outcome { none, move, eat_food, death, game_over, new_game };
 
+static constexpr const auto null = ~0U;
+
 class snake_iter {
-  xor_ll_iter m_it;
+  const unsigned *m_data{};
+  unsigned m_pos{null};
+  unsigned m_prev{null};
   unsigned m_w;
 
 public:
-  explicit constexpr snake_iter(xor_ll_iter i, unsigned w) : m_it{i}, m_w{w} {}
+  explicit constexpr snake_iter(unsigned w) : m_w{w} {}
+  explicit constexpr snake_iter(const unsigned * d, unsigned p, unsigned w) : m_data{d}, m_pos{p}, m_w{w} {}
 
-  constexpr auto operator*() const noexcept { return p2point(*m_it, m_w); }
-  constexpr bool operator==(snake_iter o) noexcept { return m_it == o.m_it; }
+  constexpr auto operator*() const noexcept { return p2point(m_pos, m_w); }
+  constexpr bool operator==(snake_iter o) noexcept { return m_pos == o.m_pos; }
   constexpr auto &operator++() noexcept {
-    ++m_it;
+    auto p = m_prev;
+    m_prev = m_pos;
+    m_pos = p ^ m_data[m_pos];
     return *this;
   }
 };
@@ -162,10 +169,10 @@ public:
   [[nodiscard]] auto right() { return update_dir(R, L); }
 
   [[nodiscard]] constexpr auto begin() const noexcept {
-    return snake_iter{m_snake.begin(), grid_w};
+    return snake_iter{m_snake.data(), m_snake.start(), grid_w};
   }
   [[nodiscard]] constexpr auto end() const noexcept {
-    return snake_iter{m_snake.end(), grid_w};
+    return snake_iter{grid_w};
   }
   [[nodiscard]] constexpr auto size() const noexcept { return m_snake.size(); }
   [[nodiscard]] constexpr auto food() const noexcept {

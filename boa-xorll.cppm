@@ -4,26 +4,6 @@ import hai;
 namespace boa {
 static constexpr const auto null = ~0U;
 
-class xor_ll_iter {
-  const unsigned *m_data{};
-  unsigned m_pos{null};
-  unsigned m_prev{null};
-
-public:
-  constexpr xor_ll_iter() = default;
-  constexpr xor_ll_iter(const unsigned *d, unsigned p) : m_data{d}, m_pos{p} {}
-
-  constexpr auto operator*() const noexcept { return m_pos; }
-  constexpr bool operator==(xor_ll_iter o) const noexcept {
-    return m_pos == o.m_pos;
-  }
-  constexpr auto &operator++() noexcept {
-    auto p = m_prev;
-    m_prev = m_pos;
-    m_pos = p ^ m_data[m_pos];
-    return *this;
-  }
-};
 class xor_ll {
   hai::array<unsigned> m_data;
   unsigned m_start{null};
@@ -33,18 +13,10 @@ class xor_ll {
 public:
   constexpr xor_ll(unsigned cells) : m_data{cells} {}
 
-  constexpr auto begin() const noexcept {
-    return xor_ll_iter{m_data.begin(), m_start};
-  }
-  constexpr auto end() const noexcept { return xor_ll_iter{}; }
-
-  constexpr void iterate(auto fn) const noexcept {
-    for (auto it = begin(); it != end(); ++it) {
-      fn(*it);
-    }
-  }
   constexpr bool is_empty(unsigned p) const noexcept { return m_data[p] == 0; }
 
+  [[nodiscard]] constexpr auto start() const noexcept { return m_start; }
+  [[nodiscard]] constexpr auto * data() const noexcept { return m_data.begin(); }
   [[nodiscard]] constexpr auto size() const noexcept { return m_size; }
   constexpr void push_front(unsigned p) noexcept {
     m_size++;
