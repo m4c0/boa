@@ -13,7 +13,6 @@ import :offscreen;
 #endif
 import boa;
 import casein;
-import dotz;
 import hai;
 import sitime;
 import vapp;
@@ -32,6 +31,9 @@ public:
 // Covers a 4:1 screen, as if such thing will ever exist
 static constexpr const auto max_cells = 24 * (24 * 4);
 
+struct ivec2 {
+  unsigned x, y;
+};
 struct upc {
   float aspect;
   float time;
@@ -39,8 +41,8 @@ struct upc {
   float pad{};
   float grid_width = 24;
   float grid_height = 24;
-  dotz::ivec2 food = { 10000 };
-  dotz::ivec2 party = { 10000 };
+  ivec2 food = { 10000 };
+  ivec2 party = { 10000 };
   float party_start = -1;
 };
 
@@ -175,7 +177,7 @@ static void update_grid() {
   }
 
   auto [x, y, p] = g_g->food();
-  if (g_pc.food != dotz::ivec2 { x, y }) {
+  if (g_pc.food.x != x || g_pc.food.y != y) {
     if (g_outcome == boa::outcome::eat_food) {
       sfx_eat();
       g_pc.party_start = g_pc.time;
