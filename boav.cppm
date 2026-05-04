@@ -50,19 +50,6 @@ struct storage {
   float first_seen;
   float seen;
 };
-struct v_buffer {
-  vee::buffer buf {};
-  vee::device_memory mem {};
-
-  constexpr v_buffer() = default;
-  v_buffer(const voo::device_and_queue & dq) {
-    constexpr const unsigned sz = max_cells * sizeof(storage);
-
-    buf = vee::create_buffer(sz, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-    mem = vee::create_host_buffer_memory(dq.physical_device(), *buf);
-    vee::bind_buffer_memory(*buf, *mem);
-  }
-};
 
 hai::uptr<boa::game> g_g {};
 upc g_pc{};
@@ -112,15 +99,19 @@ public:
 #endif
 
     // Game grid buffer
-    v_buffer gg_buf { dq };
-    auto bi = vee::descriptor_buffer_info(*gg_buf.buf);
+    constexpr const unsigned sz = max_cells * sizeof(storage);
+    vee::buffer buf = vee::create_buffer(sz, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+    vee::device_memory mem = vee::create_host_buffer_memory(dq.physical_device(), *buf);
+    vee::bind_buffer_memory(*buf, *mem);
+
+    auto bi = vee::descriptor_buffer_info(*buf);
     vee::update_descriptor_set(vee::write_descriptor_set({
       .dstSet = dset,
       .descriptorCount = 1,
       .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
       .pBufferInfo = &bi,
     }));
-    g_mem = *gg_buf.mem;
+    g_mem = *mem;
 
     while (!interrupted()) {
       voo::swapchain_and_stuff sw { dq, *rp };
