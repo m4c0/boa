@@ -67,7 +67,7 @@ struct v_buffer {
 hai::uptr<boa::game> g_g {};
 upc g_pc{};
 boa::outcome volatile g_outcome{};
-v_buffer * g_buffer {};
+VkDeviceMemory g_mem {};
 
 class thread : public vapp {
   volatile bool m_shots;
@@ -120,7 +120,7 @@ public:
       .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
       .pBufferInfo = &bi,
     }));
-    g_buffer = &gg_buf;
+    g_mem = *gg_buf.mem;
 
     while (!interrupted()) {
       voo::swapchain_and_stuff sw { dq, *rp };
@@ -162,7 +162,7 @@ public:
 } t;
 
 static void update_grid() {
-  voo::mapmem m { *g_buffer->mem };
+  voo::mapmem m { g_mem };
   auto buf = static_cast<storage *>(*m);
 
   for (auto i = 0; i < max_cells; i++) buf[i].seen = 0;
@@ -272,7 +272,7 @@ struct init {
       }
 
       g_g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w), static_cast<unsigned>(grid_h));
-      if (g_buffer) update_grid();
+      if (g_mem) update_grid();
     });
 
     handle(TOUCH_UP, reset);
