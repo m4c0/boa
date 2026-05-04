@@ -1,6 +1,11 @@
 module;
 #include "sfx.h"
+#include "snd.h"
 #include "tmr.h"
+
+#ifdef __APPLE__
+#pragma leco add_framework AudioToolbox
+#endif
 
 export module boav;
 #ifndef LECO_TARGET_IPHONEOS
@@ -10,7 +15,6 @@ import boa;
 import casein;
 import dotz;
 import hai;
-import siaudio;
 import silog;
 import sires;
 import sith;
@@ -273,10 +277,10 @@ struct init {
 
     handle(TOUCH_UP, reset);
 
-    siaudio::filler([](float * f, unsigned n) { sfx_fill(f, n); });
-    siaudio::rate(44100);
+    snd_init(&sfx_fill);
   }
   ~init() {
+    snd_deinit();
     tmr_deinit();
   }
 } i;
