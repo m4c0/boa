@@ -1,5 +1,4 @@
 export module boa;
-import :xorll;
 import hai;
 import rng;
 
@@ -45,9 +44,14 @@ export class game {
 
   unsigned grid_w;
   unsigned grid_h;
-  unsigned grid_cells{grid_w * grid_h};
+  unsigned grid_cells = grid_w * grid_h;
+
+  hai::array<unsigned> m_snake { grid_cells };
+  unsigned m_snake_start = null;
+  unsigned m_snake_end   = null;
+  unsigned m_snake_size  = 0;
+
   enum { O, L, R, U, D, E } m_dir{};
-  xor_ll m_snake{grid_cells};
   unsigned m_ticks{};
   unsigned m_tpm{max_ticks_per_move};
   unsigned m_fpd{food_per_decrement};
@@ -58,8 +62,7 @@ export class game {
 
   void reset_food(unsigned n = 0) {
     m_food = rng::rand(grid_cells);
-    if (m_snake.is_empty(m_food))
-      return;
+    if (m_snake[m_food] == 0) return;
     if (n < 100) {
       reset_food(n + 1);
       return;
@@ -67,15 +70,35 @@ export class game {
     auto wtf = m_food;
     do {
       m_food = (m_food + 1) % grid_cells;
-      if (m_snake.is_empty(m_food))
-        return;
+      if (m_snake[m_food] == 0) return;
     } while (wtf != m_food);
   }
 
   void grow() {
-    m_snake.push_front(y * grid_w + x);
-    if (m_snake.size() > m_target)
-      m_snake.pop_back();
+    unsigned p = y * grid_w + x;
+
+    m_snake_size++;
+    if (m_snake_start == null) {
+      m_snake_start = m_snake_end = p;
+      m_snake[p] = null ^ null;
+    } else {
+      m_snake[m_snake_start] ^= null ^ p;
+      m_snake[p] = null ^ m_snake_start;
+      m_snake_start = p;
+    }
+
+    if (m_snake_size <= m_target) return;
+
+    m_snake_size--;
+    if (m_snake_start == m_snake_end) {
+      m_snake[m_snake_end] = null ^ null; // 0
+      m_snake_start = m_snake_end = null;
+      return;
+    }
+    auto last = m_snake[m_snake_end] ^ null;
+    m_snake[last] ^= m_snake_end ^ null;
+    m_snake[m_snake_end] = 0;
+    m_snake_end = last;
   }
 
   [[nodiscard]] outcome update_dir(decltype(m_dir) n, decltype(m_dir) opp) {
@@ -135,7 +158,7 @@ export class game {
       reset_food();
 
     const auto p = y * grid_w + x;
-    if (!m_snake.is_empty(p)) {
+    if (m_snake[p]) {
       m_dir = E;
       return outcome::death;
     }
@@ -157,7 +180,7 @@ export class game {
 public:
   constexpr game(unsigned w, unsigned h) : grid_w{w}, grid_h{h} {
     rng::seed();
-    m_snake.push_front(y * grid_w + x);
+    grow();
   }
 
   [[nodiscard]] constexpr auto grid_width() const noexcept { return grid_w; }
@@ -169,12 +192,12 @@ public:
   [[nodiscard]] auto right() { return update_dir(R, L); }
 
   [[nodiscard]] constexpr auto begin() const noexcept {
-    return snake_iter{m_snake.data(), m_snake.start(), grid_w};
+    return snake_iter{m_snake.data(), m_snake_start, grid_w};
   }
   [[nodiscard]] constexpr auto end() const noexcept {
     return snake_iter{grid_w};
   }
-  [[nodiscard]] constexpr auto size() const noexcept { return m_snake.size(); }
+  [[nodiscard]] constexpr auto size() const noexcept { return m_snake_size; }
   [[nodiscard]] constexpr auto food() const noexcept {
     return p2point(m_food, grid_w);
   }
