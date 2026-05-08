@@ -151,17 +151,22 @@ public:
   }
 } t;
 
+static void update_first_seen(storage * buf) {
+  auto s = g_g->size();
+  auto p = g_g->head();
+  while (p != -1) {
+    if (buf[p].first_seen == 0) buf[p].first_seen = g_pc.time;
+    buf[p].seen = s-- / static_cast<float>(g_g->size());
+
+    p = g_g->data()[p].next;
+  }
+}
 static void update_grid() {
   voo::mapmem m { g_mem };
   auto buf = static_cast<storage *>(*m);
 
   for (auto i = 0; i < max_cells; i++) buf[i].seen = 0;
-
-  auto s = g_g->size();
-  for (auto [x, y, p] : *g_g) {
-    if (buf[p].first_seen == 0) buf[p].first_seen = g_pc.time;
-    buf[p].seen = s-- / static_cast<float>(g_g->size());
-  }
+  update_first_seen(buf);
 
   for (auto i = 0; i < max_cells; i++) {
     if (buf[i].seen == 0) buf[i].first_seen = 0;

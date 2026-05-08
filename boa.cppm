@@ -1,3 +1,6 @@
+module;
+#include "snk.h"
+
 export module boa;
 import hai;
 import rng;
@@ -14,55 +17,27 @@ constexpr auto p2point(unsigned p, unsigned w) {
 
 export enum class outcome { none, move, eat_food, death, game_over, new_game };
 
-static constexpr const auto null = ~0U;
-
-class snake_iter {
-  const unsigned *m_data{};
-  unsigned m_pos{null};
-  unsigned m_prev{null};
-  unsigned m_w;
-
-public:
-  explicit constexpr snake_iter(unsigned w) : m_w{w} {}
-  explicit constexpr snake_iter(const unsigned * d, unsigned p, unsigned w) : m_data{d}, m_pos{p}, m_w{w} {}
-
-  constexpr auto operator*() const noexcept { return p2point(m_pos, m_w); }
-  constexpr bool operator==(snake_iter o) noexcept { return m_pos == o.m_pos; }
-  constexpr auto &operator++() noexcept {
-    auto p = m_prev;
-    m_prev = m_pos;
-    m_pos = p ^ m_data[m_pos];
-    return *this;
-  }
-};
 export class game {
   static constexpr const auto min_ticks_per_move = 2;
   static constexpr const auto max_ticks_per_move = 16;
   static constexpr const auto food_per_decrement = 4;
-  static constexpr const auto initial_size = 3;
   static constexpr const auto size_increment = 3;
 
   unsigned grid_w;
   unsigned grid_h;
   unsigned grid_cells = grid_w * grid_h;
 
-  hai::array<unsigned> m_snake { grid_cells };
-  unsigned m_snake_start = null;
-  unsigned m_snake_end   = null;
-  unsigned m_snake_size  = 0;
-
   enum { O, L, R, U, D, E } m_dir{};
   unsigned m_ticks{};
   unsigned m_tpm{max_ticks_per_move};
   unsigned m_fpd{food_per_decrement};
   unsigned m_food{~0U};
-  unsigned m_target = initial_size;
   unsigned x{grid_w / 2};
   unsigned y{grid_h / 2};
 
   void reset_food(unsigned n = 0) {
     m_food = rng::rand(grid_cells);
-    if (m_snake[m_food] == 0) return;
+    if (!snk_data[m_food].used) return;
     if (n < 100) {
       reset_food(n + 1);
       return;
@@ -70,35 +45,13 @@ export class game {
     auto wtf = m_food;
     do {
       m_food = (m_food + 1) % grid_cells;
-      if (m_snake[m_food] == 0) return;
+      if (!snk_data[m_food].used) return;
     } while (wtf != m_food);
   }
 
   void grow() {
     unsigned p = y * grid_w + x;
-
-    m_snake_size++;
-    if (m_snake_start == null) {
-      m_snake_start = m_snake_end = p;
-      m_snake[p] = null ^ null;
-    } else {
-      m_snake[m_snake_start] ^= null ^ p;
-      m_snake[p] = null ^ m_snake_start;
-      m_snake_start = p;
-    }
-
-    if (m_snake_size <= m_target) return;
-
-    m_snake_size--;
-    if (m_snake_start == m_snake_end) {
-      m_snake[m_snake_end] = null ^ null; // 0
-      m_snake_start = m_snake_end = null;
-      return;
-    }
-    auto last = m_snake[m_snake_end] ^ null;
-    m_snake[last] ^= m_snake_end ^ null;
-    m_snake[m_snake_end] = 0;
-    m_snake_end = last;
+    snk_grow(p);
   }
 
   [[nodiscard]] outcome update_dir(decltype(m_dir) n, decltype(m_dir) opp) {
@@ -158,7 +111,7 @@ export class game {
       reset_food();
 
     const auto p = y * grid_w + x;
-    if (m_snake[p]) {
+    if (snk_data[p].used) {
       m_dir = E;
       return outcome::death;
     }
@@ -167,7 +120,7 @@ export class game {
         m_fpd = food_per_decrement;
         m_tpm--;
       }
-      m_target += size_increment;
+      snk_target += size_increment;
       reset_food();
       grow();
       return outcome::eat_food;
@@ -180,6 +133,7 @@ export class game {
 public:
   constexpr game(unsigned w, unsigned h) : grid_w{w}, grid_h{h} {
     rng::seed();
+    snk_reset();
     grow();
   }
 
@@ -191,13 +145,11 @@ public:
   [[nodiscard]] auto left() { return update_dir(L, R); }
   [[nodiscard]] auto right() { return update_dir(R, L); }
 
-  [[nodiscard]] constexpr auto begin() const noexcept {
-    return snake_iter{m_snake.data(), m_snake_start, grid_w};
-  }
-  [[nodiscard]] constexpr auto end() const noexcept {
-    return snake_iter{grid_w};
-  }
-  [[nodiscard]] constexpr auto size() const noexcept { return m_snake_size; }
+  [[nodiscard]] constexpr auto data() const noexcept { return snk_data; }
+  [[nodiscard]] constexpr auto head() const noexcept { return snk_head; }
+  [[nodiscard]] constexpr auto tail() const noexcept { return snk_tail; }
+  [[nodiscard]] constexpr auto size() const noexcept { return snk_size; }
+
   [[nodiscard]] constexpr auto food() const noexcept {
     return p2point(m_food, grid_w);
   }
