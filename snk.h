@@ -1,12 +1,14 @@
 #pragma once
 
+extern int      snk_food;
 extern int      snk_head;
 extern int      snk_tail;
 extern unsigned snk_size;
 
 void snk_reset(unsigned gw, unsigned gh);
 
-void snk_eat (int p);
+int snk_check_food(int p);
+
 void snk_grow(int p);
 int  snk_hits(int p);
 int  snk_next(int p);
@@ -23,9 +25,11 @@ typedef struct snk_node {
 } snk_node_t;
 
 static snk_node snk_data[SNK_MAX_CELLS];
+static unsigned snk_grid_w;
 static unsigned snk_grid_size;
 static unsigned snk_target;
 
+int      snk_food;
 int      snk_head;
 int      snk_tail;
 unsigned snk_size;
@@ -37,6 +41,8 @@ void snk_reset(unsigned gw, unsigned gh) {
   snk_size   = 1;
   snk_target = 3;
 
+  snk_food      = -1;
+  snk_grid_w    = gw;
   snk_grid_size = gw * gh;
 
   snk_head = snk_tail = (gh/2) * gw + (gw/2);
@@ -73,4 +79,24 @@ void snk_grow(int p) {
   snk_tail = n->prev;
   *n = {};
 }
+
+static void snk_reset_food() {
+  for (int i = 0; i < 100; i++) {
+    snk_food = rand() % snk_grid_size;
+    if (!snk_hits(snk_food)) return;
+  }
+  int wtf = snk_food;
+  do {
+    snk_food = (snk_food + 1) % snk_grid_size;
+    if (!snk_hits(snk_food)) return;
+  } while (wtf != snk_food);
+}
+int snk_check_food(int p) {
+  if (snk_food < 0) snk_reset_food();
+  if (snk_food != p) return 0;
+  snk_eat(p);
+  snk_reset_food();
+  return 1;
+}
+
 #endif

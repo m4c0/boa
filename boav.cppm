@@ -169,7 +169,8 @@ static void update_grid() {
     if (buf[i].seen == 0) buf[i].first_seen = 0;
   }
 
-  auto [x, y, p] = g_g->food();
+  unsigned x = snk_food % (unsigned)g_pc.grid_width;
+  unsigned y = snk_food / (unsigned)g_pc.grid_width;
   if (g_pc.food.x != x || g_pc.food.y != y) {
     if (g_outcome == boa::outcome::eat_food) {
       sfx_eat();
