@@ -1,5 +1,15 @@
 #pragma once
 
+void sfx_init();
+void sfx_reset();
+void sfx_fill(float * buf, unsigned len);
+
+void sfx_death();
+void sfx_eat();
+void sfx_walk();
+
+#ifdef SFX_IMPLEMENTATION
+
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
@@ -46,21 +56,21 @@ static float sfx_randf() {
   return (float)rand() / (float)RAND_MAX;
 }
 
-static void sfx_init() {
+void sfx_init() {
   sfx_gettime(&sfx_tv);
 }
-static void sfx_reset() {
+void sfx_reset() {
   sfx_eat_t = sfx_walk_t = -1;
 }
 
-static void sfx_death() {
+void sfx_death() {
   sfx_death_t = sfx_now();
 }
-static void sfx_eat() {
+void sfx_eat() {
   sfx_eat_t = sfx_now();
   sfx_eat_dt = 1.0 + 0.1 * sfx_randf();
 }
-static void sfx_walk() {
+void sfx_walk() {
   sfx_walk_t = sfx_now();
   sfx_walk_dt = 1.0 + 0.1 * sfx_randf();
 }
@@ -87,7 +97,7 @@ static constexpr const int sfx_perlin[256] = {
 static float sfx_noise(float t) {
   return sfx_perlin[(unsigned)(t * 4) % 256] > 128 ? 1 : -1;
 }
-static void sfx_fill(float * buf, unsigned len) {
+void sfx_fill(float * buf, unsigned len) {
   float ref = sfx_now();
   for (int i = 0; i < len; i++) {
     float t = ref + i / 44100.f;
@@ -131,3 +141,5 @@ static void sfx_fill(float * buf, unsigned len) {
     *buf++ = (d + e + w) * 0.5; // global volume
   }
 }
+
+#endif

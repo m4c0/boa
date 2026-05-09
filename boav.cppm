@@ -1,4 +1,5 @@
 module;
+#define SFX_IMPLEMENTATION
 #include "sfx.h"
 #include "snd.h"
 #include "tmr.h"
