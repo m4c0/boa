@@ -1,15 +1,15 @@
 #pragma once
 
-void snk_reset(int p);
-
-void snk_eat ();
-void snk_grow(int p);
-int  snk_hits(int p);
-int  snk_next(int p);
-
 extern int      snk_head;
 extern int      snk_tail;
 extern unsigned snk_size;
+
+void snk_reset(int p);
+
+void snk_eat (int p);
+void snk_grow(int p);
+int  snk_hits(int p);
+int  snk_next(int p);
 
 #ifdef SNK_IMPLEMENTATION
 #include <stdlib.h>
@@ -42,8 +42,9 @@ void snk_reset(int p) {
   };
 }
 
-void snk_eat() {
+void snk_eat(int p) {
   snk_target += 3;
+  snk_grow(p);
 }
 
 int snk_hits(int p) { return snk_data[p].used; }

@@ -48,11 +48,6 @@ export class game {
     } while (wtf != m_food);
   }
 
-  void grow() {
-    unsigned p = y * grid_w + x;
-    snk_grow(p);
-  }
-
   [[nodiscard]] outcome update_dir(decltype(m_dir) n, decltype(m_dir) opp) {
     if (m_dir == n)
       return outcome::none;
@@ -119,13 +114,12 @@ export class game {
         m_fpd = food_per_decrement;
         m_tpm--;
       }
-      snk_eat();
+      snk_eat(p);
       reset_food();
-      grow();
       return outcome::eat_food;
     }
 
-    grow();
+    snk_grow(p);
     return outcome::move;
   }
 
