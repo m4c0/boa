@@ -1,4 +1,17 @@
 #pragma once
+
+void snk_reset();
+
+void snk_eat ();
+void snk_grow(int p);
+int  snk_hits(int p);
+int  snk_next(int p);
+
+extern int      snk_head;
+extern int      snk_tail;
+extern unsigned snk_size;
+
+#ifdef SNK_IMPLEMENTATION
 #include <stdlib.h>
 
 #define SNK_MAX_CELLS (24 * 24 * 4)
@@ -9,20 +22,28 @@ typedef struct snk_node {
   int prev;
 } snk_node_t;
 
-snk_node snk_data[SNK_MAX_CELLS];
-int snk_head;
-int snk_tail;
-unsigned snk_size;
-unsigned snk_target;
+static snk_node snk_data[SNK_MAX_CELLS];
+static unsigned snk_target;
 
-static void snk_reset() {
+int      snk_head;
+int      snk_tail;
+unsigned snk_size;
+
+void snk_reset() {
   for (int i = 0; i < SNK_MAX_CELLS; i++) snk_data[i] = {};
   snk_size = 0;
   snk_target = 3;
   snk_head = snk_tail = -1;
 }
 
-static void snk_grow(int p) {
+void snk_eat() {
+  snk_target += 3;
+}
+
+int snk_hits(int p) { return snk_data[p].used; }
+int snk_next(int p) { return snk_data[p].next; }
+
+void snk_grow(int p) {
   if (snk_head == -1) {
     snk_head = snk_tail = p;
     snk_data[p] = {
@@ -49,3 +70,4 @@ static void snk_grow(int p) {
   snk_tail = n->prev;
   *n = {};
 }
+#endif

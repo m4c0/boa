@@ -1,12 +1,9 @@
+#pragma leco add_impl impls
 module;
-#define SFX_IMPLEMENTATION
 #include "sfx.h"
 #include "snd.h"
+#include "snk.h"
 #include "tmr.h"
-
-#ifdef __APPLE__
-#pragma leco add_framework AudioToolbox
-#endif
 
 export module boav;
 #ifndef LECO_TARGET_IPHONEOS
@@ -153,13 +150,12 @@ public:
 } t;
 
 static void update_first_seen(storage * buf) {
-  auto s = g_g->size();
-  auto p = g_g->head();
+  auto s = snk_size;
+  auto p = snk_head;
   while (p != -1) {
     if (buf[p].first_seen == 0) buf[p].first_seen = g_pc.time;
-    buf[p].seen = s-- / static_cast<float>(g_g->size());
-
-    p = g_g->data()[p].next;
+    buf[p].seen = s-- / static_cast<float>(snk_size);
+    p = snk_next(p);
   }
 }
 static void update_grid() {

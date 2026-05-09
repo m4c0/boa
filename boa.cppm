@@ -21,7 +21,6 @@ export class game {
   static constexpr const auto min_ticks_per_move = 2;
   static constexpr const auto max_ticks_per_move = 16;
   static constexpr const auto food_per_decrement = 4;
-  static constexpr const auto size_increment = 3;
 
   unsigned grid_w;
   unsigned grid_h;
@@ -37,7 +36,7 @@ export class game {
 
   void reset_food(unsigned n = 0) {
     m_food = rng::rand(grid_cells);
-    if (!snk_data[m_food].used) return;
+    if (!snk_hits(m_food)) return;
     if (n < 100) {
       reset_food(n + 1);
       return;
@@ -45,7 +44,7 @@ export class game {
     auto wtf = m_food;
     do {
       m_food = (m_food + 1) % grid_cells;
-      if (!snk_data[m_food].used) return;
+      if (!snk_hits(m_food)) return;
     } while (wtf != m_food);
   }
 
@@ -111,7 +110,7 @@ export class game {
       reset_food();
 
     const auto p = y * grid_w + x;
-    if (snk_data[p].used) {
+    if (snk_hits(p)) {
       m_dir = E;
       return outcome::death;
     }
@@ -120,7 +119,7 @@ export class game {
         m_fpd = food_per_decrement;
         m_tpm--;
       }
-      snk_target += size_increment;
+      snk_eat();
       reset_food();
       grow();
       return outcome::eat_food;
@@ -144,11 +143,6 @@ public:
   [[nodiscard]] auto down() { return update_dir(D, U); }
   [[nodiscard]] auto left() { return update_dir(L, R); }
   [[nodiscard]] auto right() { return update_dir(R, L); }
-
-  [[nodiscard]] constexpr auto data() const noexcept { return snk_data; }
-  [[nodiscard]] constexpr auto head() const noexcept { return snk_head; }
-  [[nodiscard]] constexpr auto tail() const noexcept { return snk_tail; }
-  [[nodiscard]] constexpr auto size() const noexcept { return snk_size; }
 
   [[nodiscard]] constexpr auto food() const noexcept {
     return p2point(m_food, grid_w);

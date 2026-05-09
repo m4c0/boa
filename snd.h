@@ -1,14 +1,15 @@
 #pragma once
+
 typedef void (*snd_filler_t)(float *, unsigned);
 
-static void snd_init(snd_filler_t fn);
-static void snd_deinit();
+void snd_init(snd_filler_t fn);
+void snd_deinit();
 
+#ifdef SND_IMPLEMENTATION
 #ifdef __APPLE__
 #include <AudioToolbox/AudioComponent.h>
 #include <AudioToolbox/AudioOutputUnit.h>
 #include <AudioToolbox/AudioUnitProperties.h>
-
 
 static AudioComponentInstance snd_tone_unit;
 
@@ -22,7 +23,7 @@ static OSStatus render(
   return noErr;
 }
 
-static void snd_init(snd_filler_t fn) {
+void snd_init(snd_filler_t fn) {
   AudioComponentDescription acd = {0};
   acd.componentType         = kAudioUnitType_Output;
   acd.componentManufacturer = kAudioUnitManufacturer_Apple;
@@ -60,7 +61,7 @@ static void snd_init(snd_filler_t fn) {
 
   AudioOutputUnitStart(snd_tone_unit);
 }
-static void snd_deinit() {
+void snd_deinit() {
   if (!snd_tone_unit) return;
 
   AudioOutputUnitStop(snd_tone_unit);
@@ -68,4 +69,5 @@ static void snd_deinit() {
   AudioComponentInstanceDispose(snd_tone_unit);
 }
 #elif _WIN32
+#endif
 #endif
