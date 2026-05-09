@@ -132,8 +132,7 @@ export class game {
 public:
   constexpr game(unsigned w, unsigned h) : grid_w{w}, grid_h{h} {
     rng::seed();
-    snk_reset();
-    grow();
+    snk_reset(y * grid_w + x);
   }
 
   [[nodiscard]] constexpr auto grid_width() const noexcept { return grid_w; }

@@ -1,6 +1,6 @@
 #pragma once
 
-void snk_reset();
+void snk_reset(int p);
 
 void snk_eat ();
 void snk_grow(int p);
@@ -29,11 +29,17 @@ int      snk_head;
 int      snk_tail;
 unsigned snk_size;
 
-void snk_reset() {
+void snk_reset(int p) {
   for (int i = 0; i < SNK_MAX_CELLS; i++) snk_data[i] = {};
-  snk_size = 0;
+  snk_size   = 1;
   snk_target = 3;
-  snk_head = snk_tail = -1;
+
+  snk_head = snk_tail = p;
+  snk_data[p] = {
+    .used = 1,
+    .next = -1,
+    .prev = -1,
+  };
 }
 
 void snk_eat() {
@@ -44,22 +50,13 @@ int snk_hits(int p) { return snk_data[p].used; }
 int snk_next(int p) { return snk_data[p].next; }
 
 void snk_grow(int p) {
-  if (snk_head == -1) {
-    snk_head = snk_tail = p;
-    snk_data[p] = {
-      .used = 1,
-      .next = -1,
-      .prev = -1,
-    };
-  } else {
-    snk_data[snk_head].prev = p;
-    snk_data[p] = {
-      .used = 1,
-      .next = snk_head,
-      .prev = -1,
-    };
-    snk_head = p;
-  }
+  snk_data[snk_head].prev = p;
+  snk_data[p] = {
+    .used = 1,
+    .next = snk_head,
+    .prev = -1,
+  };
+  snk_head = p;
 
   snk_size++;
   if (snk_size <= snk_target) return;
