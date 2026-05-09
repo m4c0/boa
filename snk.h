@@ -4,7 +4,7 @@ extern int      snk_head;
 extern int      snk_tail;
 extern unsigned snk_size;
 
-void snk_reset(int p);
+void snk_reset(unsigned gw, unsigned gh);
 
 void snk_eat (int p);
 void snk_grow(int p);
@@ -23,19 +23,24 @@ typedef struct snk_node {
 } snk_node_t;
 
 static snk_node snk_data[SNK_MAX_CELLS];
+static unsigned snk_grid_size;
 static unsigned snk_target;
 
 int      snk_head;
 int      snk_tail;
 unsigned snk_size;
 
-void snk_reset(int p) {
+void snk_reset(unsigned gw, unsigned gh) {
+  srand(time(0));
+
   for (int i = 0; i < SNK_MAX_CELLS; i++) snk_data[i] = {};
   snk_size   = 1;
   snk_target = 3;
 
-  snk_head = snk_tail = p;
-  snk_data[p] = {
+  snk_grid_size = gw * gh;
+
+  snk_head = snk_tail = (gh/2) * gw + (gw/2);
+  snk_data[snk_head] = {
     .used = 1,
     .next = -1,
     .prev = -1,
