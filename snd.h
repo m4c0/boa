@@ -79,32 +79,42 @@ static IXAudio2               * snd_xa2;
 static IXAudio2MasteringVoice * snd_main_voice;
 static IXAudio2SourceVoice    * snd_src_voice;
 
-class : public IXAudio2VoiceCallback {
-  void OnBufferEnd(void *pBufferContext) noexcept override {}
-  void OnBufferStart(void *pBufferContext) noexcept override {}
-  void OnLoopEnd(void *pBufferContext) noexcept override {}
-  void OnStreamEnd() noexcept override {}
-  void OnVoiceError(void *pBufferContext, HRESULT Error) noexcept override {}
-  void OnVoiceProcessingPassEnd() noexcept override {}
+#define SND_COM(obj, method, ...) (obj)->lpVtbl->method(obj, __VA_ARGS__)
+#define SND_CHK(obj, method, ...) if (FAILED(SND_COM(obj, method, __VA_ARGS__))) return
 
-  void OnVoiceProcessingPassStart(UINT32 size) noexcept override {
-    if (size > sizeof(snd_buffer)) size = sizeof(snd_buffer);
+static void snd_voice_processing_pass_start(IXAudio2VoiceCallback * self, UINT32 size) {
+  if (size > sizeof(snd_buffer)) size = sizeof(snd_buffer);
 
-    snd_fn(snd_buffer, size / sizeof(float));
+  snd_fn(snd_buffer, size / sizeof(float));
 
-    XAUDIO2_BUFFER buf = {
-      .AudioBytes = size,
-      .pAudioData = (BYTE *)snd_buffer,
-    };
-    snd_src_voice->SubmitSourceBuffer(&buf);
-  }
-} snd_callback;
+  XAUDIO2_BUFFER buf = {
+    .AudioBytes = size,
+    .pAudioData = (BYTE *)snd_buffer,
+  };
+  SND_COM(snd_src_voice, SubmitSourceBuffer, &buf, NULL);
+}
+
+static void snd_dummy_0(IXAudio2VoiceCallback * self, void * ctx) {}
+static void snd_dummy_1(IXAudio2VoiceCallback * self) {}
+static void snd_dummy_2(IXAudio2VoiceCallback * self, void * ctx, HRESULT err) {}
+static IXAudio2VoiceCallbackVtbl snd_vtbl = {
+  .OnBufferEnd                = &snd_dummy_0,
+  .OnBufferStart              = &snd_dummy_0,
+  .OnLoopEnd                  = &snd_dummy_0,
+  .OnStreamEnd                = &snd_dummy_1,
+  .OnVoiceError               = &snd_dummy_2,
+  .OnVoiceProcessingPassEnd   = &snd_dummy_1,
+  .OnVoiceProcessingPassStart = &snd_voice_processing_pass_start,
+};
+static IXAudio2VoiceCallback snd_callback = {
+  .lpVtbl = &snd_vtbl,
+};
 
 void snd_init(snd_filler_t fn) {
   HRESULT h;
-  if (FAILED(h = CoInitializeEx(nullptr, COINIT_MULTITHREADED))) return;
+  if (FAILED(h = CoInitializeEx(NULL, COINIT_MULTITHREADED))) return;
   if (FAILED(h = XAudio2Create(&snd_xa2, 0, XAUDIO2_DEFAULT_PROCESSOR))) return;
-  if (FAILED(h = snd_xa2->CreateMasteringVoice(&snd_main_voice))) return;
+  SND_CHK(snd_xa2, CreateMasteringVoice, &snd_main_voice, 1, 44100, 0, NULL, NULL, 0);
 
   snd_fn = fn;
 
@@ -116,15 +126,15 @@ void snd_init(snd_filler_t fn) {
     .nBlockAlign     = 4, // channels * bitsPerSample / 8
     .wBitsPerSample  = 32,
   };
-  if (FAILED(h = snd_xa2->CreateSourceVoice(&snd_src_voice, &wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &snd_callback))) return;
+  SND_CHK(snd_xa2, CreateSourceVoice, &snd_src_voice, &wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &snd_callback, NULL, NULL);
 
-  if (FAILED(h = snd_src_voice->Start())) return;
+  SND_CHK(snd_src_voice, Start, 0, 0);
 }
 
 void snd_deinit() {
-  if (snd_src_voice ) snd_src_voice ->DestroyVoice();
-  if (snd_main_voice) snd_main_voice->DestroyVoice();
-  if (snd_xa2) snd_xa2->Release();
+  if (snd_src_voice ) SND_COM(snd_src_voice,  DestroyVoice);
+  if (snd_main_voice) SND_COM(snd_main_voice, DestroyVoice);
+  if (snd_xa2       ) SND_COM(snd_xa2,        Release     );
   CoUninitialize();
 }
 

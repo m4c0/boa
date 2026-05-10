@@ -7,6 +7,7 @@ poc-snd
 *.a
 *.app
 *.dylib
+*.exe
 *.plist
 *.o
 *.xcframework
