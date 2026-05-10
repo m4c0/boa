@@ -53,7 +53,7 @@ struct storage {
 
 hai::uptr<boa::game> g_g {};
 upc g_pc{};
-boa::outcome volatile g_outcome{};
+snk_outcome_t volatile g_outcome{};
 VkDeviceMemory g_mem {};
 
 class thread : public vapp {
@@ -174,7 +174,7 @@ static void update_grid() {
   unsigned x = snk_food % (unsigned)g_pc.grid_width;
   unsigned y = snk_food / (unsigned)g_pc.grid_width;
   if (g_pc.food.x != x || g_pc.food.y != y) {
-    if (g_outcome == boa::outcome::eat_food) {
+    if (g_outcome == snk_o_eat_food) {
       sfx_eat();
       g_pc.party_start = g_pc.time;
       g_pc.party = g_pc.food;
@@ -189,14 +189,10 @@ static void update_grid() {
   } else if (g_pc.dead_at == 0.0)
     g_pc.dead_at = g_g->is_game_over() ? g_pc.time : 0;
 
-  if (g_outcome == boa::outcome::move) {
-    sfx_walk();
-  }
-  if (g_outcome == boa::outcome::death) {
-    sfx_death();
-  }
+  if (g_outcome == snk_o_move ) sfx_walk();
+  if (g_outcome == snk_o_death) sfx_death();
 
-  g_pc.grid_width = g_g->grid_width();
+  g_pc.grid_width  = g_g->grid_width();
   g_pc.grid_height = g_g->grid_height();
 }
 
@@ -226,7 +222,7 @@ static void right() {
 static void tick() {
   if (!g_g) return;
   g_outcome = g_g->tick();
-  if (g_outcome != boa::outcome::none) update_grid();
+  if (g_outcome != snk_o_none) update_grid();
 }
 
 struct init {

@@ -1,5 +1,14 @@
 #pragma once
 
+typedef enum snk_outcome {
+  snk_o_none,
+  snk_o_move,
+  snk_o_eat_food,
+  snk_o_death,
+  snk_o_game_over,
+  snk_o_new_game,
+} snk_outcome_t;
+
 extern int      snk_food;
 extern int      snk_head;
 extern int      snk_tail;

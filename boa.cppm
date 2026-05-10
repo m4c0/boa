@@ -8,8 +8,6 @@ import hai;
 import rng;
 
 namespace boa {
-export enum class outcome { none, move, eat_food, death, game_over, new_game };
-
 enum class dir_et { O, L, R, U, D, E };
 
 export class game {
@@ -27,29 +25,26 @@ export class game {
   unsigned x{grid_w / 2};
   unsigned y{grid_h / 2};
 
-  [[nodiscard]] outcome update_dir(decltype(m_dir) n, decltype(m_dir) opp) {
-    if (m_dir == n)
-      return outcome::none;
-    if (m_dir == opp)
-      return outcome::none;
-    if (m_dir == dir_et::E)
-      return outcome::none;
+  [[nodiscard]] snk_outcome_t update_dir(dir_et n, dir_et opp) {
+    if (m_dir == n        ) return snk_o_none;
+    if (m_dir == opp      ) return snk_o_none;
+    if (m_dir == dir_et::E) return snk_o_none;
 
     m_dir = n;
     m_ticks = ((m_ticks / m_tpm) + 1) * m_tpm;
     return run_tick();
   }
 
-  [[nodiscard]] outcome die() {
+  [[nodiscard]] snk_outcome_t die() {
     m_dir = dir_et::E;
-    return outcome::death;
+    return snk_o_death;
   }
 
-  [[nodiscard]] outcome run_tick() {
+  [[nodiscard]] snk_outcome_t run_tick() {
     switch (m_dir) {
       using enum dir_et;
-      case E: return outcome::game_over;
-      case O: return outcome::new_game;
+      case E: return snk_o_game_over;
+      case O: return snk_o_new_game;
       case U: --y; break;
       case D: ++y; break;
       case L: --x; break;
@@ -65,11 +60,11 @@ export class game {
         m_fpd = food_per_decrement;
         m_tpm--;
       }
-      return outcome::eat_food;
+      return snk_o_eat_food;
     }
 
     snk_grow(p);
-    return outcome::move;
+    return snk_o_move;
   }
 
 public:
@@ -88,11 +83,9 @@ public:
   [[nodiscard]] constexpr auto is_new_game () const noexcept { return m_dir == dir_et::O; }
   [[nodiscard]] constexpr auto is_game_over() const noexcept { return m_dir == dir_et::E; }
 
-  [[nodiscard]] outcome tick() {
+  [[nodiscard]] snk_outcome_t tick() {
     m_ticks++;
-    if (m_ticks % m_tpm > 0)
-      return outcome::none;
-
+    if (m_ticks % m_tpm > 0) return snk_o_none;
     return run_tick();
   }
 };
