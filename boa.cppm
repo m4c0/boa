@@ -15,15 +15,12 @@ export class game {
   static constexpr const auto max_ticks_per_move = 16;
   static constexpr const auto food_per_decrement = 4;
 
-  unsigned grid_w;
-  unsigned grid_h;
-
   dir_et   m_dir{};
   unsigned m_ticks{};
   unsigned m_tpm{max_ticks_per_move};
   unsigned m_fpd{food_per_decrement};
-  unsigned x{grid_w / 2};
-  unsigned y{grid_h / 2};
+  unsigned x;
+  unsigned y;
 
   [[nodiscard]] snk_outcome_t update_dir(dir_et n, dir_et opp) {
     if (m_dir == n        ) return snk_o_none;
@@ -50,10 +47,10 @@ export class game {
       case L: --x; break;
       case R: ++x; break;
     }
-    if (x > grid_w - 1) return die();
-    if (y > grid_h - 1) return die();
+    if (x > snk_grid_w - 1) return die();
+    if (y > snk_grid_h - 1) return die();
 
-    const auto p = y * grid_w + x;
+    const auto p = y * snk_grid_w + x;
     if (snk_hits(p)) return die();
     if (snk_check_food(p)) {
       if (m_tpm > min_ticks_per_move && --m_fpd == 0) {
@@ -68,12 +65,11 @@ export class game {
   }
 
 public:
-  constexpr game(unsigned w, unsigned h) : grid_w{w}, grid_h{h} {
+  constexpr game(unsigned w, unsigned h) {
     snk_reset(w, h);
+    x = snk_grid_w / 2;
+    y = snk_grid_h / 2;
   }
-
-  [[nodiscard]] constexpr auto grid_width() const noexcept { return grid_w; }
-  [[nodiscard]] constexpr auto grid_height() const noexcept { return grid_h; }
 
   [[nodiscard]] auto up()    { return update_dir(dir_et::U, dir_et::D); }
   [[nodiscard]] auto down()  { return update_dir(dir_et::D, dir_et::U); }

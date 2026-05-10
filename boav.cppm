@@ -192,13 +192,13 @@ static void update_grid() {
   if (g_outcome == snk_o_move ) sfx_walk();
   if (g_outcome == snk_o_death) sfx_death();
 
-  g_pc.grid_width  = g_g->grid_width();
-  g_pc.grid_height = g_g->grid_height();
+  g_pc.grid_width  = snk_grid_w;
+  g_pc.grid_height = snk_grid_h;
 }
 
 static void reset() {
   if (g_g->is_game_over()) {
-    g_g = hai::uptr<boa::game>::make(g_g->grid_width(), g_g->grid_height());
+    g_g = hai::uptr<boa::game>::make(snk_grid_w, snk_grid_h);
     update_grid();
   }
 }

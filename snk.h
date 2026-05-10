@@ -14,6 +14,9 @@ extern int      snk_head;
 extern int      snk_tail;
 extern unsigned snk_size;
 
+extern unsigned snk_grid_w;
+extern unsigned snk_grid_h;
+
 void snk_reset(unsigned gw, unsigned gh);
 
 int snk_check_food(int p);
@@ -35,11 +38,12 @@ typedef struct snk_node {
 } snk_node_t;
 
 static snk_node_t snk_data[SNK_MAX_CELLS];
-static unsigned snk_grid_w;
 static unsigned snk_grid_size;
 static unsigned snk_target;
 
 int      snk_food;
+unsigned snk_grid_w;
+unsigned snk_grid_h;
 int      snk_head;
 int      snk_tail;
 unsigned snk_size;
@@ -53,6 +57,7 @@ void snk_reset(unsigned gw, unsigned gh) {
 
   snk_food      = -1;
   snk_grid_w    = gw;
+  snk_grid_h    = gh;
   snk_grid_size = gw * gh;
 
   snk_head = snk_tail = (gh/2) * gw + (gw/2);
