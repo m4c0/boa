@@ -1,9 +1,11 @@
 #pragma leco add_impl impls
 module;
+extern "C" {
 #include "sfx.h"
 #include "snd.h"
 #include "snk.h"
 #include "tmr.h"
+}
 
 export module boav;
 #ifndef LECO_TARGET_IPHONEOS

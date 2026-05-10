@@ -19,7 +19,7 @@ void sfx_walk();
 #include <assert.h>
 #include <stdlib.h>
 
-static timeval sfx_tv = {0};
+static struct timeval sfx_tv = {0};
 
 static float sfx_walk_t  = -1;
 static float sfx_walk_dt = -1;
@@ -27,7 +27,7 @@ static float sfx_eat_t   = -1;
 static float sfx_eat_dt  = -1;
 static float sfx_death_t = -1;
 
-static void sfx_gettime(timeval * tv) {
+static void sfx_gettime(struct timeval * tv) {
 #ifdef _WIN32
   SYSTEMTIME st; GetSystemTime(&st);
 
@@ -39,19 +39,19 @@ static void sfx_gettime(timeval * tv) {
   i.u.LowPart  = ft.dwLowDateTime;
   i.u.HighPart = ft.dwHighDateTime;
 
-  tv->tv_sec = i.QuadPart / 100'1000'1000;
-  tv->tv_usec = (i.QuadPart / 100) % 1000'1000;
+  tv->tv_sec = i.QuadPart / 100*1000*1000;
+  tv->tv_usec = (i.QuadPart / 100) % 1000*1000;
 #else
   gettimeofday(tv, NULL);
 #endif
 }
 
 static float sfx_now() {
-  timeval tv; sfx_gettime(&tv);
+  struct timeval tv; sfx_gettime(&tv);
 
   float secs = tv.tv_sec - sfx_tv.tv_sec;
   float usecs = tv.tv_usec - sfx_tv.tv_usec;
-  return secs + (usecs / 1000'000);
+  return secs + (usecs / 1000*1000);
 }
 static float sfx_randf() {
   return (float)rand() / (float)RAND_MAX;
@@ -77,7 +77,7 @@ void sfx_walk() {
 }
 
 // Perlin's original permutation
-static constexpr const int sfx_perlin[256] = {
+static const int sfx_perlin[256] = {
   151, 160, 137, 91,  90,  15,  131, 13,  201, 95,  96,  53,  194, 233, 7,   225,
   140, 36,  103, 30,  69,  142, 8,   99,  37,  240, 21,  10,  23,  190, 6,   148,
   247, 120, 234, 75,  0,   26,  197, 62,  94,  252, 219, 203, 117, 35,  11,  32,

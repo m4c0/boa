@@ -33,7 +33,7 @@ void tmr_deinit() {
 }
 #elif _WIN32
 static HANDLE tmr_h;
-static void tmr_callback(void * fn, BOOLEAN) {
+static void tmr_callback(void * fn, BOOLEAN b) {
   ((tmr_fn_t)fn)();
 }
 void tmr_init(tmr_fn_t fn) {
@@ -43,7 +43,7 @@ void tmr_init(tmr_fn_t fn) {
   CreateTimerQueueTimer(&t, tmr_h, tmr_callback, (void *)fn, 25, 25, 0);
 }
 void tmr_deinit() {
-  DeleteTimerQueueEx(tmr_h, nullptr);
+  DeleteTimerQueueEx(tmr_h, NULL);
 }
 #endif
 #endif

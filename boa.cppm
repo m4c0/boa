@@ -1,5 +1,7 @@
 module;
+extern "C" {
 #include "snk.h"
+}
 
 export module boa;
 import hai;
