@@ -10,6 +10,8 @@ import rng;
 namespace boa {
 export enum class outcome { none, move, eat_food, death, game_over, new_game };
 
+enum class dir_et { O, L, R, U, D, E };
+
 export class game {
   static constexpr const auto min_ticks_per_move = 2;
   static constexpr const auto max_ticks_per_move = 16;
@@ -18,7 +20,7 @@ export class game {
   unsigned grid_w;
   unsigned grid_h;
 
-  enum { O, L, R, U, D, E } m_dir{};
+  dir_et   m_dir{};
   unsigned m_ticks{};
   unsigned m_tpm{max_ticks_per_move};
   unsigned m_fpd{food_per_decrement};
@@ -30,7 +32,7 @@ export class game {
       return outcome::none;
     if (m_dir == opp)
       return outcome::none;
-    if (m_dir == E)
+    if (m_dir == dir_et::E)
       return outcome::none;
 
     m_dir = n;
@@ -39,12 +41,13 @@ export class game {
   }
 
   [[nodiscard]] outcome die() {
-    m_dir = E;
+    m_dir = dir_et::E;
     return outcome::death;
   }
 
   [[nodiscard]] outcome run_tick() {
     switch (m_dir) {
+      using enum dir_et;
       case E: return outcome::game_over;
       case O: return outcome::new_game;
       case U: --y; break;
@@ -77,17 +80,13 @@ public:
   [[nodiscard]] constexpr auto grid_width() const noexcept { return grid_w; }
   [[nodiscard]] constexpr auto grid_height() const noexcept { return grid_h; }
 
-  [[nodiscard]] auto up() { return update_dir(U, D); }
-  [[nodiscard]] auto down() { return update_dir(D, U); }
-  [[nodiscard]] auto left() { return update_dir(L, R); }
-  [[nodiscard]] auto right() { return update_dir(R, L); }
+  [[nodiscard]] auto up()    { return update_dir(dir_et::U, dir_et::D); }
+  [[nodiscard]] auto down()  { return update_dir(dir_et::D, dir_et::U); }
+  [[nodiscard]] auto left()  { return update_dir(dir_et::L, dir_et::R); }
+  [[nodiscard]] auto right() { return update_dir(dir_et::R, dir_et::L); }
 
-  [[nodiscard]] constexpr auto is_new_game() const noexcept {
-    return m_dir == O;
-  }
-  [[nodiscard]] constexpr auto is_game_over() const noexcept {
-    return m_dir == E;
-  }
+  [[nodiscard]] constexpr auto is_new_game () const noexcept { return m_dir == dir_et::O; }
+  [[nodiscard]] constexpr auto is_game_over() const noexcept { return m_dir == dir_et::E; }
 
   [[nodiscard]] outcome tick() {
     m_ticks++;
