@@ -9,5 +9,7 @@
 
 #ifdef __APPLE__
 #pragma leco add_framework AudioToolbox
+#elif _WIN32
+#pragma leco add_library ole32
 #endif
 

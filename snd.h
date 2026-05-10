@@ -69,9 +69,64 @@ void snd_deinit() {
   AudioComponentInstanceDispose(snd_tone_unit);
 }
 #elif _WIN32
+#include <xaudio2.h>
 
-void snd_init(snd_filler_t fn) {}
-void snd_deinit() {}
+static float snd_buffer[44100];
+
+static snd_filler_t snd_fn; 
+
+static IXAudio2               * snd_xa2;
+static IXAudio2MasteringVoice * snd_main_voice;
+static IXAudio2SourceVoice    * snd_src_voice;
+
+class : public IXAudio2VoiceCallback {
+  void OnBufferEnd(void *pBufferContext) noexcept override {}
+  void OnBufferStart(void *pBufferContext) noexcept override {}
+  void OnLoopEnd(void *pBufferContext) noexcept override {}
+  void OnStreamEnd() noexcept override {}
+  void OnVoiceError(void *pBufferContext, HRESULT Error) noexcept override {}
+  void OnVoiceProcessingPassEnd() noexcept override {}
+
+  void OnVoiceProcessingPassStart(UINT32 size) noexcept override {
+    if (size > sizeof(snd_buffer)) size = sizeof(snd_buffer);
+
+    snd_fn(snd_buffer, size / sizeof(float));
+
+    XAUDIO2_BUFFER buf = {
+      .AudioBytes = size,
+      .pAudioData = (BYTE *)snd_buffer,
+    };
+    snd_src_voice->SubmitSourceBuffer(&buf);
+  }
+} snd_callback;
+
+void snd_init(snd_filler_t fn) {
+  HRESULT h;
+  if (FAILED(h = CoInitializeEx(nullptr, COINIT_MULTITHREADED))) return;
+  if (FAILED(h = XAudio2Create(&snd_xa2, 0, XAUDIO2_DEFAULT_PROCESSOR))) return;
+  if (FAILED(h = snd_xa2->CreateMasteringVoice(&snd_main_voice))) return;
+
+  snd_fn = fn;
+
+  WAVEFORMATEX wfx = {
+    .wFormatTag      = WAVE_FORMAT_IEEE_FLOAT,
+    .nChannels       = 1,
+    .nSamplesPerSec  = 44100,
+    .nAvgBytesPerSec = 44100 * sizeof(float),
+    .nBlockAlign     = 4, // channels * bitsPerSample / 8
+    .wBitsPerSample  = 32,
+  };
+  if (FAILED(h = snd_xa2->CreateSourceVoice(&snd_src_voice, &wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &snd_callback))) return;
+
+  if (FAILED(h = snd_src_voice->Start())) return;
+}
+
+void snd_deinit() {
+  if (snd_src_voice ) snd_src_voice ->DestroyVoice();
+  if (snd_main_voice) snd_main_voice->DestroyVoice();
+  if (snd_xa2) snd_xa2->Release();
+  CoUninitialize();
+}
 
 #endif
 #endif
