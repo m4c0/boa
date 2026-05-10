@@ -39,8 +39,9 @@ static void sfx_gettime(struct timeval * tv) {
   i.u.LowPart  = ft.dwLowDateTime;
   i.u.HighPart = ft.dwHighDateTime;
 
-  tv->tv_sec = i.QuadPart / 100*1000*1000;
-  tv->tv_usec = (i.QuadPart / 100) % 1000*1000;
+  ULONGLONG usec = i.QuadPart / 10;
+  tv->tv_sec  = usec / (1000*1000);
+  tv->tv_usec = usec % (1000*1000);
 #else
   gettimeofday(tv, NULL);
 #endif
@@ -51,7 +52,7 @@ static float sfx_now() {
 
   float secs = tv.tv_sec - sfx_tv.tv_sec;
   float usecs = tv.tv_usec - sfx_tv.tv_usec;
-  return secs + (usecs / 1000*1000);
+  return secs + usecs / (1000*1000.f);
 }
 static float sfx_randf() {
   return (float)rand() / (float)RAND_MAX;
