@@ -14,6 +14,8 @@ extern int      snk_head;
 extern int      snk_tail;
 extern unsigned snk_size;
 
+extern unsigned snk_x;
+extern unsigned snk_y;
 extern unsigned snk_grid_w;
 extern unsigned snk_grid_h;
 
@@ -47,6 +49,8 @@ unsigned snk_grid_h;
 int      snk_head;
 int      snk_tail;
 unsigned snk_size;
+unsigned snk_x;
+unsigned snk_y;
 
 void snk_reset(unsigned gw, unsigned gh) {
   srand(time(0));
@@ -60,7 +64,10 @@ void snk_reset(unsigned gw, unsigned gh) {
   snk_grid_h    = gh;
   snk_grid_size = gw * gh;
 
-  snk_head = snk_tail = (gh/2) * gw + (gw/2);
+  snk_x = gw / 2;
+  snk_y = gh / 2;
+
+  snk_head = snk_tail = snk_y * gw + snk_x;
   snk_data[snk_head] = (snk_node_t) {
     .used = 1,
     .next = -1,

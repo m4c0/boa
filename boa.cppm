@@ -19,8 +19,6 @@ export class game {
   unsigned m_ticks{};
   unsigned m_tpm{max_ticks_per_move};
   unsigned m_fpd{food_per_decrement};
-  unsigned x;
-  unsigned y;
 
   [[nodiscard]] snk_outcome_t update_dir(dir_et n, dir_et opp) {
     if (m_dir == n        ) return snk_o_none;
@@ -42,15 +40,15 @@ export class game {
       using enum dir_et;
       case E: return snk_o_game_over;
       case O: return snk_o_new_game;
-      case U: --y; break;
-      case D: ++y; break;
-      case L: --x; break;
-      case R: ++x; break;
+      case U: --snk_y; break;
+      case D: ++snk_y; break;
+      case L: --snk_x; break;
+      case R: ++snk_x; break;
     }
-    if (x > snk_grid_w - 1) return die();
-    if (y > snk_grid_h - 1) return die();
+    if (snk_x > snk_grid_w - 1) return die();
+    if (snk_y > snk_grid_h - 1) return die();
 
-    const auto p = y * snk_grid_w + x;
+    const auto p = snk_y * snk_grid_w + snk_x;
     if (snk_hits(p)) return die();
     if (snk_check_food(p)) {
       if (m_tpm > min_ticks_per_move && --m_fpd == 0) {
@@ -67,8 +65,6 @@ export class game {
 public:
   constexpr game(unsigned w, unsigned h) {
     snk_reset(w, h);
-    x = snk_grid_w / 2;
-    y = snk_grid_h / 2;
   }
 
   [[nodiscard]] auto up()    { return update_dir(dir_et::U, dir_et::D); }
