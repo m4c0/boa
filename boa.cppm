@@ -38,51 +38,25 @@ export class game {
     return run_tick();
   }
 
+  [[nodiscard]] outcome die() {
+    m_dir = E;
+    return outcome::death;
+  }
+
   [[nodiscard]] outcome run_tick() {
     switch (m_dir) {
-    case E:
-      return outcome::game_over;
-    case O:
-      return outcome::new_game;
-    case U:
-      if (y == 0) {
-        m_dir = E;
-        return outcome::death;
-      } else {
-        --y;
-      }
-      break;
-    case D:
-      if (y == grid_h - 1) {
-        m_dir = E;
-        return outcome::death;
-      } else {
-        ++y;
-      }
-      break;
-    case L:
-      if (x == 0) {
-        m_dir = E;
-        return outcome::death;
-      } else {
-        --x;
-      }
-      break;
-    case R:
-      if (x == grid_w - 1) {
-        m_dir = E;
-        return outcome::death;
-      } else {
-        ++x;
-      }
-      break;
+      case E: return outcome::game_over;
+      case O: return outcome::new_game;
+      case U: --y; break;
+      case D: ++y; break;
+      case L: --x; break;
+      case R: ++x; break;
     }
+    if (x > grid_w - 1) return die();
+    if (y > grid_h - 1) return die();
 
     const auto p = y * grid_w + x;
-    if (snk_hits(p)) {
-      m_dir = E;
-      return outcome::death;
-    }
+    if (snk_hits(p)) return die();
     if (snk_check_food(p)) {
       if (m_tpm > min_ticks_per_move && --m_fpd == 0) {
         m_fpd = food_per_decrement;
