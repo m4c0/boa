@@ -181,13 +181,13 @@ static void update_grid() {
     }
     g_pc.food = { x, y };
   }
-  if (g_g->is_new_game()) {
+  if (snk_is_new()) {
     sfx_reset();
     g_pc.party = {1000, 1000};
     g_pc.party_start = 0;
     g_pc.dead_at = 0.0;
   } else if (g_pc.dead_at == 0.0)
-    g_pc.dead_at = g_g->is_game_over() ? g_pc.time : 0;
+    g_pc.dead_at = snk_is_over() ? g_pc.time : 0;
 
   if (g_outcome == snk_o_move ) sfx_walk();
   if (g_outcome == snk_o_death) sfx_death();
@@ -197,7 +197,7 @@ static void update_grid() {
 }
 
 static void reset() {
-  if (g_g->is_game_over()) {
+  if (snk_is_over()) {
     g_g = hai::uptr<boa::game>::make(snk_grid_w, snk_grid_h);
     update_grid();
   }

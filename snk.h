@@ -37,6 +37,9 @@ void snk_grow(int p);
 int  snk_hits(int p);
 int  snk_next(int p);
 
+inline int snk_is_over() { return snk_dir == snk_d_e; }
+inline int snk_is_new () { return snk_dir == snk_d_o; }
+
 #ifdef SNK_IMPLEMENTATION
 #include <stdlib.h>
 #include <time.h>
@@ -77,6 +80,8 @@ void snk_reset(unsigned gw, unsigned gh) {
 
   snk_x = gw / 2;
   snk_y = gh / 2;
+
+  snk_dir = snk_d_o;
 
   snk_head = snk_tail = snk_y * gw + snk_x;
   snk_data[snk_head] = (snk_node_t) {

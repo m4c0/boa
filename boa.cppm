@@ -49,9 +49,9 @@ export class game {
   }
 
   [[nodiscard]] snk_outcome_t update_dir(snk_dir_t n, snk_dir_t opp) {
-    if (snk_dir == n      ) return snk_o_none;
-    if (snk_dir == opp    ) return snk_o_none;
-    if (snk_dir == snk_d_e) return snk_o_none;
+    if (snk_dir == n  ) return snk_o_none;
+    if (snk_dir == opp) return snk_o_none;
+    if (snk_is_over() ) return snk_o_none;
 
     snk_dir = n;
     m_ticks = ((m_ticks / m_tpm) + 1) * m_tpm;
@@ -67,9 +67,6 @@ public:
   [[nodiscard]] auto down()  { return update_dir(snk_d_d, snk_d_u); }
   [[nodiscard]] auto left()  { return update_dir(snk_d_l, snk_d_r); }
   [[nodiscard]] auto right() { return update_dir(snk_d_r, snk_d_l); }
-
-  [[nodiscard]] constexpr auto is_new_game () const noexcept { return snk_dir == snk_d_o; }
-  [[nodiscard]] constexpr auto is_game_over() const noexcept { return snk_dir == snk_d_e; }
 
   [[nodiscard]] snk_outcome_t tick() {
     m_ticks++;
