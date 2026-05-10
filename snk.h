@@ -18,10 +18,11 @@ typedef enum snk_outcome {
   snk_o_new_game,
 } snk_outcome_t;
 
-extern int      snk_food;
-extern int      snk_head;
-extern int      snk_tail;
-extern unsigned snk_size;
+extern snk_dir_t snk_dir;
+extern int       snk_food;
+extern int       snk_head;
+extern int       snk_tail;
+extern unsigned  snk_size;
 
 extern unsigned snk_x;
 extern unsigned snk_y;
@@ -49,17 +50,18 @@ typedef struct snk_node {
 } snk_node_t;
 
 static snk_node_t snk_data[SNK_MAX_CELLS];
-static unsigned snk_grid_size;
-static unsigned snk_target;
+static unsigned   snk_grid_size;
+static unsigned   snk_target;
 
-int      snk_food;
-unsigned snk_grid_w;
-unsigned snk_grid_h;
-int      snk_head;
-int      snk_tail;
-unsigned snk_size;
-unsigned snk_x;
-unsigned snk_y;
+snk_dir_t snk_dir;
+int       snk_food;
+unsigned  snk_grid_w;
+unsigned  snk_grid_h;
+int       snk_head;
+int       snk_tail;
+unsigned  snk_size;
+unsigned  snk_x;
+unsigned  snk_y;
 
 void snk_reset(unsigned gw, unsigned gh) {
   srand(time(0));

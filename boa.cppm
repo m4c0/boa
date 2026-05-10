@@ -13,28 +13,17 @@ export class game {
   static constexpr const auto max_ticks_per_move = 16;
   static constexpr const auto food_per_decrement = 4;
 
-  snk_dir_t m_dir {};
   unsigned m_ticks{};
   unsigned m_tpm{max_ticks_per_move};
   unsigned m_fpd{food_per_decrement};
 
-  [[nodiscard]] snk_outcome_t update_dir(snk_dir_t n, snk_dir_t opp) {
-    if (m_dir == n      ) return snk_o_none;
-    if (m_dir == opp    ) return snk_o_none;
-    if (m_dir == snk_d_e) return snk_o_none;
-
-    m_dir = n;
-    m_ticks = ((m_ticks / m_tpm) + 1) * m_tpm;
-    return run_tick();
-  }
-
   [[nodiscard]] snk_outcome_t die() {
-    m_dir = snk_d_e;
+    snk_dir = snk_d_e;
     return snk_o_death;
   }
 
   [[nodiscard]] snk_outcome_t run_tick() {
-    switch (m_dir) {
+    switch (snk_dir) {
       case snk_d_e: return snk_o_game_over;
       case snk_d_o: return snk_o_new_game;
       case snk_d_u: --snk_y; break;
@@ -59,6 +48,16 @@ export class game {
     return snk_o_move;
   }
 
+  [[nodiscard]] snk_outcome_t update_dir(snk_dir_t n, snk_dir_t opp) {
+    if (snk_dir == n      ) return snk_o_none;
+    if (snk_dir == opp    ) return snk_o_none;
+    if (snk_dir == snk_d_e) return snk_o_none;
+
+    snk_dir = n;
+    m_ticks = ((m_ticks / m_tpm) + 1) * m_tpm;
+    return run_tick();
+  }
+
 public:
   constexpr game(unsigned w, unsigned h) {
     snk_reset(w, h);
@@ -69,8 +68,8 @@ public:
   [[nodiscard]] auto left()  { return update_dir(snk_d_l, snk_d_r); }
   [[nodiscard]] auto right() { return update_dir(snk_d_r, snk_d_l); }
 
-  [[nodiscard]] constexpr auto is_new_game () const noexcept { return m_dir == snk_d_o; }
-  [[nodiscard]] constexpr auto is_game_over() const noexcept { return m_dir == snk_d_e; }
+  [[nodiscard]] constexpr auto is_new_game () const noexcept { return snk_dir == snk_d_o; }
+  [[nodiscard]] constexpr auto is_game_over() const noexcept { return snk_dir == snk_d_e; }
 
   [[nodiscard]] snk_outcome_t tick() {
     m_ticks++;
