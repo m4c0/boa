@@ -14,9 +14,9 @@ void snd_deinit();
 static AudioComponentInstance snd_tone_unit;
 
 static OSStatus render(
-    void * ref, AudioUnitRenderActionFlags * /*flags*/,
-    const AudioTimeStamp * /*timestamp*/,
-    UInt32 /*bus_number*/, UInt32 number_frames,
+    void * ref, AudioUnitRenderActionFlags * flags,
+    const AudioTimeStamp * timestamp,
+    UInt32 bus_number, UInt32 number_frames,
     AudioBufferList *data) {
   float * f = (float *)data->mBuffers[0].mData;
   ((snd_filler_t) ref)(f, number_frames);
@@ -34,8 +34,8 @@ void snd_init(snd_filler_t fn) {
   acd.componentSubType = kAudioUnitSubType_RemoteIO;
 #endif
 
-  AudioComponent ac = AudioComponentFindNext(nullptr, &acd);
-  if (ac == nullptr) return;
+  AudioComponent ac = AudioComponentFindNext(NULL, &acd);
+  if (!ac) return;
 
   if (AudioComponentInstanceNew(ac, &snd_tone_unit) != noErr) return;
 

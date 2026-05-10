@@ -3,6 +3,7 @@ build-ios
 export
 export.xcarchive
 out
+poc-snd
 *.a
 *.app
 *.dylib
