@@ -1,6 +1,8 @@
 #define SND_IMPLEMENTATION
 #include "snd.h"
 
+#include <math.h>
+
 static int sample;
 static void c4_midi(float * f, unsigned n) {
   // This should generate a smooth C4 in MIDI scale, with a small "click" at
@@ -13,6 +15,10 @@ static void c4_midi(float * f, unsigned n) {
 
 int main() {
   snd_init(&c4_midi);
+#ifdef _WIN32
+  Sleep(2000);
+#else
   sleep(2);
+#endif
   snd_deinit();
 }
