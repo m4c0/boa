@@ -1,5 +1,14 @@
 #pragma once
 
+typedef enum snk_dir {
+  snk_d_o,
+  snk_d_l,
+  snk_d_r,
+  snk_d_u,
+  snk_d_d,
+  snk_d_e,
+} snk_dir_t;
+
 typedef enum snk_outcome {
   snk_o_none,
   snk_o_move,

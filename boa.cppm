@@ -8,22 +8,20 @@ import hai;
 import rng;
 
 namespace boa {
-enum class dir_et { O, L, R, U, D, E };
-
 export class game {
   static constexpr const auto min_ticks_per_move = 2;
   static constexpr const auto max_ticks_per_move = 16;
   static constexpr const auto food_per_decrement = 4;
 
-  dir_et   m_dir{};
+  snk_dir_t m_dir {};
   unsigned m_ticks{};
   unsigned m_tpm{max_ticks_per_move};
   unsigned m_fpd{food_per_decrement};
 
-  [[nodiscard]] snk_outcome_t update_dir(dir_et n, dir_et opp) {
-    if (m_dir == n        ) return snk_o_none;
-    if (m_dir == opp      ) return snk_o_none;
-    if (m_dir == dir_et::E) return snk_o_none;
+  [[nodiscard]] snk_outcome_t update_dir(snk_dir_t n, snk_dir_t opp) {
+    if (m_dir == n      ) return snk_o_none;
+    if (m_dir == opp    ) return snk_o_none;
+    if (m_dir == snk_d_e) return snk_o_none;
 
     m_dir = n;
     m_ticks = ((m_ticks / m_tpm) + 1) * m_tpm;
@@ -31,19 +29,18 @@ export class game {
   }
 
   [[nodiscard]] snk_outcome_t die() {
-    m_dir = dir_et::E;
+    m_dir = snk_d_e;
     return snk_o_death;
   }
 
   [[nodiscard]] snk_outcome_t run_tick() {
     switch (m_dir) {
-      using enum dir_et;
-      case E: return snk_o_game_over;
-      case O: return snk_o_new_game;
-      case U: --snk_y; break;
-      case D: ++snk_y; break;
-      case L: --snk_x; break;
-      case R: ++snk_x; break;
+      case snk_d_e: return snk_o_game_over;
+      case snk_d_o: return snk_o_new_game;
+      case snk_d_u: --snk_y; break;
+      case snk_d_d: ++snk_y; break;
+      case snk_d_l: --snk_x; break;
+      case snk_d_r: ++snk_x; break;
     }
     if (snk_x > snk_grid_w - 1) return die();
     if (snk_y > snk_grid_h - 1) return die();
@@ -67,13 +64,13 @@ public:
     snk_reset(w, h);
   }
 
-  [[nodiscard]] auto up()    { return update_dir(dir_et::U, dir_et::D); }
-  [[nodiscard]] auto down()  { return update_dir(dir_et::D, dir_et::U); }
-  [[nodiscard]] auto left()  { return update_dir(dir_et::L, dir_et::R); }
-  [[nodiscard]] auto right() { return update_dir(dir_et::R, dir_et::L); }
+  [[nodiscard]] auto up()    { return update_dir(snk_d_u, snk_d_d); }
+  [[nodiscard]] auto down()  { return update_dir(snk_d_d, snk_d_u); }
+  [[nodiscard]] auto left()  { return update_dir(snk_d_l, snk_d_r); }
+  [[nodiscard]] auto right() { return update_dir(snk_d_r, snk_d_l); }
 
-  [[nodiscard]] constexpr auto is_new_game () const noexcept { return m_dir == dir_et::O; }
-  [[nodiscard]] constexpr auto is_game_over() const noexcept { return m_dir == dir_et::E; }
+  [[nodiscard]] constexpr auto is_new_game () const noexcept { return m_dir == snk_d_o; }
+  [[nodiscard]] constexpr auto is_game_over() const noexcept { return m_dir == snk_d_e; }
 
   [[nodiscard]] snk_outcome_t tick() {
     m_ticks++;
