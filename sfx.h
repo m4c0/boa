@@ -16,6 +16,7 @@ void sfx_walk();
 #else
 #include <sys/time.h>
 #endif
+#include <assert.h>
 #include <stdlib.h>
 
 static timeval sfx_tv = {0};

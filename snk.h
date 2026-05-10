@@ -15,6 +15,7 @@ int  snk_next(int p);
 
 #ifdef SNK_IMPLEMENTATION
 #include <stdlib.h>
+#include <time.h>
 
 #define SNK_MAX_CELLS (24 * 24 * 4)
 

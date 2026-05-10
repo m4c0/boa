@@ -69,5 +69,9 @@ void snd_deinit() {
   AudioComponentInstanceDispose(snd_tone_unit);
 }
 #elif _WIN32
+
+void snd_init(snd_filler_t fn) {}
+void snd_deinit() {}
+
 #endif
 #endif
