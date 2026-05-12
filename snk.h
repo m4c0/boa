@@ -2,11 +2,11 @@
 
 typedef enum snk_dir {
   snk_d_o,
-  snk_d_l,
+  snk_d_e,
+  snk_d_l = 0x10,
   snk_d_r,
   snk_d_u,
   snk_d_d,
-  snk_d_e,
 } snk_dir_t;
 
 typedef enum snk_outcome {
@@ -40,7 +40,7 @@ int  snk_hits(int p);
 int  snk_next(int p);
 
 [[nodiscard]] snk_outcome_t snk_run_tick();
-[[nodiscard]] snk_outcome_t snk_update_dir(snk_dir_t n, snk_dir_t opp);
+[[nodiscard]] snk_outcome_t snk_update_dir(snk_dir_t n);
 
 inline int snk_is_over() { return snk_dir == snk_d_e; }
 inline int snk_is_new () { return snk_dir == snk_d_o; }
@@ -181,10 +181,10 @@ snk_outcome_t snk_run_tick() {
   return snk_o_move;
 }
 
-snk_outcome_t snk_update_dir(snk_dir_t n, snk_dir_t opp) {
-  if (snk_dir == n  ) return snk_o_none;
-  if (snk_dir == opp) return snk_o_none;
-  if (snk_is_over() ) return snk_o_none;
+snk_outcome_t snk_update_dir(snk_dir_t n) {
+  if (snk_dir == n)       return snk_o_none;
+  if (snk_dir == (n ^ 1)) return snk_o_none;
+  if (snk_is_over())      return snk_o_none;
 
   snk_dir = n;
   return snk_run_tick();
