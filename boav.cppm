@@ -11,7 +11,6 @@ export module boav;
 #ifndef LECO_TARGET_IPHONEOS
 import :offscreen;
 #endif
-import boa;
 import casein;
 import hai;
 import sitime;
@@ -51,7 +50,6 @@ struct storage {
   float seen;
 };
 
-hai::uptr<boa::game> g_g {};
 upc g_pc{};
 snk_outcome_t volatile g_outcome{};
 VkDeviceMemory g_mem {};
@@ -198,30 +196,30 @@ static void update_grid() {
 
 static void reset() {
   if (snk_is_over()) {
-    g_g = hai::uptr<boa::game>::make(snk_grid_w, snk_grid_h);
+    snk_reset(snk_grid_w, snk_grid_h);
     update_grid();
   }
 }
 static void up() {
-  g_outcome = g_g->up();
+  g_outcome = snk_update_dir(snk_d_u);
   update_grid();
 }
 static void down() {
-  g_outcome = g_g->down();
+  g_outcome = snk_update_dir(snk_d_d);
   update_grid();
 }
 static void left() {
-  g_outcome = g_g->left();
+  g_outcome = snk_update_dir(snk_d_l);
   update_grid();
 }
 static void right() {
-  g_outcome = g_g->right();
+  g_outcome = snk_update_dir(snk_d_r);
   update_grid();
 }
 
 static void tick() {
-  if (!g_g || !g_mem) return;
-  g_outcome = g_g->tick();
+  if (!g_mem) return;
+  g_outcome = snk_run_tick();
   if (g_outcome != snk_o_none) update_grid();
 }
 
@@ -263,7 +261,7 @@ struct init {
         grid_h = grid_h * h / w;
       }
 
-      g_g = hai::uptr<boa::game>::make(static_cast<unsigned>(grid_w), static_cast<unsigned>(grid_h));
+      snk_reset(grid_w, grid_h);
       if (g_mem) update_grid();
     });
 
