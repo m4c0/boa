@@ -1,11 +1,13 @@
 #pragma once
 
-typedef void(*tmr_fn_t)();
+extern void (*tmr_fn)();
 
-void tmr_init  (tmr_fn_t fn);
+void tmr_init  ();
 void tmr_deinit();
 
 #ifdef TMR_IMPLEMENTATION
+
+void (*tmr_fn)();
 
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
@@ -16,16 +18,12 @@ void tmr_deinit();
 
 #ifdef __APPLE__
 static CFRunLoopTimerRef tmr_h;
-static void tmr_callback(CFRunLoopTimerRef ref, void * fn) {
-  ((tmr_fn_t)fn)();
-}
-void tmr_init(tmr_fn_t fn) {
-  CFRunLoopTimerContext ctx = { .info = (void *)fn };
-
+static void tmr_callback(CFRunLoopTimerRef ref, void * ctx) { tmr_fn(); }
+void tmr_init() {
   CFAbsoluteTime secs = 25.0f / 1000.0f;
   CFAbsoluteTime when = CFAbsoluteTimeGetCurrent() + secs;
 
-  tmr_h = CFRunLoopTimerCreate(NULL, when, secs, 0, 0, tmr_callback, &ctx);
+  tmr_h = CFRunLoopTimerCreate(NULL, when, secs, 0, 0, tmr_callback, NULL);
   CFRunLoopAddTimer(CFRunLoopGetMain(), tmr_h, kCFRunLoopCommonModes);
 }
 void tmr_deinit() {
@@ -33,11 +31,9 @@ void tmr_deinit() {
 }
 #elif _WIN32
 static HANDLE tmr_h;
-static void tmr_callback(void * fn, BOOLEAN b) {
-  ((tmr_fn_t)fn)();
-}
+static void tmr_callback(void * ctx, BOOLEAN b) { tmr_fn(); }
 void tmr_init(tmr_fn_t fn) {
-  CreateTimerQueueTimer(&tmr_h, NULL, tmr_callback, (void *)fn, 25, 25, 0);
+  CreateTimerQueueTimer(&tmr_h, NULL, tmr_callback, NULL, 25, 25, 0);
 }
 void tmr_deinit() {
   DeleteTimerQueueTimer(NULL, tmr_h, NULL);

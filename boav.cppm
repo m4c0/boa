@@ -229,8 +229,10 @@ struct init {
   init() {
     using namespace casein;
 
+    tmr_fn = &tick;
+
     sfx_init();
-    tmr_init(&tick);
+    tmr_init();
 
     handle(GESTURE, G_SWIPE_UP, up);
     handle(GESTURE, G_SWIPE_DOWN, down);
