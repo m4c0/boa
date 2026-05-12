@@ -232,7 +232,7 @@ struct init {
     tmr_fn = &tick;
 
     sfx_init();
-    tmr_init();
+    tmr_init(25);
 
     handle(GESTURE, G_SWIPE_UP, up);
     handle(GESTURE, G_SWIPE_DOWN, down);
