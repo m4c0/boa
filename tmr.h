@@ -37,13 +37,10 @@ static void tmr_callback(void * fn, BOOLEAN b) {
   ((tmr_fn_t)fn)();
 }
 void tmr_init(tmr_fn_t fn) {
-  tmr_h = CreateTimerQueue();
-
-  HANDLE t;
-  CreateTimerQueueTimer(&t, tmr_h, tmr_callback, (void *)fn, 25, 25, 0);
+  CreateTimerQueueTimer(&tmr_h, NULL, tmr_callback, (void *)fn, 25, 25, 0);
 }
 void tmr_deinit() {
-  DeleteTimerQueueEx(tmr_h, NULL);
+  DeleteTimerQueueTimer(NULL, tmr_h, NULL);
 }
 #endif
 #endif
