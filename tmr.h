@@ -27,7 +27,10 @@ void tmr_init(unsigned ms) {
   CFRunLoopAddTimer(CFRunLoopGetMain(), tmr_h, kCFRunLoopCommonModes);
 }
 void tmr_deinit() {
+  if (!tmr_h) return;
+  CFRunLoopRemoveTimer(CFRunLoopGetMain(), tmr_h, kCFRunLoopCommonModes);
   CFRelease(tmr_h);
+  tmr_h = NULL;
 }
 #elif _WIN32
 static HANDLE tmr_h;
@@ -36,7 +39,8 @@ void tmr_init(unsigned ms) {
   CreateTimerQueueTimer(&tmr_h, NULL, tmr_callback, NULL, ms, ms, 0);
 }
 void tmr_deinit() {
-  DeleteTimerQueueTimer(NULL, tmr_h, NULL);
+  if (tmr_h) DeleteTimerQueueTimer(NULL, tmr_h, NULL);
+  tmr_h = NULL;
 }
 #endif
 #endif
