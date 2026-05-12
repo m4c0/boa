@@ -220,7 +220,7 @@ static void right() {
 }
 
 static void tick() {
-  if (!g_g) return;
+  if (!g_g || !g_mem) return;
   g_outcome = g_g->tick();
   if (g_outcome != snk_o_none) update_grid();
 }

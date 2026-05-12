@@ -10,13 +10,7 @@ import rng;
 
 namespace boa {
 export class game {
-  static constexpr const auto min_ticks_per_move = 2;
-  static constexpr const auto max_ticks_per_move = 16;
-  static constexpr const auto food_per_decrement = 4;
-
-  unsigned m_ticks{};
-  unsigned m_tpm{max_ticks_per_move};
-  unsigned m_fpd{food_per_decrement};
+  unsigned m_timer = 300;
 
   [[nodiscard]] snk_outcome_t die() {
     snk_dir = snk_d_e;
@@ -38,10 +32,10 @@ export class game {
     const auto p = snk_y * snk_grid_w + snk_x;
     if (snk_hits(p)) return die();
     if (snk_check_food(p)) {
-      if (m_tpm > min_ticks_per_move && --m_fpd == 0) {
-        m_fpd = food_per_decrement;
-        m_tpm--;
-      }
+      tmr_deinit();
+      m_timer -= 10;
+      if (m_timer < 25) m_timer = 25;
+      tmr_init(m_timer);
       return snk_o_eat_food;
     }
 
@@ -55,14 +49,13 @@ export class game {
     if (snk_is_over() ) return snk_o_none;
 
     snk_dir = n;
-    m_ticks = ((m_ticks / m_tpm) + 1) * m_tpm;
     return run_tick();
   }
 
 public:
   game(unsigned w, unsigned h) {
     snk_reset(w, h);
-    tmr_init(25);
+    tmr_init(m_timer);
   }
   ~game() {
     tmr_deinit();
@@ -75,8 +68,6 @@ public:
   [[nodiscard]] auto right() { return update_dir(snk_d_r, snk_d_l); }
 
   [[nodiscard]] snk_outcome_t tick() {
-    m_ticks++;
-    if (m_ticks % m_tpm > 0) return snk_o_none;
     return run_tick();
   }
 };
