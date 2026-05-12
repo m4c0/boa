@@ -29,6 +29,8 @@ extern unsigned snk_y;
 extern unsigned snk_grid_w;
 extern unsigned snk_grid_h;
 
+extern unsigned snk_timer;
+
 void snk_reset(unsigned gw, unsigned gh);
 
 int snk_check_food(int p);
@@ -37,10 +39,15 @@ void snk_grow(int p);
 int  snk_hits(int p);
 int  snk_next(int p);
 
+[[nodiscard]] snk_outcome_t snk_run_tick();
+[[nodiscard]] snk_outcome_t snk_update_dir(snk_dir_t n, snk_dir_t opp);
+
 inline int snk_is_over() { return snk_dir == snk_d_e; }
 inline int snk_is_new () { return snk_dir == snk_d_o; }
 
 #ifdef SNK_IMPLEMENTATION
+#include "tmr.h"
+
 #include <stdlib.h>
 #include <time.h>
 
@@ -62,11 +69,14 @@ unsigned  snk_grid_w;
 unsigned  snk_grid_h;
 int       snk_head;
 int       snk_tail;
+unsigned  snk_timer;
 unsigned  snk_size;
 unsigned  snk_x;
 unsigned  snk_y;
 
 void snk_reset(unsigned gw, unsigned gh) {
+  tmr_deinit();
+
   srand(time(0));
 
   for (int i = 0; i < SNK_MAX_CELLS; i++) snk_data[i] = (snk_node_t) {0};
@@ -77,6 +87,7 @@ void snk_reset(unsigned gw, unsigned gh) {
   snk_grid_w    = gw;
   snk_grid_h    = gh;
   snk_grid_size = gw * gh;
+  snk_timer     = 300;
 
   snk_x = gw / 2;
   snk_y = gh / 2;
@@ -89,6 +100,8 @@ void snk_reset(unsigned gw, unsigned gh) {
     .next = -1,
     .prev = -1,
   };
+
+  tmr_init(snk_timer);
 }
 
 void snk_eat(int p) {
@@ -135,6 +148,46 @@ int snk_check_food(int p) {
   snk_eat(p);
   snk_reset_food();
   return 1;
+}
+
+[[nodiscard]] static snk_outcome_t snk_die() {
+  snk_dir = snk_d_e;
+  return snk_o_death;
+}
+
+snk_outcome_t snk_run_tick() {
+  switch (snk_dir) {
+    case snk_d_e: return snk_o_game_over;
+    case snk_d_o: return snk_o_new_game;
+    case snk_d_u: --snk_y; break;
+    case snk_d_d: ++snk_y; break;
+    case snk_d_l: --snk_x; break;
+    case snk_d_r: ++snk_x; break;
+  }
+  if (snk_x > snk_grid_w - 1) return snk_die();
+  if (snk_y > snk_grid_h - 1) return snk_die();
+
+  const int p = snk_y * snk_grid_w + snk_x;
+  if (snk_hits(p)) return snk_die();
+  if (snk_check_food(p)) {
+    tmr_deinit();
+    snk_timer -= 10;
+    if (snk_timer < 25) snk_timer = 25;
+    tmr_init(snk_timer);
+    return snk_o_eat_food;
+  }
+
+  snk_grow(p);
+  return snk_o_move;
+}
+
+snk_outcome_t snk_update_dir(snk_dir_t n, snk_dir_t opp) {
+  if (snk_dir == n  ) return snk_o_none;
+  if (snk_dir == opp) return snk_o_none;
+  if (snk_is_over() ) return snk_o_none;
+
+  snk_dir = n;
+  return snk_run_tick();
 }
 
 #endif

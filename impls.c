@@ -1,10 +1,11 @@
 #define SFX_IMPLEMENTATION
-#include "sfx.h"
 #define SND_IMPLEMENTATION
-#include "snd.h"
 #define SNK_IMPLEMENTATION
-#include "snk.h"
 #define TMR_IMPLEMENTATION
+
+#include "sfx.h"
+#include "snd.h"
+#include "snk.h"
 #include "tmr.h"
 
 #ifdef __APPLE__
