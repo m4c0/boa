@@ -196,7 +196,7 @@ static void update_grid() {
 
 static void reset() {
   if (snk_is_over()) {
-    snk_reset(snk_grid_w, snk_grid_h);
+    snk_reset();
     update_grid();
   }
 }
@@ -253,15 +253,7 @@ struct init {
 
     handle(RESIZE_WINDOW, [] {
       auto [w, h] = casein::window_size;
-      auto grid_h = 24.0f;
-      auto grid_w = grid_h;
-      if (w > h) {
-        grid_w = grid_w * w / h;
-      } else {
-        grid_h = grid_h * h / w;
-      }
-
-      snk_reset(grid_w, grid_h);
+      snk_resize(w, h);
       if (g_mem) update_grid();
     });
 

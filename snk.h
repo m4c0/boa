@@ -31,7 +31,8 @@ extern unsigned snk_grid_h;
 
 extern unsigned snk_timer;
 
-void snk_reset(unsigned gw, unsigned gh);
+void snk_reset();
+void snk_resize(unsigned w, unsigned h);
 
 int snk_check_food(int p);
 
@@ -74,7 +75,7 @@ unsigned  snk_size;
 unsigned  snk_x;
 unsigned  snk_y;
 
-void snk_reset(unsigned gw, unsigned gh) {
+void snk_reset() {
   tmr_deinit();
 
   srand(time(0));
@@ -84,17 +85,14 @@ void snk_reset(unsigned gw, unsigned gh) {
   snk_target = 3;
 
   snk_food      = -1;
-  snk_grid_w    = gw;
-  snk_grid_h    = gh;
-  snk_grid_size = gw * gh;
   snk_timer     = 300;
 
-  snk_x = gw / 2;
-  snk_y = gh / 2;
+  snk_x = snk_grid_w / 2;
+  snk_y = snk_grid_h / 2;
 
   snk_dir = snk_d_o;
 
-  snk_head = snk_tail = snk_y * gw + snk_x;
+  snk_head = snk_tail = snk_y * snk_grid_w + snk_x;
   snk_data[snk_head] = (snk_node_t) {
     .used = 1,
     .next = -1,
@@ -102,6 +100,20 @@ void snk_reset(unsigned gw, unsigned gh) {
   };
 
   tmr_init(snk_timer);
+}
+void snk_resize(unsigned w, unsigned h) {
+  float grid_h = 24.0f;
+  float grid_w = grid_h;
+  if (w > h) {
+    grid_w = grid_w * w / h;
+  } else {
+    grid_h = grid_h * h / w;
+  }
+
+  snk_grid_w = grid_w;
+  snk_grid_h = grid_h;
+  snk_grid_size = snk_grid_w * snk_grid_h;
+  snk_reset();
 }
 
 void snk_eat(int p) {
