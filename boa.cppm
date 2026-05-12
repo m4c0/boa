@@ -1,6 +1,7 @@
 module;
 extern "C" {
 #include "snk.h"
+#include "tmr.h"
 }
 
 export module boa;
@@ -59,9 +60,14 @@ export class game {
   }
 
 public:
-  constexpr game(unsigned w, unsigned h) {
+  game(unsigned w, unsigned h) {
     snk_reset(w, h);
+    tmr_init(25);
   }
+  ~game() {
+    tmr_deinit();
+  }
+
 
   [[nodiscard]] auto up()    { return update_dir(snk_d_u, snk_d_d); }
   [[nodiscard]] auto down()  { return update_dir(snk_d_d, snk_d_u); }
