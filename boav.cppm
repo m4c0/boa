@@ -28,9 +28,6 @@ public:
 };
 #endif
 
-// Covers a 4:1 screen, as if such thing will ever exist
-static constexpr const auto max_cells = 24 * (24 * 4);
-
 VkDeviceMemory g_mem {};
 
 static void update_grid(snk_outcome_t outcome) {
@@ -79,8 +76,9 @@ public:
     offscreen ofs { dq.physical_device(), create_gp };
 #endif
 
-    // Game grid buffer
-    constexpr const unsigned sz = max_cells * sizeof(gme_storage_t);
+    // Game grid buffer - Covers a 4:1 screen, as if such thing
+    // will ever exist
+    constexpr const unsigned sz = 24 * 24 * 4 * sizeof(gme_storage_t);
     vee::buffer buf = vee::create_buffer(sz, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
     vee::device_memory mem = vee::create_host_buffer_memory(dq.physical_device(), *buf);
     vee::bind_buffer_memory(*buf, *mem);
