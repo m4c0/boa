@@ -1,8 +1,6 @@
 #ifndef GME_H
 #define GME_H
 
-#include "snk.h"
-
 typedef struct gme_storage {
   float first_seen;
   float seen;
@@ -26,13 +24,14 @@ typedef struct gme_upc {
 extern gme_upc_t gme_pc;
 extern gme_storage_t * gme_buf;
 
-snk_outcome_t gme_resize(unsigned w, unsigned h);
-snk_outcome_t gme_new_game();
+void gme_resize(unsigned w, unsigned h);
+void gme_new_game();
 
-void gme_update(snk_outcome_t outcome);
+void gme_tick();
 
 #ifdef GME_IMPLEMENTATION
 #include "sfx.h"
+#include "snk.h"
 
 gme_storage_t * gme_buf;
 gme_upc_t gme_pc;
@@ -47,15 +46,6 @@ static snk_outcome_t gme_reset() {
     .party_start = -1,
   };
   return snk_reset();
-}
-
-snk_outcome_t gme_resize(unsigned w, unsigned h) {
-  snk_resize(w, h);
-  return gme_reset();
-}
-
-snk_outcome_t gme_new_game() {
-  return snk_is_over() ? gme_reset() : snk_o_none;
 }
 
 void gme_update(snk_outcome_t outcome) {
@@ -98,6 +88,22 @@ void gme_update(snk_outcome_t outcome) {
   if (outcome == snk_o_move ) sfx_walk();
   if (outcome == snk_o_death) sfx_death();
 }
+
+void gme_resize(unsigned w, unsigned h) {
+  snk_resize(w, h);
+  gme_update(gme_reset());
+}
+
+void gme_new_game() {
+  gme_update(snk_is_over() ? gme_reset() : snk_o_none);
+}
+
+void gme_left()  { gme_update(snk_update_dir(snk_d_l)); }
+void gme_right() { gme_update(snk_update_dir(snk_d_r)); }
+void gme_up()    { gme_update(snk_update_dir(snk_d_u)); }
+void gme_down()  { gme_update(snk_update_dir(snk_d_d)); }
+
+void gme_tick() { gme_update(snk_run_tick()); }
 
 #endif
 #endif
