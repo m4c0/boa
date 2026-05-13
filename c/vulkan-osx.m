@@ -39,6 +39,8 @@ void vlk_deinit();
     case NSRightArrowFunctionKey: return gme_right();
     case NSUpArrowFunctionKey:    return gme_up();
     case NSDownArrowFunctionKey:  return gme_down();
+
+    case ' ': return gme_new_game();
   }
 }
 @end
