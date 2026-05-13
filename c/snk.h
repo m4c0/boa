@@ -39,9 +39,9 @@ void snk_grow(int p);
 int  snk_hits(int p);
 int  snk_next(int p);
 
-[[nodiscard]] snk_outcome_t snk_reset();
-[[nodiscard]] snk_outcome_t snk_run_tick();
-[[nodiscard]] snk_outcome_t snk_update_dir(snk_dir_t n);
+snk_outcome_t snk_reset();
+snk_outcome_t snk_run_tick();
+snk_outcome_t snk_update_dir(snk_dir_t n);
 
 static inline int snk_is_over() { return snk_dir == snk_d_e; }
 static inline int snk_is_new () { return snk_dir == snk_d_o; }
@@ -163,7 +163,7 @@ int snk_check_food(int p) {
   return 1;
 }
 
-[[nodiscard]] static snk_outcome_t snk_die() {
+static snk_outcome_t snk_die() {
   snk_dir = snk_d_e;
   return snk_o_death;
 }

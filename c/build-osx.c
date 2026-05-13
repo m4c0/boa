@@ -43,12 +43,21 @@ static int cc(char * src, char * o) {
   return run(args);
 }
 
+static int hdr(char * src, char * o, char * d) {
+  char * args[] = {
+    "clang", "-Wall", "-x", "c", "-g", "-D", d, "-o", o, "-c", src, 0
+  };
+  return run(args);
+}
+
 static int link_exe() {
   char * args[] = {
     "clang", "-Wall",
     "-framework", "AppKit",
+    "-framework", "AudioToolbox",
     "-framework", "MetalKit",
     "-o", "boas.app/Contents/MacOS/boas", 
+    "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
     "vulkan.o", "vulkan-osx.o",
     0 };
   return run(args);
@@ -67,6 +76,11 @@ int main(int argc, char ** argv) {
 
   if (cc("vulkan.c",     "vulkan.o"    )) return 1;
   if (cc("vulkan-osx.m", "vulkan-osx.o")) return 1;
+  if (hdr("gme.h", "gme.o", "GME_IMPLEMENTATION")) return 1;
+  if (hdr("sfx.h", "sfx.o", "SFX_IMPLEMENTATION")) return 1;
+  if (hdr("snd.h", "snd.o", "SND_IMPLEMENTATION")) return 1;
+  if (hdr("snk.h", "snk.o", "SNK_IMPLEMENTATION")) return 1;
+  if (hdr("tmr.h", "tmr.o", "TMR_IMPLEMENTATION")) return 1;
   if (link_exe()) return 1;
 
   if (shader("boav.frag")) return 1;
