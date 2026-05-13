@@ -156,7 +156,6 @@ static void right() {
 }
 
 static void tick() {
-  if (!g_mem) return;
   update_grid(snk_run_tick());
 }
 
