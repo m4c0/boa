@@ -1,3 +1,8 @@
+#include "gme.h"
+#include "sfx.h"
+#include "snd.h"
+#include "tmr.h"
+
 #define _CRT_SECURE_NO_WARNINGS
 #include <assert.h>
 #include <stdio.h>
@@ -601,6 +606,10 @@ void vlk_init() {
   vkDestroyShaderModule(vlk_dev, frag, NULL);
 
   gettimeofday(&clk, NULL);
+
+  //tmr_fn = ;
+  sfx_init();
+  snd_init(&sfx_fill);
 }
 
 void vlk_frame() {
@@ -662,6 +671,9 @@ void vlk_frame() {
 }
 
 void vlk_deinit() {
+  snd_deinit();
+  tmr_deinit();
+
   vkDeviceWaitIdle(vlk_dev);
 
   vlk_destroy_swc(&vlk_swc);
