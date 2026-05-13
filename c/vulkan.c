@@ -1,6 +1,7 @@
 #include "gme.h"
 #include "sfx.h"
 #include "snd.h"
+#include "snk.h"
 #include "tmr.h"
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -26,10 +27,7 @@
 #  include "Vulkan-Headers/include/vulkan/vulkan_metal.h"
 #endif
 
-// Covers a 4:1 screen, as if such thing will ever exist
-#define MAX_CELLS (24 * 24 * 4)
-
-#define VBUF_SIZE MAX_CELLS * sizeof(gme_storage_t)
+#define VBUF_SIZE SNK_MAX_CELLS * sizeof(gme_storage_t)
 
 #define MAX_SWAPCHAIN_IMAGES 8
 typedef struct vlk_swc {

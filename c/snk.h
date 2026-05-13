@@ -1,6 +1,8 @@
 #ifndef SNK_H
 #define SNK_H
 
+#define SNK_MAX_CELLS (24 * 24 * 4)
+
 typedef enum snk_dir {
   snk_d_o,
   snk_d_e,
@@ -52,8 +54,6 @@ int snk_is_new();
 
 #include <stdlib.h>
 #include <time.h>
-
-#define SNK_MAX_CELLS (24 * 24 * 4)
 
 typedef struct snk_node {
   unsigned used;
