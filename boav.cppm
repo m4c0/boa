@@ -1,6 +1,7 @@
 #pragma leco add_impl impls
 module;
 extern "C" {
+#include "gme.h"
 #include "sfx.h"
 #include "snd.h"
 #include "snk.h"
@@ -30,27 +31,6 @@ public:
 // Covers a 4:1 screen, as if such thing will ever exist
 static constexpr const auto max_cells = 24 * (24 * 4);
 
-struct ivec2 {
-  unsigned x, y;
-};
-struct upc {
-  float aspect;
-  float time;
-  float dead_at;
-  float pad{};
-  float grid_width = 24;
-  float grid_height = 24;
-  ivec2 food = { 10000 };
-  ivec2 party = { 10000 };
-  float party_start = -1;
-};
-
-struct storage {
-  float first_seen;
-  float seen;
-};
-
-upc g_pc{};
 snk_outcome_t volatile g_outcome{};
 VkDeviceMemory g_mem {};
 
@@ -76,7 +56,7 @@ public:
     // Pipeline
     vee::pipeline_layout pl = vee::create_pipeline_layout(
       *dsl,
-      vee::vert_frag_push_constant_range<upc>()
+      vee::vert_frag_push_constant_range<gme_upc_t>()
     );
     const auto create_gp = [&](vee::render_pass::type rp) {
       return vee::create_graphics_pipeline({
@@ -96,7 +76,7 @@ public:
 #endif
 
     // Game grid buffer
-    constexpr const unsigned sz = max_cells * sizeof(storage);
+    constexpr const unsigned sz = max_cells * sizeof(gme_storage_t);
     vee::buffer buf = vee::create_buffer(sz, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
     vee::device_memory mem = vee::create_host_buffer_memory(dq.physical_device(), *buf);
     vee::bind_buffer_memory(*buf, *mem);
@@ -114,19 +94,18 @@ public:
       voo::swapchain_and_stuff sw { dq, *rp };
 
       extent_loop(dq.queue(), sw, [&] {
-        g_pc.aspect = sw.aspect();
+        gme_pc.aspect = sw.aspect();
 
         // Passing time in seconds
-        g_pc.time = 0.001 * watch.millis();
+        gme_pc.time = 0.001 * watch.millis();
 
         const auto render = [&](auto cb, auto ext) {
-          g_pc.aspect = static_cast<float>(ext.width) /
-                        static_cast<float>(ext.height);
+          gme_pc.aspect = (float)ext.width / (float)ext.height;
 
           vee::cmd_set_scissor(cb, ext);
           vee::cmd_set_viewport(cb, ext);
 
-          vee::cmd_push_vert_frag_constants(cb, *pl, &g_pc);
+          vee::cmd_push_vert_frag_constants(cb, *pl, &gme_pc);
           vee::cmd_bind_gr_pipeline(cb, *gp);
           vee::cmd_bind_descriptor_set(cb, *pl, 0, dset);
           vkCmdDraw(cb, 3, 1, 0, 0);
@@ -149,54 +128,14 @@ public:
   }
 } t;
 
-static void update_first_seen(storage * buf) {
-  auto s = snk_size;
-  auto p = snk_head;
-  while (p != -1) {
-    if (buf[p].first_seen == 0) buf[p].first_seen = g_pc.time;
-    buf[p].seen = s-- / static_cast<float>(snk_size);
-    p = snk_next(p);
-  }
-}
 static void update_grid() {
   voo::mapmem m { g_mem };
-  auto buf = static_cast<storage *>(*m);
-
-  for (auto i = 0; i < max_cells; i++) buf[i].seen = 0;
-  update_first_seen(buf);
-
-  for (auto i = 0; i < max_cells; i++) {
-    if (buf[i].seen == 0) buf[i].first_seen = 0;
-  }
-
-  unsigned x = snk_food % (unsigned)g_pc.grid_width;
-  unsigned y = snk_food / (unsigned)g_pc.grid_width;
-  if (g_pc.food.x != x || g_pc.food.y != y) {
-    if (g_outcome == snk_o_eat_food) {
-      sfx_eat();
-      g_pc.party_start = g_pc.time;
-      g_pc.party = g_pc.food;
-    }
-    g_pc.food = { x, y };
-  }
-  if (snk_is_new()) {
-    sfx_reset();
-    g_pc.party = {1000, 1000};
-    g_pc.party_start = 0;
-    g_pc.dead_at = 0.0;
-  } else if (g_pc.dead_at == 0.0)
-    g_pc.dead_at = snk_is_over() ? g_pc.time : 0;
-
-  if (g_outcome == snk_o_move ) sfx_walk();
-  if (g_outcome == snk_o_death) sfx_death();
-
-  g_pc.grid_width  = snk_grid_w;
-  g_pc.grid_height = snk_grid_h;
+  gme_update((gme_storage_t *)*m, g_outcome);
 }
 
 static void reset() {
   if (snk_is_over()) {
-    snk_reset();
+    gme_reset();
     update_grid();
   }
 }
@@ -227,10 +166,6 @@ struct init {
   init() {
     using namespace casein;
 
-    tmr_fn = &tick;
-
-    sfx_init();
-
     handle(GESTURE, G_SWIPE_UP, up);
     handle(GESTURE, G_SWIPE_DOWN, down);
     handle(GESTURE, G_SWIPE_LEFT, left);
@@ -254,11 +189,15 @@ struct init {
     handle(RESIZE_WINDOW, [] {
       auto [w, h] = casein::window_size;
       snk_resize(w, h);
+      gme_reset();
       if (g_mem) update_grid();
     });
 
     handle(TOUCH_UP, reset);
 
+    tmr_fn = &tick;
+
+    sfx_init();
     snd_init(&sfx_fill);
   }
   ~init() {

@@ -1,8 +1,10 @@
+#define GME_IMPLEMENTATION
 #define SFX_IMPLEMENTATION
 #define SND_IMPLEMENTATION
 #define SNK_IMPLEMENTATION
 #define TMR_IMPLEMENTATION
 
+#include "gme.h"
 #include "sfx.h"
 #include "snd.h"
 #include "snk.h"

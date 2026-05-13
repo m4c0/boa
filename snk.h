@@ -43,8 +43,8 @@ int  snk_next(int p);
 [[nodiscard]] snk_outcome_t snk_run_tick();
 [[nodiscard]] snk_outcome_t snk_update_dir(snk_dir_t n);
 
-inline int snk_is_over() { return snk_dir == snk_d_e; }
-inline int snk_is_new () { return snk_dir == snk_d_o; }
+static inline int snk_is_over() { return snk_dir == snk_d_e; }
+static inline int snk_is_new () { return snk_dir == snk_d_o; }
 
 #ifdef SNK_IMPLEMENTATION
 #include "tmr.h"
@@ -113,7 +113,6 @@ void snk_resize(unsigned w, unsigned h) {
   snk_grid_w = grid_w;
   snk_grid_h = grid_h;
   snk_grid_size = snk_grid_w * snk_grid_h;
-  snk_reset();
 }
 
 void snk_eat(int p) {
