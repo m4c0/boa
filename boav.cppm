@@ -33,6 +33,11 @@ static constexpr const auto max_cells = 24 * (24 * 4);
 
 VkDeviceMemory g_mem {};
 
+static void update_grid(snk_outcome_t outcome) {
+  voo::mapmem m { g_mem };
+  gme_update((gme_storage_t *)*m, outcome);
+}
+
 class thread : public vapp {
   volatile bool m_shots;
 
@@ -88,11 +93,18 @@ public:
       .pBufferInfo = &bi,
     }));
     g_mem = *mem;
+    unsigned scr_w = 0, scr_h = 0;
 
     while (!interrupted()) {
       voo::swapchain_and_stuff sw { dq, *rp };
 
       extent_loop(dq.queue(), sw, [&] {
+        auto [w, h] = casein::window_size;
+        if (scr_w != w || scr_h != h) {
+          scr_w = w; scr_h = h;
+          update_grid(gme_resize(w, h));
+        }
+
         gme_pc.aspect = sw.aspect();
 
         // Passing time in seconds
@@ -126,11 +138,6 @@ public:
     }
   }
 } t;
-
-static void update_grid(snk_outcome_t outcome) {
-  voo::mapmem m { g_mem };
-  gme_update((gme_storage_t *)*m, outcome);
-}
 
 static void new_game() {
   update_grid(gme_new_game());
@@ -176,11 +183,6 @@ struct init {
       // t.render(&*g, {}); // just to bring the game back
     });
 #endif
-
-    handle(RESIZE_WINDOW, [] {
-      auto [w, h] = casein::window_size;
-      gme_resize(w, h);
-    });
 
     handle(TOUCH_UP, new_game);
 
