@@ -23,7 +23,9 @@ typedef struct gme_upc {
 
 extern gme_upc_t gme_pc;
 
-void gme_reset();
+snk_outcome_t gme_resize(unsigned w, unsigned h);
+snk_outcome_t gme_new_game();
+
 void gme_update(gme_storage_t * buf, snk_outcome_t outcome);
 
 #ifdef GME_IMPLEMENTATION
@@ -31,16 +33,25 @@ void gme_update(gme_storage_t * buf, snk_outcome_t outcome);
 
 gme_upc_t gme_pc;
 
-void gme_reset() {
+static snk_outcome_t gme_reset() {
   gme_pc = (gme_upc_t) {
     .pad         = 0,
-    .grid_width  = 24,
-    .grid_height = 24,
+    .grid_width  = snk_grid_w,
+    .grid_height = snk_grid_h,
     .food        = { 10000, 10000 },
     .party       = { 10000, 10000 },
     .party_start = -1,
   };
-  snk_reset();
+  return snk_reset();
+}
+
+snk_outcome_t gme_resize(unsigned w, unsigned h) {
+  snk_resize(w, h);
+  return gme_reset();
+}
+
+snk_outcome_t gme_new_game() {
+  return snk_is_over() ? gme_reset() : snk_o_none;
 }
 
 void gme_update(gme_storage_t * buf, snk_outcome_t outcome) {
@@ -82,9 +93,6 @@ void gme_update(gme_storage_t * buf, snk_outcome_t outcome) {
 
   if (outcome == snk_o_move ) sfx_walk();
   if (outcome == snk_o_death) sfx_death();
-
-  gme_pc.grid_width  = snk_grid_w;
-  gme_pc.grid_height = snk_grid_h;
 }
 
 #endif

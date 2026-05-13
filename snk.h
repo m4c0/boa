@@ -31,7 +31,6 @@ extern unsigned snk_grid_h;
 
 extern unsigned snk_timer;
 
-void snk_reset();
 void snk_resize(unsigned w, unsigned h);
 
 int snk_check_food(int p);
@@ -40,6 +39,7 @@ void snk_grow(int p);
 int  snk_hits(int p);
 int  snk_next(int p);
 
+[[nodiscard]] snk_outcome_t snk_reset();
 [[nodiscard]] snk_outcome_t snk_run_tick();
 [[nodiscard]] snk_outcome_t snk_update_dir(snk_dir_t n);
 
@@ -75,7 +75,7 @@ unsigned  snk_size;
 unsigned  snk_x;
 unsigned  snk_y;
 
-void snk_reset() {
+snk_outcome_t snk_reset() {
   tmr_deinit();
 
   srand(time(0));
@@ -100,6 +100,8 @@ void snk_reset() {
   };
 
   tmr_init(snk_timer);
+
+  return snk_o_new_game;
 }
 void snk_resize(unsigned w, unsigned h) {
   float grid_h = 24.0f;

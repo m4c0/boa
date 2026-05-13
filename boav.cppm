@@ -132,13 +132,8 @@ static void update_grid(snk_outcome_t outcome) {
   gme_update((gme_storage_t *)*m, outcome);
 }
 
-static void reset() {
-  gme_reset();
-  update_grid(snk_o_new_game);
-}
-
 static void new_game() {
-  if (snk_is_over()) reset();
+  update_grid(gme_new_game());
 }
 static void up() {
   update_grid(snk_update_dir(snk_d_u));
@@ -184,8 +179,7 @@ struct init {
 
     handle(RESIZE_WINDOW, [] {
       auto [w, h] = casein::window_size;
-      snk_resize(w, h);
-      gme_reset();
+      gme_resize(w, h);
     });
 
     handle(TOUCH_UP, new_game);
