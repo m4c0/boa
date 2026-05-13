@@ -607,6 +607,8 @@ void vlk_init() {
 
   gettimeofday(&clk, NULL);
 
+  _(vkMapMemory(vlk_dev, vlk_vmem, 0, VK_WHOLE_SIZE, 0, (void **)&gme_buf));
+
   //tmr_fn = ;
   sfx_init();
   snd_init(&sfx_fill);

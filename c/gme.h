@@ -24,15 +24,17 @@ typedef struct gme_upc {
 } gme_upc_t;
 
 extern gme_upc_t gme_pc;
+extern gme_storage_t * gme_buf;
 
 snk_outcome_t gme_resize(unsigned w, unsigned h);
 snk_outcome_t gme_new_game();
 
-void gme_update(gme_storage_t * buf, snk_outcome_t outcome);
+void gme_update(snk_outcome_t outcome);
 
 #ifdef GME_IMPLEMENTATION
 #include "sfx.h"
 
+gme_storage_t * gme_buf;
 gme_upc_t gme_pc;
 
 static snk_outcome_t gme_reset() {
@@ -56,22 +58,22 @@ snk_outcome_t gme_new_game() {
   return snk_is_over() ? gme_reset() : snk_o_none;
 }
 
-void gme_update(gme_storage_t * buf, snk_outcome_t outcome) {
+void gme_update(snk_outcome_t outcome) {
   if (outcome == snk_o_none) return;
 
   int cells = snk_grid_w * snk_grid_h;
-  for (int i = 0; i < cells; i++) buf[i].seen = 0;
+  for (int i = 0; i < cells; i++) gme_buf[i].seen = 0;
 
   int s = snk_size;
   int p = snk_head;
   while (p != -1) {
-    if (buf[p].first_seen == 0) buf[p].first_seen = gme_pc.time;
-    buf[p].seen = s-- / (float)snk_size;
+    if (gme_buf[p].first_seen == 0) gme_buf[p].first_seen = gme_pc.time;
+    gme_buf[p].seen = s-- / (float)snk_size;
     p = snk_next(p);
   }
 
   for (int i = 0; i < cells; i++) {
-    if (buf[i].seen == 0) buf[i].first_seen = 0;
+    if (gme_buf[i].seen == 0) gme_buf[i].first_seen = 0;
   }
 
   unsigned x = snk_food % snk_grid_w;
