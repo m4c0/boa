@@ -44,6 +44,8 @@ void gme_reset() {
 }
 
 void gme_update(gme_storage_t * buf, snk_outcome_t outcome) {
+  if (outcome == snk_o_none) return;
+
   int cells = snk_grid_w * snk_grid_h;
   for (int i = 0; i < cells; i++) buf[i].seen = 0;
 

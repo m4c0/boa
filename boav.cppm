@@ -31,7 +31,6 @@ public:
 // Covers a 4:1 screen, as if such thing will ever exist
 static constexpr const auto max_cells = 24 * (24 * 4);
 
-snk_outcome_t volatile g_outcome{};
 VkDeviceMemory g_mem {};
 
 class thread : public vapp {
@@ -128,38 +127,35 @@ public:
   }
 } t;
 
-static void update_grid() {
+static void update_grid(snk_outcome_t outcome) {
   voo::mapmem m { g_mem };
-  gme_update((gme_storage_t *)*m, g_outcome);
+  gme_update((gme_storage_t *)*m, outcome);
 }
 
 static void reset() {
-  if (snk_is_over()) {
-    gme_reset();
-    update_grid();
-  }
+  gme_reset();
+  update_grid(snk_o_new_game);
+}
+
+static void new_game() {
+  if (snk_is_over()) reset();
 }
 static void up() {
-  g_outcome = snk_update_dir(snk_d_u);
-  update_grid();
+  update_grid(snk_update_dir(snk_d_u));
 }
 static void down() {
-  g_outcome = snk_update_dir(snk_d_d);
-  update_grid();
+  update_grid(snk_update_dir(snk_d_d));
 }
 static void left() {
-  g_outcome = snk_update_dir(snk_d_l);
-  update_grid();
+  update_grid(snk_update_dir(snk_d_l));
 }
 static void right() {
-  g_outcome = snk_update_dir(snk_d_r);
-  update_grid();
+  update_grid(snk_update_dir(snk_d_r));
 }
 
 static void tick() {
   if (!g_mem) return;
-  g_outcome = snk_run_tick();
-  if (g_outcome != snk_o_none) update_grid();
+  update_grid(snk_run_tick());
 }
 
 struct init {
@@ -170,14 +166,14 @@ struct init {
     handle(GESTURE, G_SWIPE_DOWN, down);
     handle(GESTURE, G_SWIPE_LEFT, left);
     handle(GESTURE, G_SWIPE_RIGHT, right);
-    handle(GESTURE, G_TAP_1, reset);
-    handle(GESTURE, G_SHAKE, reset);
+    handle(GESTURE, G_TAP_1, new_game);
+    handle(GESTURE, G_SHAKE, new_game);
 
     handle(KEY_DOWN, K_UP, up);
     handle(KEY_DOWN, K_DOWN, down);
     handle(KEY_DOWN, K_LEFT, left);
     handle(KEY_DOWN, K_RIGHT, right);
-    handle(KEY_DOWN, K_SPACE, reset);
+    handle(KEY_DOWN, K_SPACE, new_game);
     
 #ifndef LECO_TARGET_IPHONEOS
     handle(KEY_DOWN, K_R, [] {
@@ -190,10 +186,9 @@ struct init {
       auto [w, h] = casein::window_size;
       snk_resize(w, h);
       gme_reset();
-      if (g_mem) update_grid();
     });
 
-    handle(TOUCH_UP, reset);
+    handle(TOUCH_UP, new_game);
 
     tmr_fn = &tick;
 
