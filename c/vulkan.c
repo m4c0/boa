@@ -29,32 +29,7 @@
 // Covers a 4:1 screen, as if such thing will ever exist
 #define MAX_CELLS (24 * 24 * 4)
 
-#define VBUF_SIZE MAX_CELLS * sizeof(storage_t)
-
-typedef struct storage {
-  float first_seen;
-  float seen;
-} storage_t;
-
-typedef struct ivec2 {
-  int x, y;
-} ivec2_t;
-struct upc {
-  float aspect;
-  float time;
-  float dead_at;
-  float pad;
-  float grid_width;
-  float grid_height;
-  ivec2_t food;
-  ivec2_t party;
-  float party_start;
-} g_upc = {
-  .grid_width = 24,
-  .grid_height = 24,
-  .food = { 10000, 10000 },
-  .party = { 10000, 10000 },
-};
+#define VBUF_SIZE MAX_CELLS * sizeof(gme_storage_t)
 
 #define MAX_SWAPCHAIN_IMAGES 8
 typedef struct vlk_swc {
@@ -389,7 +364,7 @@ static void vlk_record_cmdbuf(int i) {
   };
   vkCmdSetScissor(cb, 0, 1, &sci);
 
-  vkCmdPushConstants(cb, vlk_pl, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(struct upc), &g_upc);
+  vkCmdPushConstants(cb, vlk_pl, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(gme_upc_t), &gme_pc);
   vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vlk_ppl);
   vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vlk_pl, 0, 1, &vlk_dset, 0, NULL);
   vkCmdDraw(cb, 3, 1, 0, 0);
@@ -538,7 +513,7 @@ void vlk_init() {
     .pushConstantRangeCount = 1,
     .pPushConstantRanges    = (VkPushConstantRange[]) {{
       .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-      .size       = sizeof(struct upc),
+      .size       = sizeof(gme_upc_t),
     }},
   };
   _(vkCreatePipelineLayout(vlk_dev, &pl_info, NULL, &vlk_pl));
@@ -609,9 +584,11 @@ void vlk_init() {
 
   _(vkMapMemory(vlk_dev, vlk_vmem, 0, VK_WHOLE_SIZE, 0, (void **)&gme_buf));
 
-  //tmr_fn = ;
+  tmr_fn = &gme_tick;
   sfx_init();
   snd_init(&sfx_fill);
+
+  gme_resize(vlk_ext.width, vlk_ext.height);
 }
 
 void vlk_frame() {
@@ -626,8 +603,8 @@ void vlk_frame() {
   struct timeval now;
   gettimeofday(&now, NULL);
 
-  g_upc.time   = (now.tv_sec - clk.tv_sec) + (now.tv_usec - clk.tv_usec) / 1.0e6; 
-  g_upc.aspect = (float)vlk_ext.width / (float)vlk_ext.height;
+  gme_pc.time   = (now.tv_sec - clk.tv_sec) + (now.tv_usec - clk.tv_usec) / 1.0e6; 
+  gme_pc.aspect = (float)vlk_ext.width / (float)vlk_ext.height;
 
   vlk_record_cmdbuf(idx);
 
@@ -669,6 +646,7 @@ void vlk_frame() {
     vlk_ext = cap.currentExtent;
 
     vlk_create_swc();
+    gme_resize(vlk_ext.width, vlk_ext.height);
   }
 }
 
