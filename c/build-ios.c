@@ -179,9 +179,18 @@ static int cc(char * src, char * o) {
   return run(args);
 }
 
+static int hdr(char * src, char * o, char * d) {
+  char * args[] = {
+    "clang", "-Wall", "-O3", "-target", TARGET, "-isysroot", SDK_PATH,
+    "-x", "c", "-g", "-D", d, "-o", o, "-c", src, 0
+  };
+  return run(args);
+}
+
 static int link_exe() {
   char * args[] = {
     "clang", "-Wall", "-O3", "-target", TARGET, "-isysroot", SDK_PATH,
+    "-framework", "AudioToolbox",
     "-framework", "CoreFoundation",
     "-framework", "CoreGraphics",
     "-framework", "Foundation",
@@ -191,6 +200,7 @@ static int link_exe() {
     "-framework", "QuartzCore",
     "-framework", "UIKit",
     "-o", "export.xcarchive/Products/Applications/boas.app/boas", 
+    "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
     "vulkan.o", "vulkan-ios.o",
     "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
     "-lc++",
@@ -208,6 +218,11 @@ int main(int argc, char ** argv) {
 
   if (cc("vulkan.c",     "vulkan.o"    )) return 1;
   if (cc("vulkan-ios.m", "vulkan-ios.o")) return 1;
+  if (hdr("gme.h", "gme.o", "GME_IMPLEMENTATION")) return 1;
+  if (hdr("sfx.h", "sfx.o", "SFX_IMPLEMENTATION")) return 1;
+  if (hdr("snd.h", "snd.o", "SND_IMPLEMENTATION")) return 1;
+  if (hdr("snk.h", "snk.o", "SNK_IMPLEMENTATION")) return 1;
+  if (hdr("tmr.h", "tmr.o", "TMR_IMPLEMENTATION")) return 1;
   if (link_exe()) return 1;
 
   if (shader("boav.frag")) return 1;
