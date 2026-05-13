@@ -201,6 +201,8 @@ snk_outcome_t snk_update_dir(snk_dir_t n) {
   if (snk_is_over())      return snk_o_none;
 
   snk_dir = n;
+  tmr_deinit();
+  tmr_init(snk_timer);
   return snk_run_tick();
 }
 
