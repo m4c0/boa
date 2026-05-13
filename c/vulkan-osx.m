@@ -2,6 +2,8 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <MetalKit/MetalKit.h>
 
+#include "gme.h"
+
 void vlk_init();
 void vlk_frame();
 void vlk_deinit();
@@ -18,6 +20,26 @@ void vlk_deinit();
     self.ready = YES;
   }
   vlk_frame();
+}
+@end
+
+@interface POCView : MTKView
+@end
+@implementation POCView
+- (BOOL)acceptsFirstResponder {
+  return YES;
+}
+- (void)keyDown:(NSEvent *)event {
+  NSString * chrs = event.charactersIgnoringModifiers;
+  if (chrs.length != 1) return;
+
+  unichar c = [chrs characterAtIndex:0];
+  switch (c) {
+    case NSLeftArrowFunctionKey:  return gme_left();
+    case NSRightArrowFunctionKey: return gme_right();
+    case NSUpArrowFunctionKey:    return gme_up();
+    case NSDownArrowFunctionKey:  return gme_down();
+  }
 }
 @end
 
@@ -53,7 +75,7 @@ static void run() {
   if (!name) name = info[@"CFBundleName"];
   if (!name) name = @"App";
 
-  MTKView * v = [MTKView new];
+  MTKView * v = [POCView new];
   v.delegate = [POCViewDelegate new];
 
   NSWindow * w = [NSWindow new];

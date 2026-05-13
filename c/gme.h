@@ -27,6 +27,11 @@ extern gme_storage_t * gme_buf;
 void gme_resize(unsigned w, unsigned h);
 void gme_new_game();
 
+void gme_left();
+void gme_right();
+void gme_up();
+void gme_down();
+
 void gme_tick();
 
 #ifdef GME_IMPLEMENTATION
