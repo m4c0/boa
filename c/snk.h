@@ -105,7 +105,7 @@ snk_outcome_t snk_reset() {
   return snk_o_new_game;
 }
 void snk_resize(unsigned w, unsigned h) {
-  float grid_h = 24.0f;
+  float grid_h = 16.0f;
   float grid_w = grid_h;
   if (w > h) {
     grid_w = grid_w * w / h;
