@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TMR_H
+#define TMR_H
 
 extern void (*tmr_fn)();
 
@@ -42,5 +43,6 @@ void tmr_deinit() {
   if (tmr_h) DeleteTimerQueueTimer(NULL, tmr_h, NULL);
   tmr_h = NULL;
 }
+#endif
 #endif
 #endif

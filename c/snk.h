@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SNK_H
+#define SNK_H
 
 typedef enum snk_dir {
   snk_d_o,
@@ -43,8 +44,8 @@ snk_outcome_t snk_reset();
 snk_outcome_t snk_run_tick();
 snk_outcome_t snk_update_dir(snk_dir_t n);
 
-static inline int snk_is_over() { return snk_dir == snk_d_e; }
-static inline int snk_is_new () { return snk_dir == snk_d_o; }
+int snk_is_over();
+int snk_is_new();
 
 #ifdef SNK_IMPLEMENTATION
 #include "tmr.h"
@@ -203,4 +204,8 @@ snk_outcome_t snk_update_dir(snk_dir_t n) {
   return snk_run_tick();
 }
 
+int snk_is_over() { return snk_dir == snk_d_e; }
+int snk_is_new () { return snk_dir == snk_d_o; }
+
+#endif
 #endif

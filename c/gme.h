@@ -1,4 +1,6 @@
-#pragma once
+#ifndef GME_H
+#define GME_H
+
 #include "snk.h"
 
 typedef struct gme_storage {
@@ -95,4 +97,5 @@ void gme_update(gme_storage_t * buf, snk_outcome_t outcome) {
   if (outcome == snk_o_death) sfx_death();
 }
 
+#endif
 #endif

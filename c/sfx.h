@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SFX_H
+#define SFX_H
 
 void sfx_init();
 void sfx_reset();
@@ -144,4 +145,5 @@ void sfx_fill(float * buf, unsigned len) {
   }
 }
 
+#endif
 #endif

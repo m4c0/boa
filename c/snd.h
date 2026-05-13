@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SND_H
+#define SND_H
 
 typedef void (*snd_filler_t)(float *, unsigned);
 
@@ -138,5 +139,6 @@ void snd_deinit() {
   CoUninitialize();
 }
 
+#endif
 #endif
 #endif
