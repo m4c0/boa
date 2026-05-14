@@ -8,7 +8,7 @@
 
 // You can get this path with 'xcrun --show-sdk-path --sdk iphoneos'
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
-#define TARGET "arm64-apple-ios17.0"
+#define TARGET "arm64-apple-ios26.0"
 
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
@@ -163,14 +163,14 @@ static int install() {
   return run(args);
 }
 
-static int validate() {
+static int validate(char * verb) {
   char * api_key = getenv("IOS_API_KEY");
   assert(api_key && "Missing IOS_API_KEY environment variable");
   char * api_issuer = getenv("IOS_API_ISSUER");
   assert(api_issuer && "Missing IOS_API_ISSUER environment variable");
 
   char * args[] = {
-    "xcrun", "altool", "--validate-app", "-t", "iphoneos",
+    "xcrun", "altool", verb, "-t", "iphoneos",
     "-f", "export/boas.ipa",
     "--apiKey", strdup(api_key),
     "--apiIssuer", strdup(api_issuer),
@@ -243,8 +243,12 @@ int main(int argc, char ** argv) {
   if (codesign()) return 1;
   if (symbols())  return 1;
   if (export())   return 1;
+#if 1
   if (install())  return 1;
-  if (validate()) return 1;
+  if (validate("--validate-app")) return 1;
+#else
+  if (validate("--upload-app")) return 1;
+#endif
 
   return 0;
 }
