@@ -10,8 +10,6 @@
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios17.0"
 
-// TODO: get DTSDKBuild etc from something like "defaults read /Applications/Xcode.app/Contents/Info DTPlatformBuild"
-
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
 }

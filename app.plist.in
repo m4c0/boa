@@ -13,7 +13,7 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
-    <string>3</string>
+    <string>4</string>
     <key>DTPlatformName</key>
     <string>iphoneos</string>
     <key>DTPlatformBuild</key>
@@ -21,11 +21,11 @@
     <key>DTPlatformVersion</key>
     <string>26</string>
     <key>DTSDKBuild</key>
-    <string>25E210a</string>
+    <string>23F73</string>
     <key>DTXcodeBuild</key>
     <string>17F42</string>
     <key>DTXcode</key>
-    <string>26.5</string>
+    <string>2650</string>
 
     <key>CFBundleIdentifier</key>
     <string>&IOS_BUNDLE_ID;</string>
@@ -38,7 +38,7 @@
       <string>iPhoneOS</string>
     </array>
     <key>MinimumOSVersion</key>
-    <string>17.0</string>
+    <string>26.0</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>ITSAppUsesNonExemptEncryption</key>
