@@ -91,10 +91,8 @@ static int apply(char * src, char * tgt) {
 static int shader(char * name) {
   char spv[1024];
   sprintf(spv, "export.xcarchive/Products/Applications/boas.app/%s.spv", name);
-  char src[1024];
-  sprintf(src, "../%s", name);
 
-  char * args[] = { "glslang", "-V", src, "-o", spv, 0 };
+  char * args[] = { "glslang", "-V", name, "-o", spv, 0 };
   return run(args);
 }
 
