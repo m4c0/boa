@@ -106,6 +106,15 @@ static int codesign() {
     0 };
   return run(args);
 }
+ 
+static int symbols() {
+  char * args[] = {
+    "dsymutil", 
+    "export.xcarchive/Products/Applications/boas.app/boas", 
+    "-o", "export.xcarchive/dSYMS/boas.app.dSYM",
+    0 };
+  return run(args);
+}
 
 static int export() {
   char * args[] = {
@@ -232,6 +241,7 @@ int main(int argc, char ** argv) {
 
   if (actool())   return 1;
   if (codesign()) return 1;
+  if (symbols())  return 1;
   if (export())   return 1;
   if (install())  return 1;
   if (validate()) return 1;

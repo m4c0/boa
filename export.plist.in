@@ -3,7 +3,7 @@
 <plist version="1.0">
   <dict>
     <key>method</key>
-    <string>debugging</string>
+    <string>app-store-connect</string>
     <key>teamID</key>
     <string>&IOS_TEAM;</string>
     <key>thinning</key>
