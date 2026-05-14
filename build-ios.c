@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 // You can get this path with 'xcrun --show-sdk-path --sdk iphoneos'
-#define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk"
+#define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios17.0"
 
 static void usage() {
@@ -141,7 +141,7 @@ static int actool() {
     //"--filter-for-thinning-device-configuration", "iPhone16,1"
     //"--filter-for-device-os-version", "17.0"
     "--development-region", "en",
-    "--minimum-deployment-target", "17.5",
+    "--minimum-deployment-target", "26",
     "--output-partial-info-plist", "icon-partial.plist",
     "--compile", "export.xcarchive/Products/Applications/boas.app",
     "Assets.xcassets",

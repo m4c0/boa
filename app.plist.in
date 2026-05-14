@@ -19,7 +19,7 @@
     <key>DTPlatformBuild</key>
     <string>platform_build</string>
     <key>DTPlatformVersion</key>
-    <string>17.5</string>
+    <string>26</string>
     <key>DTSDKBuild</key>
     <string>platform_build</string>
     <key>DTXcodeBuild</key>
