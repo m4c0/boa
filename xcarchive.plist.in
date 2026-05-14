@@ -15,7 +15,7 @@
       <key>CFBundleShortVersionString</key>
       <string>2.0.0</string>
       <key>CFBundleVersion</key>
-      <string>1</string>
+      <string>3</string>
       <key>SigningIdentity</key>
       <string>&IOS_SIGN_ID;</string>
       <key>Team</key>
