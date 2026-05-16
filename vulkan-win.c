@@ -36,6 +36,9 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
       vlk_deinit();
       PostQuitMessage(0);
       return 0;
+    case WM_PAINT:
+      if (vlk_hwnd) vlk_frame();
+      return 0;
   }
   return DefWindowProc(hwnd, msg, w_param, l_param);
 }
@@ -59,20 +62,21 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
     return 1;
   }
 
-  vlk_hwnd = CreateWindow(
+  HWND hwnd = CreateWindow(
       "m4c0-snake-window",
       "Casually Casual Snake Game",
       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
       600, 800, 
       NULL, NULL, h_instance, NULL);
-  if (!vlk_hwnd) {
+  if (!hwnd) {
     MessageBox(NULL, "Failed to create window", "Unhandled error", 0);
     return 1;
   }
 
-  ShowWindow(vlk_hwnd, cmd_show);
-  UpdateWindow(vlk_hwnd);
+  ShowWindow(hwnd, cmd_show);
+  UpdateWindow(hwnd);
 
+  vlk_hwnd = hwnd;
   vlk_init();
 
   MSG msg;
