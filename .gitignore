@@ -10,4 +10,5 @@ poc-snd
 *.exe
 *.plist
 *.o
+*.spv
 *.xcframework

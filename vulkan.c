@@ -2,13 +2,13 @@
 #include "sfx.h"
 #include "snd.h"
 #include "snk.h"
+#include "tme.h"
 #include "tmr.h"
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
 
 #ifdef __APPLE__
 #  include <TargetConditionals.h>
@@ -578,7 +578,7 @@ void vlk_init() {
   vkDestroyShaderModule(vlk_dev, vert, NULL);
   vkDestroyShaderModule(vlk_dev, frag, NULL);
 
-  gettimeofday(&clk, NULL);
+  tme_gettime(&clk);
 
   _(vkMapMemory(vlk_dev, vlk_vmem, 0, VK_WHOLE_SIZE, 0, (void **)&gme_buf));
 
@@ -599,7 +599,7 @@ void vlk_frame() {
   vkAcquireNextImageKHR(vlk_dev, vlk_swc.swc, ~0UL, vlk_sema_img[inf], VK_NULL_HANDLE, &idx);
 
   struct timeval now;
-  gettimeofday(&now, NULL);
+  tme_gettime(&now);
 
   gme_pc.time   = (now.tv_sec - clk.tv_sec) + (now.tv_usec - clk.tv_usec) / 1.0e6; 
   gme_pc.aspect = (float)vlk_ext.width / (float)vlk_ext.height;

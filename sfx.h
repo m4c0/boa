@@ -10,6 +10,7 @@ void sfx_eat();
 void sfx_walk();
 
 #ifdef SFX_IMPLEMENTATION
+#include "tme.h"
 
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
@@ -28,28 +29,8 @@ static float sfx_eat_t   = -1;
 static float sfx_eat_dt  = -1;
 static float sfx_death_t = -1;
 
-static void sfx_gettime(struct timeval * tv) {
-#ifdef _WIN32
-  SYSTEMTIME st; GetSystemTime(&st);
-
-  // Contains a 64-bit value representing the number of 100-nanosecond
-  // intervals since January 1, 1601 (UTC).
-  FILETIME ft; assert(SystemTimeToFileTime(&st, &ft));
-
-  ULARGE_INTEGER i;
-  i.u.LowPart  = ft.dwLowDateTime;
-  i.u.HighPart = ft.dwHighDateTime;
-
-  ULONGLONG usec = i.QuadPart / 10;
-  tv->tv_sec  = usec / (1000*1000);
-  tv->tv_usec = usec % (1000*1000);
-#else
-  gettimeofday(tv, NULL);
-#endif
-}
-
 static float sfx_now() {
-  struct timeval tv; sfx_gettime(&tv);
+  struct timeval tv; tme_gettime(&tv);
 
   float secs = tv.tv_sec - sfx_tv.tv_sec;
   float usecs = tv.tv_usec - sfx_tv.tv_usec;
@@ -60,7 +41,7 @@ static float sfx_randf() {
 }
 
 void sfx_init() {
-  sfx_gettime(&sfx_tv);
+  tme_gettime(&sfx_tv);
 }
 void sfx_reset() {
   sfx_eat_t = sfx_walk_t = -1;
