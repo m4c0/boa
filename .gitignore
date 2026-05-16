@@ -8,6 +8,7 @@ poc-snd
 *.app
 *.dylib
 *.exe
+*.pdb
 *.plist
 *.o
 *.spv
