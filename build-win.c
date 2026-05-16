@@ -2,6 +2,7 @@
 #define _CRT_NONSTDC_NO_WARNINGS
 #include <sys/stat.h>
 #include <assert.h>
+#include <direct.h>
 #include <process.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +24,7 @@ static int run(char ** args) {
 
 static int shader(char * name) {
   char spv[1024];
-  sprintf(spv, "%s.spv", name);
+  sprintf(spv, "app/%s.spv", name);
 
   char * args[] = { "glslang", "-V", name, "-o", spv, 0 };
   return run(args);
@@ -47,7 +48,7 @@ static int hdr(char * src, char * o, char * d) {
 static int link_exe() {
   char * args[] = {
     "clang", "-Wall", "-gdwarf",
-    "-o", "boas.exe",
+    "-o", "app/boas.exe",
     "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
     "vulkan.o", "vulkan-win.o",
     "-lole32", "-luser32",
@@ -57,6 +58,8 @@ static int link_exe() {
 
 int main(int argc, char ** argv) {
   if (argc != 1) return (usage(), 1);
+
+  _mkdir("app");
 
   if (cc("vulkan.c",     "vulkan.o"    )) return 1;
   if (cc("vulkan-win.c", "vulkan-win.o")) return 1;
