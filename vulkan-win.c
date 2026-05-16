@@ -62,10 +62,12 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
     return 1;
   }
 
+  DWORD style = WS_OVERLAPPEDWINDOW ^ WS_SIZEBOX ^ WS_MAXIMIZEBOX;
+
   HWND hwnd = CreateWindow(
       "m4c0-snake-window",
       "Casually Casual Snake Game",
-      WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+      style, CW_USEDEFAULT, CW_USEDEFAULT,
       600, 800, 
       NULL, NULL, h_instance, NULL);
   if (!hwnd) {
