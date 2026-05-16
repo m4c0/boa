@@ -10,7 +10,8 @@ void vlk_frame();
 void vlk_deinit();
 
 FILE * vlk_open(const char * name) {
-  return fopen(name, "rb");
+  char buf[128]; snprintf(buf, 128, "%s.spv", name);
+  return fopen(buf, "rb");
 }
 
 static char vlk_log_buf[1024];
