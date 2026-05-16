@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <windows.h>
 
-static HWND g_hwnd;
+HWND vlk_hwnd;
 
 void vlk_init();
 void vlk_frame();
@@ -16,13 +16,13 @@ FILE * vlk_open(const char * name) {
 static char vlk_log_buf[1024];
 void vlk_log(int r, const char * msg) {
   snprintf(vlk_log_buf, 1024, "Vulkan call failed (code=%d): %s\n", r, msg);
-  MessageBox(NULL, vlk_log_buf, "Vulkan error", 0);
+  MessageBox(vlk_hwnd, vlk_log_buf, "Vulkan error", 0);
 
   // This is the only way to properly programatically exit an app from any
   // thread. Other attempts froze the app or kept it as a "background app".
   // i.e. We use WM_CLOSE instead of WM_QUIT (or PostQuitMessage etc) and we
   // need to use SendNotifyMessage instead of SendMessage.
-  if (g_hwnd) SendNotifyMessage(g_hwnd, WM_CLOSE, 0, 0);
+  if (vlk_hwnd) SendNotifyMessage(vlk_hwnd, WM_CLOSE, 0, 0);
 }
 
 static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) {
@@ -61,19 +61,19 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
     return 1;
   }
 
-  g_hwnd = CreateWindow(
+  vlk_hwnd = CreateWindow(
       "m4c0-snake-window",
       "Casually Casual Snake Game",
       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
       600, 800, 
       NULL, NULL, h_instance, NULL);
-  if (!g_hwnd) {
+  if (!vlk_hwnd) {
     MessageBox(NULL, "Failed to create window", "Unhandled error", 0);
     return 1;
   }
 
-  ShowWindow(g_hwnd, cmd_show);
-  UpdateWindow(g_hwnd);
+  ShowWindow(vlk_hwnd, cmd_show);
+  UpdateWindow(vlk_hwnd);
 
   MSG msg;
   while (GetMessage(&msg, 0, 0, 0)) {

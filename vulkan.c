@@ -13,6 +13,10 @@
 #ifdef __APPLE__
 #  include <TargetConditionals.h>
 #  define VK_USE_PLATFORM_METAL_EXT
+#elif _WIN32
+#  define VK_USE_PLATFORM_WIN32_KHR
+#else
+#error Unsupported platform
 #endif
 
 #if !TARGET_OS_IPHONE
@@ -74,6 +78,8 @@ struct timeval clk;
 
 #ifdef __APPLE__
 CAMetalLayer * vlk_metal_layer();
+#elif _WIN32
+extern HWND vlk_hwnd;
 #endif
 
 void vlk_log(int r, const char * msg);
@@ -226,6 +232,15 @@ static void vlk_create_surface() {
     .pLayer = vlk_metal_layer(),
   };
   _(vkCreateMetalSurfaceEXT(vlk_ins, &info, NULL, &vlk_surf));
+#elif _WIN32
+  VkWin32SurfaceCreateInfoKHR info = {
+    .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+    .hinstance = GetModuleHandle(NULL),
+    .hwnd = vlk_hwnd,
+  };
+  _(vkCreateWin32SurfaceKHR(vlk_ins, &info, NULL, &vlk_surf));
+#else
+#error Unsupported platform
 #endif
 
   VkSurfaceCapabilitiesKHR cap;
