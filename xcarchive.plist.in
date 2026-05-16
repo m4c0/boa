@@ -13,9 +13,9 @@
       <key>CFBundleIdentifier</key>
       <string>&IOS_BUNDLE_ID;</string>
       <key>CFBundleShortVersionString</key>
-      <string>1.0.0</string>
+      <string>2.0.0</string>
       <key>CFBundleVersion</key>
-      <string>1</string>
+      <string>9</string>
       <key>SigningIdentity</key>
       <string>&IOS_SIGN_ID;</string>
       <key>Team</key>
