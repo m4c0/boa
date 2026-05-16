@@ -25,6 +25,8 @@
 
 #ifdef __APPLE__
 #  include "Vulkan-Headers/include/vulkan/vulkan_metal.h"
+#elif _WIN32
+#  include "Vulkan-Headers/include/vulkan/vulkan_win32.h"
 #endif
 
 #define VBUF_SIZE SNK_MAX_CELLS * sizeof(gme_storage_t)
@@ -111,6 +113,10 @@ static void vlk_create_instance() {
   info.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
   info.enabledExtensionCount += 2;
 #endif
+#elif _WIN32
+  ext[0] = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
+#else
+#error Unsupported platform
 #endif
 
   _(vkCreateInstance(&info, NULL, &vlk_ins));
