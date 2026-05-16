@@ -36,6 +36,9 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
       vlk_deinit();
       PostQuitMessage(0);
       return 0;
+    case WM_ERASEBKGND:
+      // i.e. "never erase background". Solves 99.999% of flicker issues
+      return 1;
     case WM_PAINT:
       if (vlk_hwnd) vlk_frame();
       return 0;
