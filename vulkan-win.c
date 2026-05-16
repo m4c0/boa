@@ -27,9 +27,6 @@ void vlk_log(int r, const char * msg) {
 
 static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) {
   switch (msg) {
-    case WM_CREATE:
-      vlk_init();
-      return 0;
     case WM_CLOSE:
       // Required to enable another thread sending "plz exit" messages
       DestroyWindow(hwnd);
@@ -74,6 +71,8 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
 
   ShowWindow(vlk_hwnd, cmd_show);
   UpdateWindow(vlk_hwnd);
+
+  vlk_init();
 
   MSG msg;
   while (GetMessage(&msg, 0, 0, 0)) {

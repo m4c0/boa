@@ -233,10 +233,11 @@ static void vlk_create_surface() {
   };
   _(vkCreateMetalSurfaceEXT(vlk_ins, &info, NULL, &vlk_surf));
 #elif _WIN32
+  assert(vlk_hwnd);
   VkWin32SurfaceCreateInfoKHR info = {
-    .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+    .sType     = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
     .hinstance = GetModuleHandle(NULL),
-    .hwnd = vlk_hwnd,
+    .hwnd      = vlk_hwnd,
   };
   _(vkCreateWin32SurfaceKHR(vlk_ins, &info, NULL, &vlk_surf));
 #else
