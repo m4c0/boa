@@ -1,3 +1,5 @@
+#include "gme.h"
+
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_MEAN_AND_LEAN
 #include <stdio.h>
@@ -39,6 +41,18 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
     case WM_ERASEBKGND:
       // i.e. "never erase background". Solves 99.999% of flicker issues
       return 1;
+    case WM_KEYDOWN:
+      if (HIWORD(l_param) & KF_REPEAT) return 0;
+
+      switch (LOWORD(w_param)) {
+        case VK_LEFT:  gme_left();     break;
+        case VK_RIGHT: gme_right();    break;
+        case VK_UP:    gme_up();       break;
+        case VK_DOWN:  gme_down();     break;
+        case VK_SPACE: gme_new_game(); break;
+      }
+
+      return 0;
     case WM_PAINT:
       if (vlk_hwnd) vlk_frame();
       return 0;
