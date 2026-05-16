@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//#define OPT "-gdwarf"
+#define OPT "-O3"
+
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
 }
@@ -32,7 +35,7 @@ static int shader(char * name) {
 
 static int cc(char * src, char * o) {
   char * args[] = {
-    "clang", "-Wall", "-gdwarf",
+    "clang", "-Wall", OPT,
     "-IVulkan-Headers/include",
     "-o", o, "-c", src, 0 };
   return run(args);
@@ -40,14 +43,14 @@ static int cc(char * src, char * o) {
 
 static int hdr(char * src, char * o, char * d) {
   char * args[] = {
-    "clang", "-Wall", "-x", "c", "-gdwarf", "-D", d, "-o", o, "-c", src, 0
+    "clang", "-Wall", "-x", "c", OPT, "-D", d, "-o", o, "-c", src, 0
   };
   return run(args);
 }
 
 static int link_exe() {
   char * args[] = {
-    "clang", "-Wall", "-gdwarf",
+    "clang", "-Wall", OPT,
     "-o", "app/boas.exe",
     "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
     "vulkan.o", "vulkan-win.o",
