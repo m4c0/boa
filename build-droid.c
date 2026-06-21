@@ -29,11 +29,16 @@ static int shader(char * name) {
   return run(args);
 }
 
+#ifdef ARCH
 #define OBJ(x) ("droid/" ARCH "/" x)
 
 static int cc(char * src, char * o) {
   char * args[] = {
     "clang", "-Wall", "-g", "-D__ANDROID__",
+    "-fdata-sections", "-ffunction-sections", "-funwind-tables",
+    "-fstack-protector-strong", "-no-canonical-prefixes",
+    "--target=" ARCH,
+    // TODOL "--sysroot"
     "-IVulkan-Headers/include",
     "-o", o, "-c", src, 0 };
   return run(args);
@@ -42,16 +47,23 @@ static int cc(char * src, char * o) {
 
 static int hdr(char * src, char * o, char * d) {
   char * args[] = {
-    "clang", "-Wall", "-x", "c", "-g", "-D__ANDROID__", "-D", d, "-o", o, "-c", src, 0
+    "clang", "-Wall", "-x", "c", "-g",
+    "-fdata-sections", "-ffunction-sections", "-funwind-tables",
+    "-fstack-protector-strong", "-no-canonical-prefixes",
+    "--target=" ARCH,
+    // TODOL "--sysroot"
+    "-D__ANDROID__", "-D", d, "-o", o, "-c", src,
+    0
   };
   return run(args);
 }
 #define HDR(src, o, d) hdr(src, OBJ(o), d)
 
-#ifdef ARCH
 static int link_exe() {
   char * args[] = {
-    "clang", "-Wall",
+    "clang", "-Wall", "-shared",
+    "-Wl,-Bsymbolic", "-fuse-ld=lld", "-Wl,--no-undefined",
+    // TODO: "-resource-dir",
     "-o", "droid/" ARCH "/libboas.so", 
     OBJ("gme.o"),
     OBJ("sfx.o"),

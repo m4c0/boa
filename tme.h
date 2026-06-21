@@ -1,9 +1,9 @@
 #ifndef TME_H
 #define TME_H
-#include <assert.h>
 
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
+#include <assert.h>
 #include <windows.h>
 #else
 #include <sys/time.h>
@@ -24,7 +24,8 @@ static void tme_gettime(struct timeval * tv) {
   ULONGLONG usec = i.QuadPart / 10;
   tv->tv_sec  = usec / (1000*1000);
   tv->tv_usec = usec % (1000*1000);
-#else
+#elif __ANDROID__
+#elif __APPLE__
   gettimeofday(tv, NULL);
 #endif
 }
