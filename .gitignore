@@ -1,5 +1,7 @@
+build-droid
 build-osx
 build-ios
+droid
 export
 export.xcarchive
 out
