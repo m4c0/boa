@@ -29,9 +29,11 @@ static int shader(char * name) {
   return run(args);
 }
 
+#define OBJ(x) ("droid/" ARCH "/" x)
+
 static int cc(char * src, char * o) {
   char * args[] = {
-    "clang", "-Wall", "-g",
+    "clang", "-Wall", "-g", "-D__ANDROID__",
     "-IVulkan-Headers/include",
     "-o", o, "-c", src, 0 };
   return run(args);
@@ -40,19 +42,23 @@ static int cc(char * src, char * o) {
 
 static int hdr(char * src, char * o, char * d) {
   char * args[] = {
-    "clang", "-Wall", "-x", "c", "-g", "-D", d, "-o", o, "-c", src, 0
+    "clang", "-Wall", "-x", "c", "-g", "-D__ANDROID__", "-D", d, "-o", o, "-c", src, 0
   };
   return run(args);
 }
-#define HDR(src, o, d) hdr(src, "droid/" ARCH "/" o, d)
+#define HDR(src, o, d) hdr(src, OBJ(o), d)
 
 #ifdef ARCH
 static int link_exe() {
   char * args[] = {
     "clang", "-Wall",
     "-o", "droid/" ARCH "/libboas.so", 
-    "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
-    "vulkan.o",
+    OBJ("gme.o"),
+    OBJ("sfx.o"),
+    OBJ("snd.o"),
+    OBJ("snk.o"),
+    OBJ("tmr.o"),
+    OBJ("vulkan.o"),
     0 };
   return run(args);
 }

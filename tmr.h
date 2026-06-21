@@ -10,14 +10,16 @@ void tmr_deinit();
 
 void (*tmr_fn)();
 
-#ifdef __APPLE__
+#ifdef __ANDROID__
+#elif __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #elif _WIN32
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 #endif
 
-#ifdef __APPLE__
+#ifdef __ANDROID__
+#elif __APPLE__
 static CFRunLoopTimerRef tmr_h;
 static void tmr_callback(CFRunLoopTimerRef ref, void * ctx) { tmr_fn(); }
 void tmr_init(unsigned ms) {
