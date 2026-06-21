@@ -23,7 +23,7 @@ static int run(char ** args) {
 
 static int shader(char * name) {
   char spv[1024];
-  sprintf(spv, "app/%s.spv", name);
+  sprintf(spv, "droid/%s.spv", name);
 
   char * args[] = { "glslang", "-V", name, "-o", spv, 0 };
   return run(args);
@@ -36,6 +36,7 @@ static int cc(char * src, char * o) {
     "-o", o, "-c", src, 0 };
   return run(args);
 }
+#define CC(src, o) cc(src, "droid/" ARCH "/" o)
 
 static int hdr(char * src, char * o, char * d) {
   char * args[] = {
@@ -45,15 +46,17 @@ static int hdr(char * src, char * o, char * d) {
 }
 #define HDR(src, o, d) hdr(src, "droid/" ARCH "/" o, d)
 
+#ifdef ARCH
 static int link_exe() {
   char * args[] = {
     "clang", "-Wall",
-    "-o", "boas.app/Contents/MacOS/boas", 
+    "-o", "droid/" ARCH "/libboas.so", 
     "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
-    "vulkan.o", "vulkan-osx.o",
+    "vulkan.o",
     0 };
   return run(args);
 }
+#endif
 
 static int meta(char * tgt) {
   char o[1024];
@@ -76,15 +79,22 @@ int main(int argc, char ** argv) {
   if (meta("i686-none-linux-android26"     )) return 1;
   if (meta("x86_64-none-linux-android26"   )) return 1;
 
+  if (shader("boav.frag")) return 1;
+  if (shader("boav.vert")) return 1;
+
   return 0;
 #else
   mkdir("droid/" ARCH, 0777);
+
+  if (CC("vulkan.c", "vulkan.o")) return 1;
 
   if (HDR("gme.h", "gme.o", "GME_IMPLEMENTATION")) return 1;
   if (HDR("sfx.h", "sfx.o", "SFX_IMPLEMENTATION")) return 1;
   if (HDR("snd.h", "snd.o", "SND_IMPLEMENTATION")) return 1;
   if (HDR("snk.h", "snk.o", "SNK_IMPLEMENTATION")) return 1;
   if (HDR("tmr.h", "tmr.o", "TMR_IMPLEMENTATION")) return 1;
+
+  if (link_exe()) return 1;
 
   return 0;
 #endif
