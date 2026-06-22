@@ -80,6 +80,8 @@ struct timeval clk;
 
 #ifdef __APPLE__
 CAMetalLayer * vlk_metal_layer();
+#elif __ANDROID__
+extern struct ANativeWindow * vlk_nwnd;
 #elif _WIN32
 extern HWND vlk_hwnd;
 #endif
@@ -244,6 +246,12 @@ static void vlk_create_surface() {
     .hwnd      = vlk_hwnd,
   };
   _(vkCreateWin32SurfaceKHR(vlk_ins, &info, NULL, &vlk_surf));
+#elif __ANDROID__
+  VkAndroidSurfaceCreateInfoKHR info = {
+    .sType  = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
+    .window = vlk_nwnd,
+  };
+  _(vkCreateAndroidSurfaceKHR(vlk_ins, &info, NULL, &vlk_surf));
 #else
 #error Unsupported platform
 #endif
@@ -599,7 +607,7 @@ void vlk_init() {
     .layout     = vlk_pl,
     .renderPass = vlk_rp,
   };
-  _(vkCreateGraphicsPipelines(vlk_dev, NULL, 1, &ppl_info, NULL, &vlk_ppl));
+  _(vkCreateGraphicsPipelines(vlk_dev, 0, 1, &ppl_info, NULL, &vlk_ppl));
 
   vkDestroyShaderModule(vlk_dev, vert, NULL);
   vkDestroyShaderModule(vlk_dev, frag, NULL);

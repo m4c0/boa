@@ -8,6 +8,12 @@ void snd_deinit();
 
 #ifdef SND_IMPLEMENTATION
 #ifdef __ANDROID__
+
+void snd_init(snd_filler_t fn) {
+}
+void snd_deinit() {
+}
+
 #elif __APPLE__
 #include <AudioToolbox/AudioComponent.h>
 #include <AudioToolbox/AudioOutputUnit.h>

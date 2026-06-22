@@ -19,6 +19,10 @@ void (*tmr_fn)();
 #endif
 
 #ifdef __ANDROID__
+void tmr_init(unsigned ms) {
+}
+void tmr_deinit() {
+}
 #elif __APPLE__
 static CFRunLoopTimerRef tmr_h;
 static void tmr_callback(CFRunLoopTimerRef ref, void * ctx) { tmr_fn(); }

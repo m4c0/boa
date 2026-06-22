@@ -73,6 +73,7 @@ static int link_exe() {
     OBJ("snk.o"),
     OBJ("tmr.o"),
     OBJ("vulkan.o"),
+    OBJ("vulkan-droid.o"),
     0 };
   return run(args);
 }
@@ -114,6 +115,7 @@ int main(int argc, char ** argv) {
   mkdir("droid/" ARCH, 0777);
 
   if (CC("vulkan.c", "vulkan.o")) return 1;
+  if (CC("vulkan-droid.c", "vulkan-droid.o")) return 1;
 
   if (HDR("gme.h", "gme.o", "GME_IMPLEMENTATION")) return 1;
   if (HDR("sfx.h", "sfx.o", "SFX_IMPLEMENTATION")) return 1;

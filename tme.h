@@ -25,6 +25,7 @@ static void tme_gettime(struct timeval * tv) {
   tv->tv_sec  = usec / (1000*1000);
   tv->tv_usec = usec % (1000*1000);
 #elif __ANDROID__
+  gettimeofday(tv, NULL);
 #elif __APPLE__
   gettimeofday(tv, NULL);
 #endif
