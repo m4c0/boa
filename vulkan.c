@@ -13,6 +13,8 @@
 #ifdef __APPLE__
 #  include <TargetConditionals.h>
 #  define VK_USE_PLATFORM_METAL_EXT
+#elif __ANDROID__
+#  define VK_USE_PLATFORM_ANDROID_KHR
 #elif _WIN32
 #  define VK_USE_PLATFORM_WIN32_KHR
 #else
@@ -121,6 +123,8 @@ static void vlk_create_instance() {
 #endif
 #elif _WIN32
   ext[0] = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
+#elif __ANDROID__
+  ext[0] = VK_KHR_ANDROID_SURFACE_EXTENSION_NAME;
 #else
 #error Unsupported platform
 #endif

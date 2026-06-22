@@ -34,11 +34,11 @@ static int shader(char * name) {
 
 static int cc(char * src, char * o) {
   char * args[] = {
-    "clang", "-Wall", "-g", "-D__ANDROID__",
+    "clang", "-Wall", "-g",
     "-fdata-sections", "-ffunction-sections", "-funwind-tables",
     "-fstack-protector-strong", "-no-canonical-prefixes",
     "--target=" ARCH,
-    // TODOL "--sysroot"
+    "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
     "-IVulkan-Headers/include",
     "-o", o, "-c", src, 0 };
   return run(args);
@@ -51,8 +51,8 @@ static int hdr(char * src, char * o, char * d) {
     "-fdata-sections", "-ffunction-sections", "-funwind-tables",
     "-fstack-protector-strong", "-no-canonical-prefixes",
     "--target=" ARCH,
-    // TODOL "--sysroot"
-    "-D__ANDROID__", "-D", d, "-o", o, "-c", src,
+    "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
+    "-D", d, "-o", o, "-c", src,
     0
   };
   return run(args);
@@ -63,7 +63,9 @@ static int link_exe() {
   char * args[] = {
     "clang", "-Wall", "-shared",
     "-Wl,-Bsymbolic", "-fuse-ld=lld", "-Wl,--no-undefined",
-    // TODO: "-resource-dir",
+    "-resource-dir", ANDROID_NDK_PREBUILT_ROOT "/lib/clang/21",
+    "--target=" ARCH,
+    "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
     "-o", "droid/" ARCH "/libboas.so", 
     OBJ("gme.o"),
     OBJ("sfx.o"),
@@ -77,12 +79,19 @@ static int link_exe() {
 #endif
 
 static int meta(char * tgt) {
+  fprintf(stderr, "Building for target %s\n", tgt);
+
+  char * ndk = getenv("ANDROID_NDK_PREBUILT_ROOT");
+  assert(ndk && "missing env var ANDROID_NDK_PREBUILT_ROOT");
+
   char o[1024];
   snprintf(o, 1024, "droid/build-%s", tgt);
   char d[1024];
   snprintf(d, 1024, "-DARCH=\"%s\"", tgt);
+  char n[1024];
+  snprintf(n, 1024, "-DANDROID_NDK_PREBUILT_ROOT=\"%s\"", ndk);
 
-  { char * args[] = { "clang", d, "-o", o, "build-droid.c", 0 };
+  { char * args[] = { "clang", n, d, "-o", o, "build-droid.c", 0 };
     if (run(args)) return 1; }
 
   char * args[] = { o, 0 };
