@@ -40,6 +40,6 @@ int run(char ** args) {
 #define CC(src, o, ...) RUN("clang", "-Wall", __VA_ARGS__, "-o", o, "-c", src)
 #define HDR(src, o, ...) CC(src, o, "-x", "c", __VA_ARGS__)
 
-#define SHADER(src, fld) RUN("glslang", "-V", src, fld "/" src ".spv")
+#define SHADER(src, fld) RUN("glslang", "-V", src, "-o", fld "/" src ".spv")
 
 #endif
