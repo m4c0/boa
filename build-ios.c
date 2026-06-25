@@ -1,10 +1,8 @@
+#include "build.h"
+
 #include <sys/stat.h>
-#include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 // You can get this path with 'xcrun --show-sdk-path --sdk iphoneos'
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
@@ -29,23 +27,6 @@ static char * slurp(const char * file) {
 
   fclose(f);
   return data;
-}
-
-static int run(char ** args) {
-  assert(args && args[0]);
-
-  pid_t pid = fork();
-  if (pid == 0) {
-    execvp(args[0], args);
-    abort();
-  } else if (pid > 0) {
-    int sl = 0;
-    assert(0 <= waitpid(pid, &sl, 0));
-    if (WIFEXITED(sl)) return WEXITSTATUS(sl);
-  }
-
-  fprintf(stderr, "failed to run child process: %s\n", args[0]);
-  return 1;
 }
 
 static int apply(char * src, char * tgt) {
@@ -91,63 +72,52 @@ static int apply(char * src, char * tgt) {
 static int shader(char * name) {
   char spv[1024];
   sprintf(spv, "export.xcarchive/Products/Applications/boas.app/%s.spv", name);
-
-  char * args[] = { "glslang", "-V", name, "-o", spv, 0 };
-  return run(args);
+  RUN("glslang", "-V", name, "-o", spv);
+  return 0;
 }
 
 static int codesign() {
   char * team = getenv("IOS_TEAM");
   assert(team && "Missing IOS_TEAM environment variable");
 
-  char * args[] = {
-    "codesign", "-s", strdup(team),
-    "export.xcarchive/Products/Applications/boas.app",
-    0 };
-  return run(args);
+  RUN("codesign", "-s", strdup(team), "export.xcarchive/Products/Applications/boas.app");
+  return 0;
 }
  
 static int symbols() {
-  char * args[] = {
-    "dsymutil", 
-    "export.xcarchive/Products/Applications/boas.app/boas", 
-    "-o", "export.xcarchive/dSYMS/boas.app.dSYM",
-    0 };
-  return run(args);
+  RUN("dsymutil", 
+      "export.xcarchive/Products/Applications/boas.app/boas", 
+      "-o", "export.xcarchive/dSYMS/boas.app.dSYM");
+  return 0;
 }
 
 static int export() {
-  char * args[] = {
-    "xcodebuild", "-exportArchive",
-    "-archivePath", "export.xcarchive",
-    "-exportPath", "export",
-    "-exportOptionsPlist", "export.plist",
-    0 };
-  return run(args);
+  RUN("xcodebuild", "-exportArchive",
+      "-archivePath", "export.xcarchive",
+      "-exportPath", "export",
+      "-exportOptionsPlist", "export.plist");
+  return 0;
 }
 
 static int actool() {
-  char * args[] = {
-    "actool",
-    "--notices", "--warnings", "--errors",
-    "--output-format", "human-readable-text",
-    "--app-icon", "AppIcon",
-    "--accent-color", "AccentColor",
-    "--compress-pngs",
-    "--enable-on-demand-resources", "YES",
-    "--target-device", "iphone",
-    "--target-device", "ipad",
-    "--platform", "iphoneos",
-    //"--filter-for-thinning-device-configuration", "iPhone16,1"
-    //"--filter-for-device-os-version", "17.0"
-    "--development-region", "en",
-    "--minimum-deployment-target", "26",
-    "--output-partial-info-plist", "icon-partial.plist",
-    "--compile", "export.xcarchive/Products/Applications/boas.app",
-    "Assets.xcassets",
-    0
-  };
-  return run(args);
+  RUN("actool",
+      "--notices", "--warnings", "--errors",
+      "--output-format", "human-readable-text",
+      "--app-icon", "AppIcon",
+      "--accent-color", "AccentColor",
+      "--compress-pngs",
+      "--enable-on-demand-resources", "YES",
+      "--target-device", "iphone",
+      "--target-device", "ipad",
+      "--platform", "iphoneos",
+      //"--filter-for-thinning-device-configuration", "iPhone16,1"
+      //"--filter-for-device-os-version", "17.0"
+      "--development-region", "en",
+      "--minimum-deployment-target", "26",
+      "--output-partial-info-plist", "icon-partial.plist",
+      "--compile", "export.xcarchive/Products/Applications/boas.app",
+      "Assets.xcassets");
+  return 0;
 }
 
 static int install() {
@@ -157,10 +127,8 @@ static int install() {
     return 0;
   }
 
-  char * args[] = {
-    "xcrun", "devicectl", "device", "install", "app", "--device", device, "export/boas.ipa", 0
-  };
-  return run(args);
+  RUN("xcrun", "devicectl", "device", "install", "app", "--device", device, "export/boas.ipa");
+  return 0;
 }
 
 static int validate(char * verb) {
@@ -169,50 +137,40 @@ static int validate(char * verb) {
   char * api_issuer = getenv("IOS_API_ISSUER");
   assert(api_issuer && "Missing IOS_API_ISSUER environment variable");
 
-  char * args[] = {
-    "xcrun", "altool", verb, "-t", "iphoneos",
-    "-f", "export/boas.ipa",
-    "--apiKey", strdup(api_key),
-    "--apiIssuer", strdup(api_issuer),
-    0 };
-  return run(args);
+  RUN("xcrun", "altool", verb, "-t", "iphoneos",
+      "-f", "export/boas.ipa",
+      "--apiKey", strdup(api_key),
+      "--apiIssuer", strdup(api_issuer));
+  return 0;
 }
 
 static int cc(char * src, char * o) {
-  char * args[] = {
-    "clang", "-Wall", "-O3", "-target", TARGET, "-isysroot", SDK_PATH,
-    "-IVulkan-Headers/include",
-    "-o", o, "-c", src, 0 };
-  return run(args);
+  CC(src, o, "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include");
+  return 0;
 }
 
 static int hdr(char * src, char * o, char * d) {
-  char * args[] = {
-    "clang", "-Wall", "-O3", "-target", TARGET, "-isysroot", SDK_PATH,
-    "-x", "c", "-g", "-D", d, "-o", o, "-c", src, 0
-  };
-  return run(args);
+  HDR(src, o, "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include", "-D", d);
+  return 0;
 }
 
 static int link_exe() {
-  char * args[] = {
-    "clang", "-Wall", "-O3", "-target", TARGET, "-isysroot", SDK_PATH,
-    "-framework", "AudioToolbox",
-    "-framework", "CoreFoundation",
-    "-framework", "CoreGraphics",
-    "-framework", "Foundation",
-    "-framework", "IOSurface",
-    "-framework", "Metal",
-    "-framework", "MetalKit",
-    "-framework", "QuartzCore",
-    "-framework", "UIKit",
-    "-o", "export.xcarchive/Products/Applications/boas.app/boas", 
-    "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
-    "vulkan.o", "vulkan-ios.o",
-    "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
-    "-lc++",
-    0 };
-  return run(args);
+  RUN("clang", "-Wall", "-O3", "-target", TARGET, "-isysroot", SDK_PATH,
+      "-framework", "AudioToolbox",
+      "-framework", "CoreFoundation",
+      "-framework", "CoreGraphics",
+      "-framework", "Foundation",
+      "-framework", "IOSurface",
+      "-framework", "Metal",
+      "-framework", "MetalKit",
+      "-framework", "QuartzCore",
+      "-framework", "UIKit",
+      "-o", "export.xcarchive/Products/Applications/boas.app/boas", 
+      "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
+      "vulkan.o", "vulkan-ios.o",
+      "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
+      "-lc++");
+  return 0;
 }
 
 int main(int argc, char ** argv) {

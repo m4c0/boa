@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-static int run(char ** args) {
+int run(char ** args) {
 #ifdef __APPLE__
   assert(args && args[0]);
 
@@ -29,7 +29,7 @@ static int run(char ** args) {
 }
 #define RUN(...) do { char * args[] = { __VA_ARGS__, 0 }; if (run(args)) return 1; } while (0)
 
-#define CC(src, o, ...) RUN("clang", "-Wall", "-g", __VA_ARGS__, "-o", o, "-c", src);
-#define HDR(src, o, d) RUN("clang", "-Wall", "-x", "c", "-g", "-D", d, "-o", o, "-c", src);
+#define CC(src, o, ...) RUN("clang", "-Wall", __VA_ARGS__, "-o", o, "-c", src)
+#define HDR(src, o, ...) CC(src, o, "-x", "c", __VA_ARGS__)
 
 #endif

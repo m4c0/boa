@@ -1,8 +1,6 @@
 #include "build.h"
 
 #include <sys/stat.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
@@ -16,12 +14,12 @@ static int shader(char * name) {
 }
 
 static int cc(char * src, char * o) {
-  CC(src, o, "-IVulkan-Headers/include");
+  CC(src, o, "-g", "-IVulkan-Headers/include");
   return 0;
 }
 
 static int hdr(char * src, char * o, char * d) {
-  HDR(src, o, d);
+  HDR(src, o, "-g", "-D", d);
   return 0;
 }
 
