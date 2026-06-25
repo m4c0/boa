@@ -7,27 +7,12 @@
 #ifdef ARCH
 #define OBJ(x) ("droid/" ARCH "/" x)
 
-static int cc(char * src, char * o) {
-  CC(src, o,
-      "-fdata-sections", "-ffunction-sections", "-funwind-tables",
-      "-fstack-protector-strong", "-no-canonical-prefixes",
-      "--target=" ARCH,
-      "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
-      "-IVulkan-Headers/include");
-  return 0;
-}
-#define CC1(src, o) cc(src, "droid/" ARCH "/" o)
-
-static int hdr(char * src, char * o, char * d) {
-  HDR(src, o,
-      "-fdata-sections", "-ffunction-sections", "-funwind-tables",
-      "-fstack-protector-strong", "-no-canonical-prefixes",
-      "--target=" ARCH,
-      "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
-      "-D", d);
-  return 0;
-}
-#define HDR1(src, o, d) hdr(src, OBJ(o), d)
+#define CFLAGS \
+  "-fdata-sections", "-ffunction-sections", "-funwind-tables", \
+  "-fstack-protector-strong", "-no-canonical-prefixes", \
+  "--target=" ARCH, \
+  "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/", \
+  "-IVulkan-Headers/include"
 
 static int link_exe() {
   RUN("clang", "-Wall", "-shared",
@@ -80,15 +65,13 @@ int main(int argc, char ** argv) {
 #else
   mkdir("droid/" ARCH, 0777);
 
-  if (CC1("vulkan.c", "vulkan.o")) return 1;
-  if (CC1("vulkan-droid.c", "vulkan-droid.o")) return 1;
-
-  if (HDR1("gme.h", "gme.o", "GME_IMPLEMENTATION")) return 1;
-  if (HDR1("sfx.h", "sfx.o", "SFX_IMPLEMENTATION")) return 1;
-  if (HDR1("snd.h", "snd.o", "SND_IMPLEMENTATION")) return 1;
-  if (HDR1("snk.h", "snk.o", "SNK_IMPLEMENTATION")) return 1;
-  if (HDR1("tmr.h", "tmr.o", "TMR_IMPLEMENTATION")) return 1;
-
+  CC("vulkan.c",       OBJ("vulkan.o"),       CFLAGS);
+  CC("vulkan-droid.c", OBJ("vulkan-droid.o"), CFLAGS);
+  HDR("gme.h", OBJ("gme.o"), CFLAGS, "-D", "GME_IMPLEMENTATION");
+  HDR("sfx.h", OBJ("sfx.o"), CFLAGS, "-D", "SFX_IMPLEMENTATION");
+  HDR("snd.h", OBJ("snd.o"), CFLAGS, "-D", "SND_IMPLEMENTATION");
+  HDR("snk.h", OBJ("snk.o"), CFLAGS, "-D", "SNK_IMPLEMENTATION");
+  HDR("tmr.h", OBJ("tmr.o"), CFLAGS, "-D", "TMR_IMPLEMENTATION");
   if (link_exe()) return 1;
 
   return 0;

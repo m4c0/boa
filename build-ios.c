@@ -10,6 +10,8 @@
 
 #define RES_PATH "export.xcarchive/Products/Applications/boas.app"
 
+#define CFLAGS "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include"
+
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
 }
@@ -139,16 +141,6 @@ static int validate(char * verb) {
   return 0;
 }
 
-static int cc(char * src, char * o) {
-  CC(src, o, "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include");
-  return 0;
-}
-
-static int hdr(char * src, char * o, char * d) {
-  HDR(src, o, "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include", "-D", d);
-  return 0;
-}
-
 static int link_exe() {
   RUN("clang", "-Wall", "-O3", "-target", TARGET, "-isysroot", SDK_PATH,
       "-framework", "AudioToolbox",
@@ -176,13 +168,13 @@ int main(int argc, char ** argv) {
   mkdir("export.xcarchive/Products/Applications", 0777);
   mkdir("export.xcarchive/Products/Applications/boas.app", 0777);
 
-  if (cc("vulkan.c",     "vulkan.o"    )) return 1;
-  if (cc("vulkan-ios.m", "vulkan-ios.o")) return 1;
-  if (hdr("gme.h", "gme.o", "GME_IMPLEMENTATION")) return 1;
-  if (hdr("sfx.h", "sfx.o", "SFX_IMPLEMENTATION")) return 1;
-  if (hdr("snd.h", "snd.o", "SND_IMPLEMENTATION")) return 1;
-  if (hdr("snk.h", "snk.o", "SNK_IMPLEMENTATION")) return 1;
-  if (hdr("tmr.h", "tmr.o", "TMR_IMPLEMENTATION")) return 1;
+  CC("vulkan.c",     "vulkan.o",     CFLAGS);
+  CC("vulkan-ios.m", "vulkan-ios.o", CFLAGS);
+  HDR("gme.h", "gme.o", CFLAGS, "-D", "GME_IMPLEMENTATION");
+  HDR("sfx.h", "sfx.o", CFLAGS, "-D", "SFX_IMPLEMENTATION");
+  HDR("snd.h", "snd.o", CFLAGS, "-D", "SND_IMPLEMENTATION");
+  HDR("snk.h", "snk.o", CFLAGS, "-D", "SNK_IMPLEMENTATION");
+  HDR("tmr.h", "tmr.o", CFLAGS, "-D", "TMR_IMPLEMENTATION");
   if (link_exe()) return 1;
 
   SHADER("boav.frag", RES_PATH);

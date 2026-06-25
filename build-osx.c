@@ -4,18 +4,10 @@
 
 #define RES_PATH "boas.app/Contents/Resources"
 
+#define CFLAGS "-g", "-IVulkan-Headers/include"
+
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
-}
-
-static int cc(char * src, char * o) {
-  CC(src, o, "-g", "-IVulkan-Headers/include");
-  return 0;
-}
-
-static int hdr(char * src, char * o, char * d) {
-  HDR(src, o, "-g", "-D", d);
-  return 0;
 }
 
 static int link_exe() {
@@ -39,13 +31,13 @@ int main(int argc, char ** argv) {
 
   RUN("cp", "libvulkan.dylib", "boas.app/Contents/MacOS/");
 
-  if (cc("vulkan.c",     "vulkan.o"    )) return 1;
-  if (cc("vulkan-osx.m", "vulkan-osx.o")) return 1;
-  if (hdr("gme.h", "gme.o", "GME_IMPLEMENTATION")) return 1;
-  if (hdr("sfx.h", "sfx.o", "SFX_IMPLEMENTATION")) return 1;
-  if (hdr("snd.h", "snd.o", "SND_IMPLEMENTATION")) return 1;
-  if (hdr("snk.h", "snk.o", "SNK_IMPLEMENTATION")) return 1;
-  if (hdr("tmr.h", "tmr.o", "TMR_IMPLEMENTATION")) return 1;
+  CC("vulkan.c",     "vulkan.o",     CFLAGS);
+  CC("vulkan-osx.m", "vulkan-osx.o", CFLAGS);
+  HDR("gme.h", "gme.o", CFLAGS, "-D", "GME_IMPLEMENTATION");
+  HDR("sfx.h", "sfx.o", CFLAGS, "-D", "SFX_IMPLEMENTATION");
+  HDR("snd.h", "snd.o", CFLAGS, "-D", "SND_IMPLEMENTATION");
+  HDR("snk.h", "snk.o", CFLAGS, "-D", "SNK_IMPLEMENTATION");
+  HDR("tmr.h", "tmr.o", CFLAGS, "-D", "TMR_IMPLEMENTATION");
   if (link_exe()) return 1;
 
   SHADER("boav.frag", RES_PATH);
