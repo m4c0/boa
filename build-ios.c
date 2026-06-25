@@ -8,6 +8,8 @@
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios26.0"
 
+#define RES_PATH "export.xcarchive/Products/Applications/boas.app"
+
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
 }
@@ -66,13 +68,6 @@ static int apply(char * src, char * tgt) {
 
   assert(fprintf(f, "%s", file));
   fclose(f);
-  return 0;
-}
-
-static int shader(char * name) {
-  char spv[1024];
-  sprintf(spv, "export.xcarchive/Products/Applications/boas.app/%s.spv", name);
-  RUN("glslang", "-V", name, "-o", spv);
   return 0;
 }
 
@@ -190,8 +185,8 @@ int main(int argc, char ** argv) {
   if (hdr("tmr.h", "tmr.o", "TMR_IMPLEMENTATION")) return 1;
   if (link_exe()) return 1;
 
-  if (shader("boav.frag")) return 1;
-  if (shader("boav.vert")) return 1;
+  SHADER("boav.frag", RES_PATH);
+  SHADER("boav.vert", RES_PATH);
 
   if (apply("export.plist.in",    "export.plist")) return 1;
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;

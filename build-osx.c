@@ -2,15 +2,10 @@
 
 #include <sys/stat.h>
 
+#define RES_PATH "boas.app/Contents/Resources"
+
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
-}
-
-static int shader(char * name) {
-  char spv[1024];
-  sprintf(spv, "boas.app/Contents/Resources/%s.spv", name);
-  RUN("glslang", "-V", name, "-o", spv);
-  return 0;
 }
 
 static int cc(char * src, char * o) {
@@ -53,8 +48,8 @@ int main(int argc, char ** argv) {
   if (hdr("tmr.h", "tmr.o", "TMR_IMPLEMENTATION")) return 1;
   if (link_exe()) return 1;
 
-  if (shader("boav.frag")) return 1;
-  if (shader("boav.vert")) return 1;
+  SHADER("boav.frag", RES_PATH);
+  SHADER("boav.vert", RES_PATH);
 
   return 0;
 }

@@ -7,15 +7,10 @@
 //#define OPT "-gdwarf"
 #define OPT "-O3"
 
+#define RES_PATH "app"
+
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
-}
-
-static int shader(char * name) {
-  char spv[1024];
-  sprintf(spv, "app/%s.spv", name);
-  RUN("glslang", "-V", name, "-o", spv);
-  return 0;
 }
 
 static int cc(char * src, char * o) {
@@ -51,8 +46,8 @@ int main(int argc, char ** argv) {
   if (hdr("tmr.h", "tmr.o", "TMR_IMPLEMENTATION")) return 1;
   if (link_exe()) return 1;
 
-  if (shader("boav.frag")) return 1;
-  if (shader("boav.vert")) return 1;
+  SHADER("boav.frag", RES_PATH);
+  SHADER("boav.vert", RES_PATH);
 
   return 0;
 }

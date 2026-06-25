@@ -2,12 +2,7 @@
 
 #include <sys/stat.h>
 
-static int shader(char * name) {
-  char spv[1024];
-  sprintf(spv, "droid/%s.spv", name);
-  RUN("glslang", "-V", name, "-o", spv);
-  return 0;
-}
+#define RES_PATH "droid"
 
 #ifdef ARCH
 #define OBJ(x) ("droid/" ARCH "/" x)
@@ -78,8 +73,8 @@ int main(int argc, char ** argv) {
   if (meta("i686-none-linux-android26"     )) return 1;
   if (meta("x86_64-none-linux-android26"   )) return 1;
 
-  if (shader("boav.frag")) return 1;
-  if (shader("boav.vert")) return 1;
+  SHADER("boav.frag", RES_PATH);
+  SHADER("boav.vert", RES_PATH);
 
   return 0;
 #else
