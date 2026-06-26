@@ -24,13 +24,7 @@ static int link_exe() {
       "--target=" ARCH,
       "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
       "-o", "droid/" ARCH "/libboas.so", 
-      OBJ("gme.o"),
-      OBJ("sfx.o"),
-      OBJ("snd.o"),
-      OBJ("snk.o"),
-      OBJ("tmr.o"),
-      OBJ("vulkan.o"),
-      OBJ("vulkan-droid.o"));
+      OBJS, "vulkan-droid.o");
   return 0;
 }
 #endif
@@ -68,7 +62,7 @@ int main(int argc, char ** argv) {
 #else
   mkdir("droid/" ARCH, 0777);
 
-  CC("vulkan-droid.c", OBJ("vulkan-droid.o"), CFLAGS);
+  CC("vulkan-droid.c", "vulkan-droid.o", CFLAGS);
   if (compile_common()) return 1;
   if (link_exe()) return 1;
 

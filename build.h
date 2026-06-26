@@ -42,6 +42,7 @@ int run(char ** args) {
 
 #define SHADER(src, fld) RUN("glslang", "-V", src, "-o", fld "/" src ".spv")
 
+#define OBJS "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o", "vulkan.o"
 static int compile_common() {
   CC("vulkan.c", "vulkan.o", CFLAGS);
   HDR("gme.h", "gme.o", CFLAGS, "-D", "GME_IMPLEMENTATION");

@@ -16,8 +16,7 @@ static int link_exe() {
     "-framework", "AudioToolbox",
     "-framework", "MetalKit",
     "-o", "boas.app/Contents/MacOS/boas", 
-    "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
-    "vulkan.o", "vulkan-osx.o");
+    OBJS, "vulkan-osx.o");
   return 0;
 }
 

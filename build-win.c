@@ -19,8 +19,7 @@ static void usage() {
 static int link_exe() {
   RUN("clang", "-Wall", OPT,
       "-o", "app/boas.exe",
-      "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o",
-      "vulkan.o", "vulkan-win.o",
+      OBJS, "vulkan-win.o",
       "-lole32", "-luser32");
   return 0;
 }
