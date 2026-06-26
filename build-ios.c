@@ -168,13 +168,8 @@ int main(int argc, char ** argv) {
   mkdir("export.xcarchive/Products/Applications", 0777);
   mkdir("export.xcarchive/Products/Applications/boas.app", 0777);
 
-  CC("vulkan.c",     "vulkan.o",     CFLAGS);
   CC("vulkan-ios.m", "vulkan-ios.o", CFLAGS);
-  HDR("gme.h", "gme.o", CFLAGS, "-D", "GME_IMPLEMENTATION");
-  HDR("sfx.h", "sfx.o", CFLAGS, "-D", "SFX_IMPLEMENTATION");
-  HDR("snd.h", "snd.o", CFLAGS, "-D", "SND_IMPLEMENTATION");
-  HDR("snk.h", "snk.o", CFLAGS, "-D", "SNK_IMPLEMENTATION");
-  HDR("tmr.h", "tmr.o", CFLAGS, "-D", "TMR_IMPLEMENTATION");
+  if (compile_common()) return 1;;
   if (link_exe()) return 1;
 
   SHADER("boav.frag", RES_PATH);

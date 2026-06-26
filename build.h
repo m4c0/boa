@@ -42,4 +42,14 @@ int run(char ** args) {
 
 #define SHADER(src, fld) RUN("glslang", "-V", src, "-o", fld "/" src ".spv")
 
+static int compile_common() {
+  CC("vulkan.c", "vulkan.o", CFLAGS);
+  HDR("gme.h", "gme.o", CFLAGS, "-D", "GME_IMPLEMENTATION");
+  HDR("sfx.h", "sfx.o", CFLAGS, "-D", "SFX_IMPLEMENTATION");
+  HDR("snd.h", "snd.o", CFLAGS, "-D", "SND_IMPLEMENTATION");
+  HDR("snk.h", "snk.o", CFLAGS, "-D", "SNK_IMPLEMENTATION");
+  HDR("tmr.h", "tmr.o", CFLAGS, "-D", "TMR_IMPLEMENTATION");
+  return 0;
+}
+
 #endif

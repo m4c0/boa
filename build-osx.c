@@ -1,10 +1,10 @@
+#define CFLAGS "-g", "-IVulkan-Headers/include"
 #include "build.h"
 
 #include <sys/stat.h>
 
 #define RES_PATH "boas.app/Contents/Resources"
 
-#define CFLAGS "-g", "-IVulkan-Headers/include"
 
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
@@ -31,13 +31,8 @@ int main(int argc, char ** argv) {
 
   RUN("cp", "libvulkan.dylib", "boas.app/Contents/MacOS/");
 
-  CC("vulkan.c",     "vulkan.o",     CFLAGS);
   CC("vulkan-osx.m", "vulkan-osx.o", CFLAGS);
-  HDR("gme.h", "gme.o", CFLAGS, "-D", "GME_IMPLEMENTATION");
-  HDR("sfx.h", "sfx.o", CFLAGS, "-D", "SFX_IMPLEMENTATION");
-  HDR("snd.h", "snd.o", CFLAGS, "-D", "SND_IMPLEMENTATION");
-  HDR("snk.h", "snk.o", CFLAGS, "-D", "SNK_IMPLEMENTATION");
-  HDR("tmr.h", "tmr.o", CFLAGS, "-D", "TMR_IMPLEMENTATION");
+  if (compile_common()) return 1;;
   if (link_exe()) return 1;
 
   SHADER("boav.frag", RES_PATH);

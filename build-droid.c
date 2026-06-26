@@ -1,3 +1,13 @@
+#ifdef ARCH
+#  define CFLAGS \
+  "-fdata-sections", "-ffunction-sections", "-funwind-tables", \
+  "-fstack-protector-strong", "-no-canonical-prefixes", \
+  "--target=" ARCH, \
+  "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/", \
+  "-IVulkan-Headers/include"
+#else
+#  define CFLAGS ""
+#endif
 #include "build.h"
 
 #include <sys/stat.h>
@@ -6,13 +16,6 @@
 
 #ifdef ARCH
 #define OBJ(x) ("droid/" ARCH "/" x)
-
-#define CFLAGS \
-  "-fdata-sections", "-ffunction-sections", "-funwind-tables", \
-  "-fstack-protector-strong", "-no-canonical-prefixes", \
-  "--target=" ARCH, \
-  "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/", \
-  "-IVulkan-Headers/include"
 
 static int link_exe() {
   RUN("clang", "-Wall", "-shared",
@@ -65,13 +68,8 @@ int main(int argc, char ** argv) {
 #else
   mkdir("droid/" ARCH, 0777);
 
-  CC("vulkan.c",       OBJ("vulkan.o"),       CFLAGS);
   CC("vulkan-droid.c", OBJ("vulkan-droid.o"), CFLAGS);
-  HDR("gme.h", OBJ("gme.o"), CFLAGS, "-D", "GME_IMPLEMENTATION");
-  HDR("sfx.h", OBJ("sfx.o"), CFLAGS, "-D", "SFX_IMPLEMENTATION");
-  HDR("snd.h", OBJ("snd.o"), CFLAGS, "-D", "SND_IMPLEMENTATION");
-  HDR("snk.h", OBJ("snk.o"), CFLAGS, "-D", "SNK_IMPLEMENTATION");
-  HDR("tmr.h", OBJ("tmr.o"), CFLAGS, "-D", "TMR_IMPLEMENTATION");
+  if (compile_common()) return 1;
   if (link_exe()) return 1;
 
   return 0;
