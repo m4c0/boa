@@ -55,9 +55,6 @@ int main(int argc, char ** argv) {
   if (meta("i686-none-linux-android26"     )) return 1;
   if (meta("x86_64-none-linux-android26"   )) return 1;
 
-  SHADER("boav.frag", RES_PATH);
-  SHADER("boav.vert", RES_PATH);
-
   return 0;
 #else
   mkdir("droid/" ARCH, 0777);
@@ -65,6 +62,9 @@ int main(int argc, char ** argv) {
   CC("vulkan-droid.c", "vulkan-droid.o", CFLAGS);
   if (compile_common()) return 1;
   if (link_exe()) return 1;
+
+  SHADER("boav.frag", RES_PATH);
+  SHADER("boav.vert", RES_PATH);
 
   return 0;
 #endif

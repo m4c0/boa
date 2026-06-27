@@ -1,3 +1,6 @@
+//#define OPT "-gdwarf"
+#define OPT "-O3"
+
 #define CFLAGS OPT, "-IVulkan-Headers/include"
 #include "build.h"
 
@@ -6,9 +9,6 @@
 #include <direct.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-//#define OPT "-gdwarf"
-#define OPT "-O3"
 
 #define RES_PATH "app"
 

@@ -1,9 +1,10 @@
 #ifndef BUILD_H
 #define BUILD_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #ifdef __APPLE__
-#  include <stdio.h>
-#  include <stdlib.h>
 #  include <unistd.h>
 #elif _WIN32
 #  define _CRT_SECURE_NO_WARNINGS
