@@ -60,9 +60,7 @@ int main(int argc, char ** argv) {
   mkdir("droid/" ARCH, 0777);
 
   CC("vulkan-droid.c", "vulkan-droid.o", CFLAGS);
-  if (compile_common()) return 1;
-  if (link_exe()) return 1;
-  if (shaders()) return 1;
+  if (compile_and_link_exe()) return 1;
 
   return 0;
 #endif
