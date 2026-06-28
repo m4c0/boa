@@ -10,10 +10,6 @@
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios26.0"
 
-static void usage() {
-  fprintf(stderr, "just call 'build' without arguments\n");
-}
-
 static char * slurp(const char * file) {
   FILE * f = fopen(file, "rb");
   assert(f);
@@ -158,8 +154,6 @@ static int link_exe() {
 }
 
 int main(int argc, char ** argv) {
-  if (argc != 1) return (usage(), 1);
-
   mkdir("export.xcarchive", 0777);
   mkdir("export.xcarchive/Products", 0777);
   mkdir("export.xcarchive/Products/Applications", 0777);

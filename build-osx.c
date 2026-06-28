@@ -4,10 +4,6 @@
 
 #include <sys/stat.h>
 
-static void usage() {
-  fprintf(stderr, "just call 'build' without arguments\n");
-}
-
 static int link_exe() {
   RUN("clang", "-Wall",
     "-framework", "AppKit",
@@ -19,8 +15,6 @@ static int link_exe() {
 }
 
 int main(int argc, char ** argv) {
-  if (argc != 1) return (usage(), 1);
-
   mkdir("boas.app", 0777);
   mkdir("boas.app/Contents", 0777);
   mkdir("boas.app/Contents/MacOS", 0777);

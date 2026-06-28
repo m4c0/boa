@@ -1,12 +1,12 @@
 //#define OPT "-gdwarf"
 #define OPT "-O3"
+#include <stdio.h>
 
 #define CFLAGS OPT, "-IVulkan-Headers/include"
 #define RES_PATH "app"
 #include "build.h"
 
 #include <direct.h>
-#include <stdio.h>
 
 static int link_exe() {
   RUN("clang", "-Wall", OPT,
