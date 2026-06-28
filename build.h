@@ -54,4 +54,10 @@ static int compile_common() {
   return 0;
 }
 
+static int shaders() {
+  SHADER("boav.frag", RES_PATH);
+  SHADER("boav.vert", RES_PATH);
+  return 0;
+}
+
 #endif

@@ -1,3 +1,5 @@
+#define RES_PATH "export.xcarchive/Products/Applications/boas.app"
+#define CFLAGS "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include"
 #include "build.h"
 
 #include <sys/stat.h>
@@ -7,10 +9,6 @@
 // You can get this path with 'xcrun --show-sdk-path --sdk iphoneos'
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios26.0"
-
-#define RES_PATH "export.xcarchive/Products/Applications/boas.app"
-
-#define CFLAGS "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include"
 
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
@@ -170,9 +168,7 @@ int main(int argc, char ** argv) {
   CC("vulkan-ios.m", "vulkan-ios.o", CFLAGS);
   if (compile_common()) return 1;;
   if (link_exe()) return 1;
-
-  SHADER("boav.frag", RES_PATH);
-  SHADER("boav.vert", RES_PATH);
+  if (shaders()) return 1;
 
   if (apply("export.plist.in",    "export.plist")) return 1;
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;

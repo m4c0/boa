@@ -2,6 +2,7 @@
 #define OPT "-O3"
 
 #define CFLAGS OPT, "-IVulkan-Headers/include"
+#define RES_PATH "app"
 #include "build.h"
 
 #include <sys/stat.h>
@@ -9,8 +10,6 @@
 #include <direct.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#define RES_PATH "app"
 
 static void usage() {
   fprintf(stderr, "just call 'build' without arguments\n");
@@ -32,9 +31,7 @@ int main(int argc, char ** argv) {
   CC("vulkan-win.c", "vulkan-win.o", CFLAGS);
   if (compile_common()) return 1;;
   if (link_exe()) return 1;
-
-  SHADER("boav.frag", RES_PATH);
-  SHADER("boav.vert", RES_PATH);
+  if (shaders()) return 1;
 
   return 0;
 }

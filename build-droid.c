@@ -5,14 +5,14 @@
   "--target=" ARCH, \
   "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/", \
   "-IVulkan-Headers/include"
+#  define RES_PATH ""
 #else
 #  define CFLAGS ""
+#  define RES_PATH "droid"
 #endif
 #include "build.h"
 
 #include <sys/stat.h>
-
-#define RES_PATH "droid"
 
 #ifdef ARCH
 #define OBJ(x) ("droid/" ARCH "/" x)
@@ -62,9 +62,7 @@ int main(int argc, char ** argv) {
   CC("vulkan-droid.c", "vulkan-droid.o", CFLAGS);
   if (compile_common()) return 1;
   if (link_exe()) return 1;
-
-  SHADER("boav.frag", RES_PATH);
-  SHADER("boav.vert", RES_PATH);
+  if (shaders()) return 1;
 
   return 0;
 #endif
