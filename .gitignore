@@ -11,6 +11,7 @@ poc-snd
 *.app
 *.dylib
 *.exe
+*.flat
 *.pdb
 *.plist
 *.o

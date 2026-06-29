@@ -60,6 +60,8 @@ int main(int argc, char ** argv) {
 
   if (shaders()) return 1;
 
+  RUN("aapt2", "compile", "res/values/strings.xml", "-o", ".");
+
   return 0;
 #else
   mkdir("droid/" ARCH, 0777);
