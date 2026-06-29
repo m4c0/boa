@@ -27,6 +27,9 @@ static int link_exe() {
       OBJS, "vulkan-droid.o");
   return 0;
 }
+
+#else
+static int link_exe() { return 1; } // removes warning
 #endif
 
 static int meta(char * tgt) {
@@ -54,6 +57,8 @@ int main(int argc, char ** argv) {
   if (meta("armv7-none-linux-androideabi26")) return 1;
   if (meta("i686-none-linux-android26"     )) return 1;
   if (meta("x86_64-none-linux-android26"   )) return 1;
+
+  if (shaders()) return 1;
 
   return 0;
 #else

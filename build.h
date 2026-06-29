@@ -16,11 +16,9 @@
 
 static int compile_common();
 static int link_exe();
-static int shaders();
 static int compile_and_link_exe() {
   if (compile_common()) return 1;
   if (link_exe()) return 1;
-  if (shaders()) return 1;
   return 0;
 }
 

@@ -161,6 +161,7 @@ int main(int argc, char ** argv) {
 
   CC("vulkan-ios.m", "vulkan-ios.o", CFLAGS);
   if (compile_and_link_exe()) return 1;
+  if (shaders()) return 1;
 
   if (apply("export.plist.in",    "export.plist")) return 1;
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;

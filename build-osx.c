@@ -24,6 +24,7 @@ int main(int argc, char ** argv) {
 
   CC("vulkan-osx.m", "vulkan-osx.o", CFLAGS);
   if (compile_and_link_exe()) return 1;
+  if (shaders()) return 1;
 
   return 0;
 }
