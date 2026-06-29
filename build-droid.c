@@ -60,7 +60,12 @@ int main(int argc, char ** argv) {
 
   if (shaders()) return 1;
 
-  RUN("aapt2", "compile", "res/values/strings.xml", "-o", ".");
+  char * dir = getenv("ANDROID_BUILD_TOOLS");
+  assert(dir && "missing env for ANDROID_BUILD_TOOLS");
+
+  char buf[1024];
+  snprintf(buf, 1024, "%s/aapt2", dir);
+  RUN(buf, "compile", "res/values/strings.xml", "-o", ".");
 
   return 0;
 #else
