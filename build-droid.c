@@ -62,10 +62,16 @@ int main(int argc, char ** argv) {
 
   char * dir = getenv("ANDROID_BUILD_TOOLS");
   assert(dir && "missing env for ANDROID_BUILD_TOOLS");
+  char aapt2[1024];
+  snprintf(aapt2, 1024, "%s/aapt2", dir);
 
-  char buf[1024];
-  snprintf(buf, 1024, "%s/aapt2", dir);
-  RUN(buf, "compile", "res/values/strings.xml", "-o", ".");
+  dir = getenv("ANDROID_PLATFORM");
+  assert(dir && "missing env for ANDROID_PLATFORM");
+  char jar[1024];
+  snprintf(jar, 1024, "%s/android.jar", dir);
+
+  RUN(aapt2, "compile", "res/values/strings.xml", "-o", ".");
+  RUN(aapt2, "link", "values_strings.arsc.flat", "-o", "app.res.apk", "--manifest", "AndroidManifest.xml", "-I", jar);
 
   return 0;
 #else
