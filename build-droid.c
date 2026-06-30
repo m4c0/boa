@@ -64,6 +64,8 @@ int main(int argc, char ** argv) {
   assert(dir && "missing env for ANDROID_BUILD_TOOLS");
   char aapt2[1024];
   snprintf(aapt2, 1024, "%s/aapt2", dir);
+  char apksigner[1024];
+  snprintf(apksigner, 1024, "%s/apksigner", dir);
 
   dir = getenv("ANDROID_PLATFORM");
   assert(dir && "missing env for ANDROID_PLATFORM");
@@ -72,6 +74,10 @@ int main(int argc, char ** argv) {
 
   RUN(aapt2, "compile", "res/values/strings.xml", "-o", ".");
   RUN(aapt2, "link", "values_strings.arsc.flat", "-o", "app.res.apk", "--manifest", "AndroidManifest.xml", "-I", jar);
+
+  // Just an example
+  // RUN("keytool", "-genkeypair", "-keystore", "keystore.jks", "-alias", "androidkey", "-validity", "10000", "-keyalg", "RSA", "-keysize", "2048", "-storepass", "android", "-keypass", "android", "-dname", "CN=CA");
+  // RUN(apksigner, "sign", "--in", "app.apk", "-ks", "keystore.jks", "--ks-key-alias", "androidkey", "--ks-pass", "pass:android", "--key-pass", "pass:android");
 
   return 0;
 #else
