@@ -8,22 +8,20 @@
 #  define RES_PATH ""
 #else
 #  define CFLAGS ""
-#  define RES_PATH "droid"
+#  define RES_PATH "droid/apk"
 #endif
 #include "build.h"
 
 #include <sys/stat.h>
 
 #ifdef ARCH
-#define OBJ(x) ("droid/" ARCH "/" x)
-
 static int link_exe() {
   RUN("clang", "-Wall", "-shared",
       "-Wl,-Bsymbolic", "-fuse-ld=lld", "-Wl,--no-undefined",
       "-resource-dir", ANDROID_NDK_PREBUILT_ROOT "/lib/clang/21",
       "--target=" ARCH,
       "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
-      "-o", "droid/" ARCH "/libboas.so", 
+      "-o", "droid/apk/" ARCH "/libboas.so", 
       OBJS, "vulkan-droid.o");
   return 0;
 }
@@ -53,6 +51,7 @@ static int meta(char * tgt) {
 int main(int argc, char ** argv) {
 #ifndef ARCH
   mkdir("droid", 0777);
+  mkdir("droid/apk", 0777);
   if (meta("aarch64-none-linux-android26"  )) return 1;
   if (meta("armv7-none-linux-androideabi26")) return 1;
   if (meta("i686-none-linux-android26"     )) return 1;
@@ -66,22 +65,28 @@ int main(int argc, char ** argv) {
   snprintf(aapt2, 1024, "%s/aapt2", dir);
   char apksigner[1024];
   snprintf(apksigner, 1024, "%s/apksigner", dir);
+  char zipalign[1024];
+  snprintf(zipalign, 1024, "%s/zipalign", dir);
 
   dir = getenv("ANDROID_PLATFORM");
   assert(dir && "missing env for ANDROID_PLATFORM");
   char jar[1024];
   snprintf(jar, 1024, "%s/android.jar", dir);
 
-  RUN(aapt2, "compile", "res/values/strings.xml", "-o", ".");
-  RUN(aapt2, "link", "values_strings.arsc.flat", "-o", "app.res.apk", "--manifest", "AndroidManifest.xml", "-I", jar);
+  RUN(aapt2, "compile", "res/values/strings.xml", "-o", "droid/");
+  RUN(aapt2, "link", "droid/values_strings.arsc.flat", "-o", "droid/app.res.apk", "--manifest", "AndroidManifest.xml", "-I", jar);
+
+  RUN("jar", "--update", "--file", "droid/app.res.apk", "-C", "droid/apk", ".");
+
+  RUN(zipalign, "-p", "-f", "-v", "4", "droid/app.res.apk", "droid/app.apk");
 
   // Just an example
-  // RUN("keytool", "-genkeypair", "-keystore", "keystore.jks", "-alias", "androidkey", "-validity", "10000", "-keyalg", "RSA", "-keysize", "2048", "-storepass", "android", "-keypass", "android", "-dname", "CN=CA");
-  // RUN(apksigner, "sign", "--in", "app.apk", "-ks", "keystore.jks", "--ks-key-alias", "androidkey", "--ks-pass", "pass:android", "--key-pass", "pass:android");
+  // RUN("keytool", "-genkeypair", "-keystore", "droid/keystore.jks", "-alias", "androidkey", "-validity", "10000", "-keyalg", "RSA", "-keysize", "2048", "-storepass", "android", "-keypass", "android", "-dname", "CN=CA");
+  RUN(apksigner, "sign", "--in", "droid/app.apk", "-ks", "droid/keystore.jks", "--ks-key-alias", "androidkey", "--ks-pass", "pass:android", "--key-pass", "pass:android");
 
   return 0;
 #else
-  mkdir("droid/" ARCH, 0777);
+  mkdir("droid/apk/" ARCH, 0777);
 
   CC("vulkan-droid.c", "vulkan-droid.o", CFLAGS);
   if (compile_and_link_exe()) return 1;
