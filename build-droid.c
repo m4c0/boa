@@ -21,9 +21,9 @@ static int link_exe() {
       "-resource-dir", ANDROID_NDK_PREBUILT_ROOT "/lib/clang/21",
       "--target=" ARCH,
       "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
-      "-o", "droid/apk/" ARCH "/libboas.so", 
+      "-o", "droid/apk/" ARCHDIR "/libboas.so", 
       OBJS, "vulkan-droid.o");
-  RUN("cp", "droid/apk/" ARCH "/libboas.so", "droid/aab/lib/" ARCH "/");
+  RUN("cp", "droid/apk/" ARCHDIR "/libboas.so", "droid/aab/lib/" ARCHDIR "/");
   return 0;
 }
 
@@ -31,7 +31,7 @@ static int link_exe() {
 static int link_exe() { return 1; } // removes warning
 #endif
 
-static int meta(char * tgt) {
+static int meta(char * dir, char * tgt) {
   fprintf(stderr, "Building for target %s\n", tgt);
 
   char * ndk = getenv("ANDROID_NDK_PREBUILT_ROOT");
@@ -39,12 +39,14 @@ static int meta(char * tgt) {
 
   char o[1024];
   snprintf(o, 1024, "droid/build-%s", tgt);
+  char a[1024];
+  snprintf(a, 1024, "-DARCH=\"%s\"", tgt);
   char d[1024];
-  snprintf(d, 1024, "-DARCH=\"%s\"", tgt);
+  snprintf(d, 1024, "-DARCHDIR=\"%s\"", dir);
   char n[1024];
   snprintf(n, 1024, "-DANDROID_NDK_PREBUILT_ROOT=\"%s\"", ndk);
 
-  RUN("clang", n, d, "-o", o, "build-droid.c");
+  RUN("clang", n, a, d, "-o", o, "build-droid.c");
   RUN(o);
   return 0;
 }
@@ -57,10 +59,10 @@ int main(int argc, char ** argv) {
   mkdir("droid/aab/manifest", 0777);
   mkdir("droid/apk", 0777);
 
-  if (meta("aarch64-none-linux-android26"  )) return 1;
-  if (meta("armv7-none-linux-androideabi26")) return 1;
-  if (meta("i686-none-linux-android26"     )) return 1;
-  if (meta("x86_64-none-linux-android26"   )) return 1;
+  if (meta("arm64-v8a",   "aarch64-linux-android32"  )) return 1;
+  if (meta("armeabi-v7a", "armv7-linux-androideabi32")) return 1;
+  if (meta("x86",         "i686-linux-android32"     )) return 1;
+  if (meta("x86_64",      "x86_64-linux-android32"   )) return 1;
 
   if (shaders()) return 1;
 
@@ -107,12 +109,12 @@ int main(int argc, char ** argv) {
       "-C", "droid/aab", "resources.pb");
 
   RUN("java", "-jar", bundletools, "build-bundle", "--modules=droid/aab.zip", "--output=droid/app.aab");
-  RUN("jarsigner", "-keystore", "droid/keystore.jks", "-storepass", "android", "droid/app.aab", "android");
+  RUN("jarsigner", "-keystore", "droid/keystore.jks", "-storepass", "android", "droid/app.aab", "androidkey");
 
   return 0;
 #else
-  mkdir("droid/aab/lib/" ARCH, 0777);
-  mkdir("droid/apk/" ARCH, 0777);
+  mkdir("droid/aab/lib/" ARCHDIR, 0777);
+  mkdir("droid/apk/" ARCHDIR, 0777);
 
   CC("vulkan-droid.c", "vulkan-droid.o", CFLAGS);
   if (compile_and_link_exe()) return 1;
