@@ -23,6 +23,7 @@ static int link_exe() {
       "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
       "-o", "droid/apk/" ARCH "/libboas.so", 
       OBJS, "vulkan-droid.o");
+  RUN("cp", "droid/apk/" ARCH "/libboas.so", "droid/aab/lib/" ARCH "/");
   return 0;
 }
 
@@ -51,7 +52,11 @@ static int meta(char * tgt) {
 int main(int argc, char ** argv) {
 #ifndef ARCH
   mkdir("droid", 0777);
+  mkdir("droid/aab", 0777);
+  mkdir("droid/aab/lib", 0777);
+  mkdir("droid/aab/manifest", 0777);
   mkdir("droid/apk", 0777);
+
   if (meta("aarch64-none-linux-android26"  )) return 1;
   if (meta("armv7-none-linux-androideabi26")) return 1;
   if (meta("i686-none-linux-android26"     )) return 1;
@@ -73,6 +78,11 @@ int main(int argc, char ** argv) {
   char jar[1024];
   snprintf(jar, 1024, "%s/android.jar", dir);
 
+  char * bundletools = getenv("ANDROID_BUILDBUNDLE");
+  assert(bundletools && "missing env for ANDROID_BUILDBUNDLE");
+
+  // APK
+
   RUN(aapt2, "compile", "res/values/strings.xml", "-o", "droid/");
   RUN(aapt2, "link", "droid/values_strings.arsc.flat", "-o", "droid/app.res.apk", "--manifest", "AndroidManifest.xml", "-I", jar);
 
@@ -81,11 +91,27 @@ int main(int argc, char ** argv) {
   RUN(zipalign, "-p", "-f", "-v", "4", "droid/app.res.apk", "droid/app.apk");
 
   // Just an example
-  // RUN("keytool", "-genkeypair", "-keystore", "droid/keystore.jks", "-alias", "androidkey", "-validity", "10000", "-keyalg", "RSA", "-keysize", "2048", "-storepass", "android", "-keypass", "android", "-dname", "CN=CA");
+  RUN("keytool", "-genkeypair", "-keystore", "droid/keystore.jks", "-alias", "androidkey", "-validity", "10000", "-keyalg", "RSA", "-keysize", "2048", "-storepass", "android", "-keypass", "android", "-dname", "CN=CA");
   RUN(apksigner, "sign", "--in", "droid/app.apk", "-ks", "droid/keystore.jks", "--ks-key-alias", "androidkey", "--ks-pass", "pass:android", "--key-pass", "pass:android");
+
+  // AAB
+
+  RUN(aapt2, "compile", "--dir", "res", "-o", "droid/res.zip");
+  RUN(aapt2, "link", "--proto-format", "-o", "droid/linked.zip", "-I", jar, "--manifest", "AndroidManifest.xml", "droid/res.zip", "--auto-add-overlay");
+
+  RUN("jar", "xf", "droid/linked.zip", "-C", "droid/aab");
+  RUN("mv", "droid/aab/AndroidManifest.xml", "droid/aab/manifest/");
+  RUN("jar", "cMf", "droid/aab.zip",
+      "-C", "droid/aab", "manifest",
+      "-C", "droid/aab", "lib",
+      "-C", "droid/aab", "resources.pb");
+
+  RUN("java", "-jar", bundletools, "build-bundle", "--modules=droid/aab.zip", "--output=droid/app.aab");
+  RUN("jarsigner", "-keystore", "droid/keystore.jks", "-storepass", "android", "droid/app.aab", "android");
 
   return 0;
 #else
+  mkdir("droid/aab/lib/" ARCH, 0777);
   mkdir("droid/apk/" ARCH, 0777);
 
   CC("vulkan-droid.c", "vulkan-droid.o", CFLAGS);
