@@ -11,9 +11,12 @@ void vlk_init();
 void vlk_frame();
 void vlk_deinit();
 
-FILE * vlk_open(const char * name) {
-  char buf[128]; snprintf(buf, 128, "%s.spv", name);
-  return fopen(buf, "rb");
+unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {
+  HRSRC r = FindResource(NULL, name, ext);
+  HGLOBAL g = LoadResource(NULL, r);
+  *ptr = LockResource(g);
+
+  return SizeofResource(NULL, r);
 }
 
 static char vlk_log_buf[1024];

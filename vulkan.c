@@ -423,17 +423,10 @@ static void vlk_create_swc() {
   vlk_create_framebuffer();
 }
 
-FILE * vlk_open(const char * name);
+unsigned vlk_open(const char * name, const char * ext, const void ** ptr);
 static VkShaderModule vlk_create_shader_module(const char * name) {
-  FILE * f = vlk_open(name);
-  assert(f);
-  assert(0 == fseek(f, 0, SEEK_END));
-  long sz = ftell(f);
-  assert(sz && (sz % 4 == 0));
-  assert(0 == fseek(f, 0, SEEK_SET));
-  uint32_t * data = malloc(sz);
-  assert(1 == fread(data, sz, 1, f));
-  fclose(f);
+  unsigned * data;
+  unsigned sz = vlk_open(name, "spv", (const void **)&data);
 
   VkShaderModuleCreateInfo info = {
     .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -443,8 +436,6 @@ static VkShaderModule vlk_create_shader_module(const char * name) {
 
   VkShaderModule mod;
   _(vkCreateShaderModule(vlk_dev, &info, NULL, &mod));
-
-  free(data);
   return mod;
 }
 
