@@ -5,6 +5,7 @@
 
 void vlk_init();
 
+struct AAssetManager * aam;
 struct ANativeWindow * vlk_nwnd;
 
 FILE * vlk_open(const char * name) {
@@ -12,6 +13,7 @@ FILE * vlk_open(const char * name) {
 }
 
 void vlk_log(int r, const char * msg) {
+  __android_log_print(ANDROID_LOG_ERROR, "m4c0", "vulkan error [%d]: %s\n", r, msg);
   abort();
 }
 
@@ -27,6 +29,9 @@ static void on_native_window_created(ANativeActivity * act, ANativeWindow * wnd)
 
 void ANativeActivity_onCreate(ANativeActivity * activity, void * state, size_t state_sz) {
   __android_log_print(ANDROID_LOG_INFO, "m4c0", "creating activity: %p\n", activity);
+
+  aam = activity->assetManager;
+
   activity->callbacks->onStart = on_start;
   activity->callbacks->onNativeWindowCreated = on_native_window_created;
 }
