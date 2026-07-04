@@ -8,7 +8,7 @@
 #  define RES_PATH ""
 #else
 #  define CFLAGS ""
-#  define RES_PATH "droid/apk"
+#  define RES_PATH "droid/apk/assets"
 #endif
 #include "build.h"
 
@@ -58,9 +58,11 @@ int main(int argc, char ** argv) {
 
   mkdir("droid", 0777);
   mkdir("droid/aab", 0777);
+  mkdir("droid/aab/assets", 0777);
   mkdir("droid/aab/lib", 0777);
   mkdir("droid/aab/manifest", 0777);
   mkdir("droid/apk", 0777);
+  mkdir("droid/apk/assets", 0777);
   mkdir("droid/apk/lib", 0777);
 
   if (meta("arm64-v8a",   "aarch64-linux-android32"  )) return 1;
@@ -91,6 +93,8 @@ int main(int argc, char ** argv) {
 
   RUN(aapt2, "compile", "res/values/strings.xml", "-o", "droid/");
   RUN(aapt2, "link", "droid/values_strings.arsc.flat", "-o", "droid/app.res.apk", "--manifest", "AndroidManifest.xml", "-I", jar);
+
+  RUN("cp", "-r", "droid/apk/assets", "droid/aab/");
 
   RUN("jar", "--update", "--file", "droid/app.res.apk", "-C", "droid/apk", ".");
 
