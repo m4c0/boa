@@ -22,6 +22,7 @@ static int link_exe() {
       "--target=" ARCH,
       "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
       "-o", "droid/apk/lib/" ARCHDIR "/libboas.so", 
+      "-llog",
       OBJS, "vulkan-droid.o");
   RUN("cp", "droid/apk/lib/" ARCHDIR "/libboas.so", "droid/aab/lib/" ARCHDIR "/");
   return 0;
