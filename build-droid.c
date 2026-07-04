@@ -21,9 +21,9 @@ static int link_exe() {
       "-resource-dir", ANDROID_NDK_PREBUILT_ROOT "/lib/clang/21",
       "--target=" ARCH,
       "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
-      "-o", "droid/apk/" ARCHDIR "/libboas.so", 
+      "-o", "droid/apk/lib/" ARCHDIR "/libboas.so", 
       OBJS, "vulkan-droid.o");
-  RUN("cp", "droid/apk/" ARCHDIR "/libboas.so", "droid/aab/lib/" ARCHDIR "/");
+  RUN("cp", "droid/apk/lib/" ARCHDIR "/libboas.so", "droid/aab/lib/" ARCHDIR "/");
   return 0;
 }
 
@@ -53,11 +53,14 @@ static int meta(char * dir, char * tgt) {
 
 int main(int argc, char ** argv) {
 #ifndef ARCH
+  RUN("rm", "-rf", "droid");
+
   mkdir("droid", 0777);
   mkdir("droid/aab", 0777);
   mkdir("droid/aab/lib", 0777);
   mkdir("droid/aab/manifest", 0777);
   mkdir("droid/apk", 0777);
+  mkdir("droid/apk/lib", 0777);
 
   if (meta("arm64-v8a",   "aarch64-linux-android32"  )) return 1;
   if (meta("armeabi-v7a", "armv7-linux-androideabi32")) return 1;
@@ -114,7 +117,7 @@ int main(int argc, char ** argv) {
   return 0;
 #else
   mkdir("droid/aab/lib/" ARCHDIR, 0777);
-  mkdir("droid/apk/" ARCHDIR, 0777);
+  mkdir("droid/apk/lib/" ARCHDIR, 0777);
 
   CC("vulkan-droid.c", "vulkan-droid.o", CFLAGS);
   if (compile_and_link_exe()) return 1;
