@@ -22,7 +22,7 @@ int main(int argc, char ** argv) {
 
   RUN("cp", "libvulkan.dylib", "boas.app/Contents/MacOS/");
 
-  CC("vulkan-osx.m", "vulkan-osx.o", CFLAGS);
+  CM("vulkan-osx");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
 

@@ -46,25 +46,27 @@ int run(char ** args) {
 }
 #define RUN(...) do { char * args[] = { __VA_ARGS__, 0 }; if (run(args)) return 1; } while (0)
 
-#define CC(src, o, ...) RUN("clang", "-Wall", __VA_ARGS__, "-o", o, "-c", src)
-#define HDR(src, o, ...) CC(src, o, "-x", "c", __VA_ARGS__)
+#define CC1(src, o, ...) RUN("clang", "-Wall", __VA_ARGS__, "-o", o, "-c", src)
+#define HDR(src, d) CC1(src".h", src".o", "-x", "c", "-D", d, CFLAGS)
+#define CC(src) CC1(src".c", src".o", CFLAGS)
+#define CM(src) CC1(src".m", src".o", CFLAGS)
 
-#define SHADER(src, fld) RUN("glslang", "-V", src, "-o", fld "/" src ".spv")
+#define SHADER(src) RUN("glslang", "-V", src, "-o", RES_PATH "/" src ".spv")
 
 #define OBJS "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o", "vulkan.o"
 static int compile_common() {
-  CC("vulkan.c", "vulkan.o", CFLAGS);
-  HDR("gme.h", "gme.o", CFLAGS, "-D", "GME_IMPLEMENTATION");
-  HDR("sfx.h", "sfx.o", CFLAGS, "-D", "SFX_IMPLEMENTATION");
-  HDR("snd.h", "snd.o", CFLAGS, "-D", "SND_IMPLEMENTATION");
-  HDR("snk.h", "snk.o", CFLAGS, "-D", "SNK_IMPLEMENTATION");
-  HDR("tmr.h", "tmr.o", CFLAGS, "-D", "TMR_IMPLEMENTATION");
+  CC("vulkan");
+  HDR("gme", "GME_IMPLEMENTATION");
+  HDR("sfx", "SFX_IMPLEMENTATION");
+  HDR("snd", "SND_IMPLEMENTATION");
+  HDR("snk", "SNK_IMPLEMENTATION");
+  HDR("tmr", "TMR_IMPLEMENTATION");
   return 0;
 }
 
 static int shaders() {
-  SHADER("shader.frag", RES_PATH);
-  SHADER("shader.vert", RES_PATH);
+  SHADER("shader.frag");
+  SHADER("shader.vert");
   return 0;
 }
 

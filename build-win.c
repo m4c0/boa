@@ -19,7 +19,7 @@ static int link_exe() {
 int main(int argc, char ** argv) {
   _mkdir("app");
 
-  CC("vulkan-win.c", "vulkan-win.o", CFLAGS);
+  CC("vulkan-win");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
 

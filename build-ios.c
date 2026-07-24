@@ -1,3 +1,7 @@
+// You can get this path with 'xcrun --show-sdk-path --sdk iphoneos'
+#define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
+#define TARGET "arm64-apple-ios26.0"
+
 #define RES_PATH "export.xcarchive/Products/Applications/boas.app"
 #define CFLAGS "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include"
 #include "build.h"
@@ -5,10 +9,6 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <string.h>
-
-// You can get this path with 'xcrun --show-sdk-path --sdk iphoneos'
-#define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
-#define TARGET "arm64-apple-ios26.0"
 
 static char * slurp(const char * file) {
   FILE * f = fopen(file, "rb");
@@ -159,7 +159,7 @@ int main(int argc, char ** argv) {
   mkdir("export.xcarchive/Products/Applications", 0777);
   mkdir("export.xcarchive/Products/Applications/boas.app", 0777);
 
-  CC("vulkan-ios.m", "vulkan-ios.o", CFLAGS);
+  CM("vulkan-ios");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
 

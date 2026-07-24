@@ -124,7 +124,7 @@ int main(int argc, char ** argv) {
   mkdir("droid/aab/lib/" ARCHDIR, 0777);
   mkdir("droid/apk/lib/" ARCHDIR, 0777);
 
-  CC("vulkan-droid.c", "vulkan-droid.o", CFLAGS);
+  CC("vulkan-droid");
   if (compile_and_link_exe()) return 1;
 
   return 0;
