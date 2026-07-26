@@ -5,11 +5,12 @@ jobs:
   build-android:
     runs-on: macos-latest
     steps:
+      - run: curl -Lv -o /tmp/bundletool.jar https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
       - run: |
           echo "ANDROID_NDK_PREBUILT_ROOT=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/darwin-x86_64" >> "$GITHUB_ENV"
           echo "ANDROID_BUILD_TOOLS=$ANDROID_SDK_ROOT/build-tools/37.0.0" >> "$GITHUB_ENV"
           echo "ANDROID_PLATFORM=$ANDROID_SDK_ROOT/platforms/android-37.0" >> "$GITHUB_ENV"
-          echo "ANDROID_BUILDBUNDLE=$ANDROID_SDK_ROOT/build-tools" >> "$GITHUB_ENV"
+          echo "ANDROID_BUILDBUNDLE=/tmp/bundletool.jar" >> "$GITHUB_ENV"
       - run: brew install glslang
       - uses: actions/checkout@v6
         with:

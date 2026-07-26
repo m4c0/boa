@@ -91,9 +91,11 @@ int main(int argc, char ** argv) {
   assert(dir && "missing env for ANDROID_PLATFORM");
   char jar[1024];
   snprintf(jar, 1024, "%s/android.jar", dir);
+  assert(fopen(jar, "rb") && "ANDROID_PLATFORM does not contain a valid android.jar");
 
   char * bundletools = getenv("ANDROID_BUILDBUNDLE");
   assert(bundletools && "missing env for ANDROID_BUILDBUNDLE");
+  assert(fopen(bundletools, "rb") && "invalid ANDROID_BUILDBUNDLE");
 
   // APK
 
@@ -102,6 +104,7 @@ int main(int argc, char ** argv) {
 
   RUN("cp", "-r", "droid/apk/assets", "droid/aab/");
 
+  RUN("jar", "--help");
   RUN("jar", "--update", "--file", "droid/app.res.apk", "-C", "droid/apk", ".");
 
   RUN(zipalign, "-p", "-f", "-v", "4", "droid/app.res.apk", "droid/app.apk");
