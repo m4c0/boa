@@ -25,11 +25,8 @@ static int pch() {
 }
 
 static int link_exe() {
-  RUN("clang", "-Wall", "-shared",
+  RUN(ANDROID_NDK_PREBUILT_ROOT"/bin/"ARCH"-clang", "-Wall", "-shared",
       "-Wl,-Bsymbolic", "-Wl,--no-undefined",
-      "-resource-dir", ANDROID_NDK_PREBUILT_ROOT "/lib/clang/21",
-      "--target=" ARCH,
-      "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
       "-o", "droid/apk/lib/" ARCHDIR "/libboas.so", 
       "-landroid", "-llog",
       OBJS, "vulkan-droid.o", "volk.o");
@@ -74,10 +71,10 @@ int main(int argc, char ** argv) {
   mkdir("droid/apk/assets", 0777);
   mkdir("droid/apk/lib", 0777);
 
-  if (meta("arm64-v8a",   "aarch64-linux-android32"  )) return 1;
-  if (meta("armeabi-v7a", "armv7-linux-androideabi32")) return 1;
-  if (meta("x86",         "i686-linux-android32"     )) return 1;
-  if (meta("x86_64",      "x86_64-linux-android32"   )) return 1;
+  if (meta("arm64-v8a",   "aarch64-linux-android32"   )) return 1;
+  if (meta("armeabi-v7a", "armv7a-linux-androideabi32")) return 1;
+  if (meta("x86",         "i686-linux-android32"      )) return 1;
+  if (meta("x86_64",      "x86_64-linux-android32"    )) return 1;
 
   if (shaders()) return 1;
 
