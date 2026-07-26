@@ -3,12 +3,9 @@
 #import <UIKit/UIKit.h>
 
 #include "gme.h"
+#include "vlk.h"
 
-void vlk_init();
-void vlk_frame();
-void vlk_deinit();
-
-CAMetalLayer * g_layer;
+CAMetalLayer * vlk_metal_layer;
 
 @interface POCViewDelegate : NSObject<MTKViewDelegate>
 @property (nonatomic) BOOL ready;
@@ -18,7 +15,7 @@ CAMetalLayer * g_layer;
 }
 - (void)drawInMTKView:(MTKView *)view {
   if (!self.ready) {
-    g_layer = (CAMetalLayer *)view.layer;
+    vlk_metal_layer = (CAMetalLayer *)view.layer;
 
     vlk_init();
     self.ready = YES;
@@ -86,8 +83,6 @@ CAMetalLayer * g_layer;
   vlk_deinit();
 }
 @end
-
-CAMetalLayer * vlk_metal_layer() { return g_layer; }
 
 __strong static NSData * last_resource;
 unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {

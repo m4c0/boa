@@ -1,15 +1,7 @@
 #include "gme.h"
-
-#define _CRT_SECURE_NO_WARNINGS
-#define WIN32_MEAN_AND_LEAN
-#include <stdio.h>
-#include <windows.h>
+#include "vlk.h"
 
 HWND vlk_hwnd;
-
-void vlk_init();
-void vlk_frame();
-void vlk_deinit();
 
 unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {
   HRSRC r = FindResource(NULL, name, ext);

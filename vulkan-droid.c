@@ -1,3 +1,5 @@
+#include "vlk.h"
+
 #include <android/choreographer.h>
 #include <android/native_activity.h>
 #include <android/log.h>
@@ -5,9 +7,6 @@
 #include <stdlib.h>
 
 ANativeWindow * vlk_nwnd;
-
-void vlk_init();
-void vlk_frame();
 
 static AAssetManager * aam;
 static AAsset        * ass;

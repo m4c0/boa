@@ -1,6 +1,26 @@
 #ifndef VLK_H
 #define VLK_H
 
+void vlk_init();
+void vlk_frame();
+void vlk_deinit();
+
+void * vlk_headless(int w, int h);
+
+void vlk_reset();
+void vlk_mouse_down(int x, int y);
+void vlk_mouse_move(int x, int y);
+
+extern unsigned vlk_open(const char * name, const char * ext, const void ** ptr);
+
+#ifdef __APPLE__
+extern CAMetalLayer * vlk_metal_layer;
+#elif __ANDROID__
+extern struct ANativeWindow * vlk_nwnd;
+#elif _WIN32
+extern HWND vlk_hwnd;
+#endif
+
 #ifdef VLK_IMPLEMENTATION
 #include "gme.h"
 #include "sfx.h"
@@ -55,14 +75,6 @@ static VkPipelineLayout      vlk_pl;
 static VkPipeline            vlk_ppl;
 
 struct timeval clk;
-
-#ifdef __APPLE__
-CAMetalLayer * vlk_metal_layer();
-#elif __ANDROID__
-extern struct ANativeWindow * vlk_nwnd;
-#elif _WIN32
-extern HWND vlk_hwnd;
-#endif
 
 void vlk_log(int r, const char * msg);
 static void vlk_check(VkResult r, const char * msg) {
@@ -213,7 +225,7 @@ static void vlk_create_surface() {
 #ifdef __APPLE__
   VkMetalSurfaceCreateInfoEXT info = {
     .sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT,
-    .pLayer = vlk_metal_layer(),
+    .pLayer = vlk_metal_layer,
   };
   _(vkCreateMetalSurfaceEXT(vlk_ins, &info, NULL, &vlk_surf));
 #elif _WIN32
