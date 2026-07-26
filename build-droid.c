@@ -116,8 +116,10 @@ int main(int argc, char ** argv) {
 
   RUN(aapt2, "compile", "--dir", "res", "-o", "droid/res.zip");
   RUN(aapt2, "link", "--proto-format", "-o", "droid/linked.zip", "-I", jar, "--manifest", "AndroidManifest.xml", "droid/res.zip", "--auto-add-overlay");
+  RUN("unzip", "-t", "droid/res.zip");
+  RUN("unzip", "-t", "droid/linked.zip");
 
-  RUN("jar", "-x", "-f", "droid/linked.zip", "-C", "droid/aab");
+  RUN("jar", "-x", "-v", "-f", "droid/linked.zip", "-C", "droid/aab", ".");
   RUN("mv", "droid/aab/AndroidManifest.xml", "droid/aab/manifest/");
   RUN("jar", "-c", "-M", "-f", "droid/aab.zip",
       "-C", "droid/aab", "manifest",
