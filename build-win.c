@@ -52,5 +52,7 @@ int main(int argc, char ** argv) {
   CC("vulkan-win");
   if (compile_and_link_exe()) return 1;
 
+  // RUN("c:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64\\makeappx.exe", "pack", "/f", "AppxMapping.ini", "/p", "boas.msix");
+
   return 0;
 }
