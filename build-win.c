@@ -18,7 +18,7 @@ static int pch() {
 
 static int link_exe() {
   RUN("clang", "-Wall", OPT,
-      "-o", "app/boas.exe",
+      "-o", "boas.exe",
       OBJS, "vulkan-win.o", "main.res",
       "-lole32", "-luser32");
   return 0;
@@ -52,6 +52,7 @@ int main(int argc, char ** argv) {
   CC("vulkan-win");
   if (compile_and_link_exe()) return 1;
 
+  // https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/how-to-create-a-basic-package-manifest
   // RUN("c:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64\\makeappx.exe", "pack", "/f", "AppxMapping.ini", "/p", "boas.msix");
 
   return 0;

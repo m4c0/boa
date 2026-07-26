@@ -13,6 +13,7 @@ poc-snd
 *.exe
 *.flat
 *.ico
+*.msix
 *.o
 *.pch
 *.pdb

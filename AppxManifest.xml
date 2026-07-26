@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
-  <Identity Name="" 
-            Version="" 
-            Publisher="" />
+  <Identity Name="boas" 
+            Version="1.1.0.0" 
+            Publisher="CN=m4c0" />
   <Properties>
-    <DisplayName></DisplayName>
-    <PublisherDisplayName></PublisherDisplayName>
-    <Logo></Logo>
+    <DisplayName>Boas</DisplayName>
+    <PublisherDisplayName>m4c0</PublisherDisplayName>
+    <Logo>Icon-1024.png</Logo>
   </Properties>
   <Prerequisites>
-    <OSMinVersion></OSMinVersion>
-    <OSMaxVersionTested></OSMaxVersionTested>
+    <OSMinVersion>6.2.1</OSMinVersion>
+    <OSMaxVersionTested>6.2.1</OSMaxVersionTested>
   </Prerequisites>
   <Resources>
-    <Resource Language="" />
+    <Resource Language="en-us" />
   </Resources>
   <Applications>
-    <Application Id="" StartPage="">
-      <VisualElements DisplayName="" Description=""
-           Logo="" SmallLogo=""  
-           ForegroundText="" BackgroundColor="">
-         <SplashScreen Image="" />
+    <Application Id="boas" Executable="boas.exe" EntryPoint="WinMain">
+      <VisualElements DisplayName="Boas" Description="Snake game"
+           Logo="Icon-1024.png" SmallLogo="Icon-1024.png"  
+           ForegroundText="light" BackgroundColor="black">
+         <SplashScreen Image="Icon-1024.png" />
       </VisualElements>
     </Application>
   </Applications>
