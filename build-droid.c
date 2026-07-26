@@ -104,7 +104,6 @@ int main(int argc, char ** argv) {
 
   RUN("cp", "-r", "droid/apk/assets", "droid/aab/");
 
-  RUN("jar", "--help");
   RUN("jar", "--update", "--file", "droid/app.res.apk", "-C", "droid/apk", ".");
 
   RUN(zipalign, "-p", "-f", "-v", "4", "droid/app.res.apk", "droid/app.apk");
@@ -118,9 +117,9 @@ int main(int argc, char ** argv) {
   RUN(aapt2, "compile", "--dir", "res", "-o", "droid/res.zip");
   RUN(aapt2, "link", "--proto-format", "-o", "droid/linked.zip", "-I", jar, "--manifest", "AndroidManifest.xml", "droid/res.zip", "--auto-add-overlay");
 
-  RUN("jar", "xf", "droid/linked.zip", "-C", "droid/aab");
+  RUN("jar", "-x", "-f", "droid/linked.zip", "-C", "droid/aab");
   RUN("mv", "droid/aab/AndroidManifest.xml", "droid/aab/manifest/");
-  RUN("jar", "cMf", "droid/aab.zip",
+  RUN("jar", "-c", "-M", "-f", "droid/aab.zip",
       "-C", "droid/aab", "manifest",
       "-C", "droid/aab", "lib",
       "-C", "droid/aab", "resources.pb");
