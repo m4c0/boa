@@ -4,14 +4,12 @@ on: [push, pull_request]
 jobs:
   build-android:
     runs-on: macos-latest
-    env:
-      ANDROID_NDK_PREBUILT_ROOT: $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/darwin-x86_64
-      ANDROID_BUILD_TOOLS: $ANDROID_SDK_ROOT/build-tools
-      ANDROID_PLATFORM: $ANDROID_SDK_ROOT/build-tools
-      ANDROID_BUILDBUNDLE: $ANDROID_SDK_ROOT/build-tools
     steps:
-      - run: find $ANDROID_NDK_ROOT -type d
-      - run: find $ANDROID_SDK_ROOT -type d
+      - run: |
+          echo "ANDROID_NDK_PREBUILT_ROOT=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/darwin-x86_64" >> "$GITHUB_ENV"
+          echo "ANDROID_BUILD_TOOLS=$ANDROID_SDK_ROOT/build-tools/37.0.0" >> "$GITHUB_ENV"
+          echo "ANDROID_PLATFORM=$ANDROID_SDK_ROOT/platforms/android-37.0" >> "$GITHUB_ENV"
+          echo "ANDROID_BUILDBUNDLE=$ANDROID_SDK_ROOT/build-tools" >> "$GITHUB_ENV"
       - run: brew install glslang
       - uses: actions/checkout@v6
         with:
