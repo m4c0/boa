@@ -59,4 +59,8 @@ jobs:
       - run: mv bin/glslang.exe .
       - run: clang -o build.exe build-win.c
       - run: ./build.exe
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          path: boas.exe
 
