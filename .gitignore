@@ -4,7 +4,6 @@ build-osx
 build-ios
 droid
 export
-export.xcarchive
 out
 poc-snd
 *.a
@@ -13,9 +12,12 @@ poc-snd
 *.dylib
 *.exe
 *.flat
+*.ico
+*.o
 *.pch
 *.pdb
 *.plist
-*.o
+*.res
 *.spv
+*.xcarchive
 *.xcframework

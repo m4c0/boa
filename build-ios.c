@@ -10,25 +10,8 @@
 #include <stdint.h>
 #include <string.h>
 
-static char * slurp(const char * file) {
-  FILE * f = fopen(file, "rb");
-  assert(f);
-
-  assert(0 == fseek(f, 0, SEEK_END));
-  long sz = ftell(f);
-  assert(sz);
-  assert(0 == fseek(f, 0, SEEK_SET));
-
-  char * data = malloc(sz + 1);
-  assert(1 == fread(data, sz, 1, f));
-  data[sz] = 0;
-
-  fclose(f);
-  return data;
-}
-
 static int apply(char * src, char * tgt) {
-  char * file = slurp(src);
+  char * file = slurp(src, NULL); // TODO: use size instead of cstr
 
   FILE * f = fopen(tgt, "wb");
   assert(f);
