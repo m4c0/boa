@@ -21,6 +21,7 @@ jobs:
   build-ios:
     runs-on: macos-latest
     env:
+      IOS_BUILD_ONLY: yup # Just run a build check
       IOS_TEAM: dummy
       IOS_SIGN_ID: "dummy Certificate Name"
       IOS_BUNDLE_ID: com.github.m4c0.example

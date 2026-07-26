@@ -161,6 +161,8 @@ int main(int argc, char ** argv) {
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;
   if (apply("app.plist.in",       "export.xcarchive/Products/Applications/boas.app/Info.plist")) return 1;
 
+  if (getenv("IOS_BUILD_ONLY")) return 0;
+
   if (actool())   return 1;
   if (codesign()) return 1;
   if (symbols())  return 1;
