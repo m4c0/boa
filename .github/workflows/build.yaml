@@ -1,38 +1,62 @@
 name: build game
-on:
-  workflow_dispatch:
-  push:
-  pull_request:
+on: [push, pull_request]
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os:
-          - macos-latest
-          - windows-latest
-    runs-on: ${{ matrix.os }}
+  build-android:
+    runs-on: macos-latest
+    env:
+      ANDROID_NDK_PREBUILT_ROOT: $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/darwin-x86_64
+      ANDROID_BUILD_TOOLS: $ANDROID_SDK_ROOT/build-tools
+      ANDROID_PLATFORM: $ANDROID_SDK_ROOT/build-tools
+      ANDROID_BUILDBUNDLE: $ANDROID_SDK_ROOT/build-tools
     steps:
-      - name: 🧰 Setup ECOW
-        uses: m4c0/ecow/.github/actions/setup@main
+      - run: find $ANDROID_NDK_ROOT -type d
+      - run: find $ANDROID_SDK_ROOT -type d
+      - run: brew install glslang
+      - uses: actions/checkout@v6
         with:
-          os: ${{ matrix.os }}
-      - name: 🧴 Setup Casein
-        uses: m4c0/casein/.github/actions/deps@main
-      - name: 🦆 Setup Quack
-        uses: m4c0/quack/.github/actions/deps@main
-      - name: 🖖 Install glslang
-        uses: m4c0/vee/.github/actions/glslang@main
+          submodules: true
+      - run: clang -o build build-droid.c
+      - run: ./build
+  build-ios:
+    runs-on: macos-latest
+    env:
+      IOS_TEAM: dummy
+      IOS_SIGN_ID: "dummy Certificate Name"
+      IOS_BUNDLE_ID: com.github.m4c0.example
+      IOS_PROV_PROF: "dummy Development"
+    steps:
+      - uses: actions/checkout@v6
         with:
-          os: ${{ matrix.os }}
-      - name: 🛒 Checkout Boa
-        uses: actions/checkout@v3
+          submodules: true
+      - run: brew install glslang
+      - run: curl -L -o moltenvk.tar https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-ios.tar
+      - run: tar xfv moltenvk.tar
+      - run: mv MoltenVK/MoltenVK/static/MoltenVK.xcframework/ .
+      - run: clang -o build build-ios.c
+      - run: ./build
+  build-osx:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
         with:
-          repository: m4c0/boa
-          path: boa
-      - name: 🔨 Build
-        uses: m4c0/ecow/.github/actions/compile@main
+          submodules: true
+      - run: brew install glslang
+      - run: curl -L -o moltenvk.tar https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-macos.tar
+      - run: tar xfv moltenvk.tar
+      - run: mv MoltenVK/MoltenVK/static/MoltenVK.xcframework/ .
+      - run: touch libvulkan.dylib # hack
+      - run: clang -o build build-osx.c
+      - run: ./build
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
         with:
-          os: ${{ matrix.os }}
-          project: boa
+          submodules: true
+      - run: curl -L -o glslang.zip https://github.com/KhronosGroup/glslang/releases/download/main-tot/glslang-master-windows-Release.zip
+      - run: unzip glslang.zip bin/glslang.exe
+      - run: mv bin/glslang.exe .
+      - run: clang -o build.exe build-win.c
+      - run: ./build.exe
 
