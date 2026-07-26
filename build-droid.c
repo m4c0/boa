@@ -15,6 +15,15 @@
 #include <sys/stat.h>
 
 #ifdef ARCH
+static int pch() {
+  RUN("clang", "-Wall", "-g", "-x", "c-header",
+    "-IVulkan-Headers/include",
+    "-D", "VK_USE_PLATFORM_ANDROID_KHR",
+    "-D", "VLK_USE_VOLK",
+    "-o", "pch.pch", "pch.h");
+  return 0;
+}
+
 static int link_exe() {
   RUN("clang", "-Wall", "-shared",
       "-Wl,-Bsymbolic", "-fuse-ld=lld", "-Wl,--no-undefined",
@@ -123,6 +132,8 @@ int main(int argc, char ** argv) {
 #else
   mkdir("droid/aab/lib/" ARCHDIR, 0777);
   mkdir("droid/apk/lib/" ARCHDIR, 0777);
+
+  if (pch()) return 1;
 
   CC("vulkan-droid");
   if (compile_and_link_exe()) return 1;

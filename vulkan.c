@@ -12,13 +12,6 @@
 
 #ifdef __APPLE__
 #  include <TargetConditionals.h>
-#  define VK_USE_PLATFORM_METAL_EXT
-#elif __ANDROID__
-#  define VK_USE_PLATFORM_ANDROID_KHR
-#elif _WIN32
-#  define VK_USE_PLATFORM_WIN32_KHR
-#else
-#error Unsupported platform
 #endif
 
 #if !TARGET_OS_IPHONE
@@ -28,12 +21,6 @@
 
 // not really needed. I'm using because it enables Vim's ctrl-n
 #include "Vulkan-Headers/include/vulkan/vulkan_core.h"
-
-#ifdef __APPLE__
-#  include "Vulkan-Headers/include/vulkan/vulkan_metal.h"
-#elif _WIN32
-#  include "Vulkan-Headers/include/vulkan/vulkan_win32.h"
-#endif
 
 #define VBUF_SIZE SNK_MAX_CELLS * sizeof(gme_storage_t)
 

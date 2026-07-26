@@ -67,6 +67,15 @@ static int apply(char * src, char * tgt) {
   return 0;
 }
 
+static int pch() {
+  RUN("clang", "-Wall", "-O3", "-x", "c-header",
+    "-target", TARGET, "-isysroot", SDK_PATH,
+    "-IVulkan-Headers/include",
+    "-D", "VK_USE_PLATFORM_METAL_EXT",
+    "-o", "pch.pch", "pch.h");
+  return 0;
+}
+
 static int codesign() {
   char * team = getenv("IOS_TEAM");
   assert(team && "Missing IOS_TEAM environment variable");
@@ -158,6 +167,8 @@ int main(int argc, char ** argv) {
   mkdir("export.xcarchive/Products", 0777);
   mkdir("export.xcarchive/Products/Applications", 0777);
   mkdir("export.xcarchive/Products/Applications/boas.app", 0777);
+
+  if (pch()) return 1;
 
   CM("vulkan-ios");
   if (compile_and_link_exe()) return 1;
