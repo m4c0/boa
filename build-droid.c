@@ -16,7 +16,7 @@
 
 #ifdef ARCH
 static int pch() {
-  RUN("clang", "-Wall", "-g", "-x", "c-header",
+  RUN("clang", "-Wall", "-g", "-x", "c-header", CFLAGS,
     "-IVulkan-Headers/include",
     "-D", "VK_USE_PLATFORM_ANDROID_KHR",
     "-D", "VLK_USE_VOLK",
