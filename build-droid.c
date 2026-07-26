@@ -32,7 +32,7 @@ static int link_exe() {
       "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
       "-o", "droid/apk/lib/" ARCHDIR "/libboas.so", 
       "-landroid", "-llog",
-      OBJS, "vulkan-droid.o");
+      OBJS, "vulkan-droid.o", "volk.o");
   RUN("cp", "droid/apk/lib/" ARCHDIR "/libboas.so", "droid/aab/lib/" ARCHDIR "/");
   return 0;
 }
@@ -135,6 +135,7 @@ int main(int argc, char ** argv) {
 
   if (pch()) return 1;
 
+  CC("volk");
   CC("vulkan-droid");
   if (compile_and_link_exe()) return 1;
 

@@ -19,7 +19,7 @@ static int link_exe() {
     "-framework", "AudioToolbox",
     "-framework", "MetalKit",
     "-o", "boas.app/Contents/MacOS/boas", 
-    OBJS, "vulkan-osx.o");
+    OBJS, "vulkan-osx.o", "volk.o");
   return 0;
 }
 
@@ -33,6 +33,7 @@ int main(int argc, char ** argv) {
 
   if (pch()) return 1;
 
+  CC("volk");
   CM("vulkan-osx");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
