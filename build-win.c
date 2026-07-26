@@ -2,7 +2,7 @@
 #define OPT "-O3"
 
 #define CFLAGS OPT, "-IVulkan-Headers/include"
-#define RES_PATH "app"
+#define RES_PATH "."
 #include "build.h"
 
 #include <direct.h>
@@ -45,12 +45,12 @@ int main(int argc, char ** argv) {
 
   if (pch()) return 1;
 
-  if (icon()) return 1;
+  if (icon())    return 1;
+  if (shaders()) return 1;
   RUN("llvm-rc", "/FO", "main.res", "main.rc");
 
   CC("vulkan-win");
   if (compile_and_link_exe()) return 1;
-  if (shaders()) return 1;
 
   return 0;
 }
