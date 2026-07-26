@@ -26,7 +26,7 @@ static int pch() {
 
 static int link_exe() {
   RUN("clang", "-Wall", "-shared",
-      "-Wl,-Bsymbolic", "-fuse-ld=lld", "-Wl,--no-undefined",
+      "-Wl,-Bsymbolic", "-Wl,--no-undefined",
       "-resource-dir", ANDROID_NDK_PREBUILT_ROOT "/lib/clang/21",
       "--target=" ARCH,
       "--sysroot", ANDROID_NDK_PREBUILT_ROOT "/sysroot/",
