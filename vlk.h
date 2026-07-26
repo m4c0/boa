@@ -1,3 +1,7 @@
+#ifndef VLK_H
+#define VLK_H
+
+#ifdef VLK_IMPLEMENTATION
 #include "gme.h"
 #include "sfx.h"
 #include "snd.h"
@@ -5,22 +9,9 @@
 #include "tme.h"
 #include "tmr.h"
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #ifdef __APPLE__
 #  include <TargetConditionals.h>
 #endif
-
-#if !TARGET_OS_IPHONE
-#  define VOLK_IMPLEMENTATION
-#  include "volk.h"
-#endif
-
-// not really needed. I'm using because it enables Vim's ctrl-n
-#include "Vulkan-Headers/include/vulkan/vulkan_core.h"
 
 #define VBUF_SIZE SNK_MAX_CELLS * sizeof(gme_storage_t)
 
@@ -688,3 +679,5 @@ void vlk_deinit() {
   vkDestroySurfaceKHR(vlk_ins, vlk_surf, NULL);
   vkDestroyInstance(vlk_ins, NULL);
 }
+#endif
+#endif

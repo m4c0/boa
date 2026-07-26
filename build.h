@@ -72,12 +72,12 @@ int run(char ** args) {
 
 #define OBJS "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o", "vulkan.o"
 static int compile_common() {
-  CC("vulkan");
   HDR("gme", "GME_IMPLEMENTATION");
   HDR("sfx", "SFX_IMPLEMENTATION");
   HDR("snd", "SND_IMPLEMENTATION");
   HDR("snk", "SNK_IMPLEMENTATION");
   HDR("tmr", "TMR_IMPLEMENTATION");
+  HDR("vlk", "VLK_IMPLEMENTATION");
   return 0;
 }
 
