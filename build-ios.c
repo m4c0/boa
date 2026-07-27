@@ -4,7 +4,7 @@
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios26.0"
 
-#define RES_PATH "export.xcarchive/Products/Applications/boas.app"
+#define RES_PATH "export.xcarchive/Products/Applications/"APP".app"
 #define CFLAGS "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include"
 #include "build.h"
 
@@ -77,14 +77,12 @@ static int codesign() {
   char * team = getenv("IOS_TEAM");
   assert(team && "Missing IOS_TEAM environment variable");
 
-  RUN("codesign", "-s", strdup(team), "export.xcarchive/Products/Applications/boas.app");
+  RUN("codesign", "-f", "-s", strdup(team), RES_PATH);
   return 0;
 }
  
 static int symbols() {
-  RUN("dsymutil", 
-      "export.xcarchive/Products/Applications/boas.app/boas", 
-      "-o", "export.xcarchive/dSYMS/boas.app.dSYM");
+  RUN("dsymutil", RES_PATH"/"APP, "-o", "export.xcarchive/dSYMS/"APP".app.dSYM");
   return 0;
 }
 
@@ -112,7 +110,7 @@ static int actool() {
       "--development-region", "en",
       "--minimum-deployment-target", "26",
       "--output-partial-info-plist", "icon-partial.plist",
-      "--compile", "export.xcarchive/Products/Applications/boas.app",
+      "--compile", RES_PATH,
       "Assets.xcassets");
   return 0;
 }
@@ -124,7 +122,7 @@ static int install() {
     return 0;
   }
 
-  RUN("xcrun", "devicectl", "device", "install", "app", "--device", device, "export/boas.ipa");
+  RUN("xcrun", "devicectl", "device", "install", "app", "--device", device, "export/"APP".ipa");
   return 0;
 }
 
@@ -135,7 +133,7 @@ static int validate(char * verb) {
   assert(api_issuer && "Missing IOS_API_ISSUER environment variable");
 
   RUN("xcrun", "altool", verb, "-t", "iphoneos",
-      "-f", "export/boas.ipa",
+      "-f", "export/"APP".ipa",
       "--apiKey", strdup(api_key),
       "--apiIssuer", strdup(api_issuer));
   return 0;
@@ -152,8 +150,8 @@ static int link_exe() {
       "-framework", "MetalKit",
       "-framework", "QuartzCore",
       "-framework", "UIKit",
-      "-o", "export.xcarchive/Products/Applications/boas.app/boas", 
-      OBJS, "vulkan-ios.o",
+      "-o", RES_PATH"/"APP, 
+      OBJS, "app.o",
       "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
       "-lc++");
   return 0;
@@ -165,7 +163,7 @@ int main(int argc, char ** argv) {
   mkdir("export.xcarchive", 0777);
   mkdir("export.xcarchive/Products", 0777);
   mkdir("export.xcarchive/Products/Applications", 0777);
-  mkdir("export.xcarchive/Products/Applications/boas.app", 0777);
+  mkdir(RES_PATH, 0777);
 
   if (pch()) return 1;
 
@@ -175,7 +173,7 @@ int main(int argc, char ** argv) {
 
   if (apply("export.plist.in",    "export.plist")) return 1;
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;
-  if (apply("app.plist.in",       "export.xcarchive/Products/Applications/boas.app/Info.plist")) return 1;
+  if (apply("app.plist.in",       "export.xcarchive/Products/Applications/"APP".app/Info.plist")) return 1;
 
   if (getenv("IOS_BUILD_ONLY")) return 0;
 
