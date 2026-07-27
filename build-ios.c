@@ -153,7 +153,7 @@ static int link_exe() {
       "-framework", "QuartzCore",
       "-framework", "UIKit",
       "-o", RES_PATH"/"APP, 
-      OBJS, "app.o",
+      OBJS, "vulkan-ios.o",
       "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
       "-lc++");
   return 0;
