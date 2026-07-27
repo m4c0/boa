@@ -12,6 +12,8 @@
 #include <string.h>
 #include <time.h>
 
+#define UPLOAD 0
+
 static time_t bundle_version;
 
 static int apply(char * src, char * tgt) {
@@ -181,11 +183,11 @@ int main(int argc, char ** argv) {
   if (codesign()) return 1;
   if (symbols())  return 1;
   if (export())   return 1;
-#if 1
-  if (install())  return 1;
-  if (validate("--validate-app")) return 1;
-#else
+#if UPLOAD
   if (validate("--upload-app")) return 1;
+#else
+  if (install()) return 1;
+  if (validate("--validate-app")) return 1;
 #endif
 
   return 0;
