@@ -1,3 +1,5 @@
+#define APP "boas"
+
 // You can get this path with 'xcrun --show-sdk-path --sdk iphoneos'
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios26.0"
@@ -7,8 +9,10 @@
 #include "build.h"
 
 #include <sys/stat.h>
-#include <stdint.h>
 #include <string.h>
+#include <time.h>
+
+static time_t bundle_version;
 
 static int apply(char * src, char * tgt) {
   char * file = slurp(src, NULL); // TODO: use size instead of cstr
@@ -35,14 +39,24 @@ static int apply(char * src, char * tgt) {
     char * env = getenv(p);
     if (strncmp(p, "IOS_", 4)) {
       assert(fprintf(f, "&%s;", file));
-      file = ++pp;
+    } else if (0 == strcmp(p, "IOS_APP_NAME")) {
+      assert(fprintf(f, APP));
+    } else if (0 == strcmp(p, "IOS_BUNDLE_VERSION")) {
+      assert(fprintf(f, "%ld", bundle_version));
+    } else if (0 == strcmp(p, "IOS_METHOD")) {
+#if UPLOAD
+      assert(fprintf(f, "app-store-connect"));
+#else
+      assert(fprintf(f, "debugging"));
+#endif
     } else if (env) {
       assert(fprintf(f, "%s", env));
-      file = ++pp;
     } else {
       fprintf(stderr, "Missing environment: %s\n", p);
       exit(1);
     }
+
+    file = ++pp;
   }
 
   assert(fprintf(f, "%s", file));
@@ -146,6 +160,8 @@ static int link_exe() {
 }
 
 int main(int argc, char ** argv) {
+  bundle_version = time(NULL);
+
   mkdir("export.xcarchive", 0777);
   mkdir("export.xcarchive/Products", 0777);
   mkdir("export.xcarchive/Products/Applications", 0777);

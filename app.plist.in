@@ -5,15 +5,15 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>boas</string>
+    <string>&IOS_APP_NAME;</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>boas</string>
+    <string>&IOS_APP_NAME;</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
-    <string>9</string>
+    <string>&IOS_BUNDLE_VERSION;</string>
     <key>DTPlatformName</key>
     <string>iphoneos</string>
     <key>DTPlatformBuild</key>
