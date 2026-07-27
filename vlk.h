@@ -8,8 +8,6 @@ void vlk_deinit();
 void * vlk_headless(int w, int h);
 
 void vlk_reset();
-void vlk_mouse_down(int x, int y);
-void vlk_mouse_move(int x, int y);
 
 extern unsigned vlk_open(const char * name, const char * ext, const void ** ptr);
 
@@ -25,15 +23,10 @@ extern HWND vlk_hwnd;
 #include "gme.h"
 #include "sfx.h"
 #include "snd.h"
-#include "snk.h"
 #include "tme.h"
 #include "tmr.h"
 
-#ifdef __APPLE__
-#  include <TargetConditionals.h>
-#endif
-
-#define VBUF_SIZE SNK_MAX_CELLS * sizeof(gme_storage_t)
+#define VBUF_SIZE GME_MAX_CELLS * sizeof(gme_storage_t)
 
 #define MAX_SWAPCHAIN_IMAGES 8
 typedef struct vlk_swc {

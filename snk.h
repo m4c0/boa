@@ -1,8 +1,6 @@
 #ifndef SNK_H
 #define SNK_H
 
-#define SNK_MAX_CELLS (24 * 24 * 4)
-
 typedef enum snk_dir {
   snk_d_o,
   snk_d_e,
@@ -42,7 +40,7 @@ void snk_grow(int p);
 int  snk_hits(int p);
 int  snk_next(int p);
 
-snk_outcome_t snk_reset();
+snk_outcome_t snk_reset(int max_cells);
 snk_outcome_t snk_run_tick();
 snk_outcome_t snk_update_dir(snk_dir_t n);
 
@@ -61,9 +59,9 @@ typedef struct snk_node {
   int prev;
 } snk_node_t;
 
-static snk_node_t snk_data[SNK_MAX_CELLS];
-static unsigned   snk_grid_size;
-static unsigned   snk_target;
+static snk_node_t * snk_data;
+static unsigned     snk_grid_size;
+static unsigned     snk_target;
 
 snk_dir_t snk_dir;
 int       snk_food;
@@ -76,12 +74,15 @@ unsigned  snk_size;
 unsigned  snk_x;
 unsigned  snk_y;
 
-snk_outcome_t snk_reset() {
+snk_outcome_t snk_reset(int max_cells) {
   tmr_deinit();
+
+  if (snk_data) free(snk_data);
+  snk_data = calloc(max_cells, sizeof(snk_node_t));
 
   srand(time(0));
 
-  for (int i = 0; i < SNK_MAX_CELLS; i++) snk_data[i] = (snk_node_t) {0};
+  for (int i = 0; i < max_cells; i++) snk_data[i] = (snk_node_t) {0};
   snk_size   = 1;
   snk_target = 3;
 

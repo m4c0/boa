@@ -1,6 +1,8 @@
 #ifndef GME_H
 #define GME_H
 
+#define GME_MAX_CELLS (24 * 24 * 4)
+
 typedef struct gme_storage {
   float first_seen;
   float seen;
@@ -50,7 +52,7 @@ static snk_outcome_t gme_reset() {
     .party       = { 10000, 10000 },
     .party_start = -1,
   };
-  return snk_reset();
+  return snk_reset(GME_MAX_CELLS);
 }
 
 void gme_update(snk_outcome_t outcome) {
