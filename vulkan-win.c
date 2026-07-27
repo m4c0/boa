@@ -91,7 +91,7 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
   UpdateWindow(hwnd);
 
   vlk_hwnd = hwnd;
-  vlk_init();
+  vlk_init(1);
 
   MSG msg;
   while (GetMessage(&msg, 0, 0, 0)) {

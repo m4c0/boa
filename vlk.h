@@ -1,7 +1,7 @@
 #ifndef VLK_H
 #define VLK_H
 
-void vlk_init();
+void vlk_init(int surf);
 void vlk_frame();
 void vlk_deinit();
 
@@ -443,14 +443,21 @@ static int vlk_find_host_memory() {
   return host;
 }
 
-void vlk_init() {
+void vlk_init(int surf) {
 #if !TARGET_OS_IPHONE
   _(volkInitialize());
 #endif
 
   vlk_create_instance();
   vlk_find_physical_device();
-  vlk_create_surface();
+
+  if (surf) vlk_create_surface();
+  else {
+    vlk_surf_fmt.format = VK_FORMAT_R8G8B8A8_UNORM;
+    vlk_surf_fmt.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+    vlk_swc_count = 1;
+  }
+
   vlk_create_device();
   vlk_create_command_pool();
   vlk_create_command_buffer();

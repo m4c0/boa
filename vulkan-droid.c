@@ -47,7 +47,7 @@ static void on_destroy(ANativeActivity * activity) {
 static void on_native_window_created(ANativeActivity * act, ANativeWindow * wnd) {
   __android_log_print(ANDROID_LOG_INFO, "m4c0", "window created: %p\n", wnd);
   vlk_nwnd = wnd;
-  vlk_init();
+  vlk_init(1);
   tick();
 }
 
