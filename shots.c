@@ -7,7 +7,7 @@ unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {
 #ifdef _WIN32
   sprintf(fname, "app/%s.%s", name, ext);
 #else
-  sprintf(fname, "simon.app/Contents/Resources/%s.%s", name, ext);
+  sprintf(fname, "boas.app/Contents/Resources/%s.%s", name, ext);
 #endif
   FILE * f = fopen(fname, "rb");
 
@@ -46,9 +46,6 @@ void shot(unsigned w, unsigned h) {
 }
 
 int main() {
-  // icon
-  shot(1024, 1024);
-
   // apple store
   shot(1260, 2736);
   shot(1284, 2778);
