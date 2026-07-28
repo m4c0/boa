@@ -61,7 +61,7 @@ typedef struct snk_node {
 
 static snk_node_t * snk_data;
 static unsigned     snk_grid_size;
-static unsigned     snk_target;
+unsigned snk_target;
 
 snk_dir_t snk_dir;
 int       snk_food;

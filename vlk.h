@@ -761,11 +761,12 @@ void vlk_deinit() {
   vkDestroyInstance(vlk_ins, NULL);
 }
 
+extern unsigned snk_target;
 void * vlk_headless(int w, int h) {
-  gme_left();
-  gme_left();
-  gme_left();
-  gme_down();
+  snk_target = 10;
+  gme_left(); gme_tick(); gme_tick();
+  gme_down(); gme_tick(); gme_tick();
+  gme_right(); gme_tick(); gme_tick(); gme_tick();
   gme_pc.time = 2.0;
 
   VkCommandBuffer cb;
