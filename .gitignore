@@ -17,6 +17,7 @@ poc-snd
 *.o
 *.pch
 *.pdb
+*.png
 *.plist
 *.res
 *.spv

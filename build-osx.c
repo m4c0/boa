@@ -1,4 +1,4 @@
-#define APP "simon"
+#define APP "boas"
 
 #define CFLAGS "-g", "-IVulkan-Headers/include"
 #define RES_PATH APP".app/Contents/Resources"
@@ -25,6 +25,16 @@ static int link_exe() {
   return 0;
 }
 
+static int link_shots_exe() {
+  RUN("clang", "-Wall",
+    "-framework", "AppKit",
+    "-framework", "AudioToolbox",
+    "-framework", "MetalKit",
+    "-o", APP".app/Contents/MacOS/shots", 
+    OBJS, "volk.o", "shots.o");
+  return 0;
+}
+
 int main(int argc, char ** argv) {
   mkdir(APP".app", 0777);
   mkdir(APP".app/Contents", 0777);
@@ -39,6 +49,9 @@ int main(int argc, char ** argv) {
   CM("vulkan-osx");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
+
+  CC("shots");
+  if (link_shots_exe()) return 1;
 
   return 0;
 }

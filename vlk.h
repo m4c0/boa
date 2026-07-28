@@ -142,7 +142,13 @@ static void vlk_find_physical_device() {
 static void vlk_create_device() {
   const char * ext[] = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
     "VK_KHR_portability_subset",
+  };
+
+  VkPhysicalDeviceSynchronization2FeaturesKHR sync2 = {
+    .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR,
+    .synchronization2 = VK_TRUE,
   };
 
   const float pri = 1.0f;
@@ -154,10 +160,11 @@ static void vlk_create_device() {
   };
   VkDeviceCreateInfo info = (VkDeviceCreateInfo) {
     .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+    .pNext = &sync2,
     .queueCreateInfoCount = 1,
     .pQueueCreateInfos = &q,
     .ppEnabledExtensionNames = ext,
-    .enabledExtensionCount = 1,
+    .enabledExtensionCount = 2,
   };
 
 #ifdef __APPLE__
@@ -523,11 +530,8 @@ void vlk_init(int surf) {
   vlk_allocate_command_buffers(vlk_swc_count, vlk_cb);
 
   vlk_create_render_pass();
-  vlk_create_swc();
   vlk_create_semaphores();
   vlk_create_fence();
-
-  vlk_create_swc();
 
   vlk_vbuf = vlk_create_buffer(VBUF_SIZE, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
@@ -668,6 +672,8 @@ void vlk_init(int surf) {
 }
 
 void vlk_frame() {
+  if (!vlk_swc.swc) vlk_create_swc();
+
   unsigned inf = vlk_cur_inflight;
 
   _(vkWaitForFences(vlk_dev, 1, vlk_fence + inf, VK_TRUE, ~0UL));
