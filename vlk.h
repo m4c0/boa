@@ -355,10 +355,6 @@ static void vlk_allocate_command_buffers(int count, VkCommandBuffer * cbs) {
 }
 
 static void vlk_record_cmdbuf(int i) {
-  struct timeval now;
-  tme_gettime(&now);
-
-  gme_pc.time   = (now.tv_sec - clk.tv_sec) + (now.tv_usec - clk.tv_usec) / 1.0e6; 
   gme_pc.aspect = (float)vlk_ext.width / (float)vlk_ext.height;
 
   VkCommandBuffer cb = vlk_cb[i];
@@ -688,6 +684,10 @@ void vlk_frame() {
   unsigned idx;
   vkAcquireNextImageKHR(vlk_dev, vlk_swc.swc, ~0UL, vlk_sema_img[inf], VK_NULL_HANDLE, &idx);
 
+  struct timeval now;
+  tme_gettime(&now);
+  gme_pc.time = (now.tv_sec - clk.tv_sec) + (now.tv_usec - clk.tv_usec) / 1.0e6; 
+
   vlk_record_cmdbuf(idx);
 
   // TODO: confirm if this is the best and document why
@@ -762,6 +762,12 @@ void vlk_deinit() {
 }
 
 void * vlk_headless(int w, int h) {
+  gme_left();
+  gme_left();
+  gme_left();
+  gme_down();
+  gme_pc.time = 2.0;
+
   VkCommandBuffer cb;
   vlk_allocate_command_buffers(vlk_swc_count, &cb);
 
