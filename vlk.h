@@ -790,7 +790,7 @@ void * vlk_headless(int w, int h) {
     .pCommandBuffers = vlk_cb,
     .commandBufferCount = 1,
   };
-  _(vkQueueSubmit(vlk_q, 1, &submit, NULL));
+  _(vkQueueSubmit(vlk_q, 1, &submit, VK_NULL_HANDLE));
   // Syncing in the lazy way
   vkDeviceWaitIdle(vlk_dev);
 
@@ -835,7 +835,7 @@ void * vlk_headless(int w, int h) {
     .pCommandBuffers = &cb,
     .commandBufferCount = 1,
   };
-  _(vkQueueSubmit(vlk_q, 1, &submit, NULL));
+  _(vkQueueSubmit(vlk_q, 1, &submit, VK_NULL_HANDLE));
 
   vkDeviceWaitIdle(vlk_dev);
 
