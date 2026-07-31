@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: true
-      - run: curl -L -o glslang.zip https://github.com/KhronosGroup/glslang/releases/download/main-tot/glslang-master-windows-Release.zip
+      - run: curl -L -o glslang.zip https://github.com/KhronosGroup/glslang/releases/download/main-tot/glslang-main-windows-x86_64-release.zip
       - run: unzip glslang.zip bin/glslang.exe
       - run: mv bin/glslang.exe .
       - run: clang -o build.exe build-win.c
