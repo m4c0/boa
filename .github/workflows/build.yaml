@@ -51,6 +51,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
+      - run: dir 'c:\Program Files (x86)\Windows Kits\10\bin'
       - uses: actions/checkout@v6
         with:
           submodules: true
@@ -61,6 +62,14 @@ jobs:
       - run: ./build.exe
       - uses: actions/upload-artifact@v7
         with:
-          name: windows
+          name: windows-exe
           path: boas.exe
+      - shell: pwsh
+        run: |
+          $env:Path += ";c:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64"
+          makeappx.exe pack /f AppxMapping.ini /p boas.msix
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows-msix
+          path: boas.msix
 
