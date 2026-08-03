@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10">
+  <Identity Name="&WIN_IDENTITY_NAME;" 
+            Version="2.0.0.0" 
+            Publisher="&WIN_IDENTITY_PUBLISHER;" />
+  <Properties>
+    <DisplayName>Casually Casual Snake Game</DisplayName>
+    <PublisherDisplayName>m4c0</PublisherDisplayName>
+    <Logo>Icon-1024.png</Logo>
+  </Properties>
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+  <Applications>
+    <Application Id="boas" Executable="boas.exe" EntryPoint="WinMain">
+      <uap:VisualElements
+        DisplayName="Snake" Description="Casual snake game"
+        Square150x150Logo="Icon-1024.png"
+        Square44x44Logo="Icon-1024.png"  
+        BackgroundColor="black">
+        <uap:SplashScreen Image="Icon-1024.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+  <Dependencies>
+    <TargetDeviceFamily
+      Name="Windows.Desktop"
+      MinVersion="10.0.17763.0"
+      MaxVersionTested="10.0.17763.0"/>
+  </Dependencies>
+</Package>

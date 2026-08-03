@@ -16,54 +16,26 @@
 
 static time_t bundle_version;
 
-static int apply(char * src, char * tgt) {
-  char * file = slurp(src, NULL); // TODO: use size instead of cstr
-
-  FILE * f = fopen(tgt, "wb");
-  assert(f);
-
-  char * p = file;
-  while (*p) {
-    p = strchr(file, '&');
-    if (!p) break;
-
-    assert(1 == fwrite(file, p-file, 1, f));
-    file = ++p;
-
-    char * pp = strchr(p, ';');
-    if (!pp) {
-      assert(0 == fputc('&', f));
-      file++;
-      continue;
-    }
-    *pp = 0;
-
-    char * env = getenv(p);
-    if (strncmp(p, "IOS_", 4)) {
-      assert(fprintf(f, "&%s;", file));
-    } else if (0 == strcmp(p, "IOS_APP_NAME")) {
-      assert(fprintf(f, APP));
-    } else if (0 == strcmp(p, "IOS_BUNDLE_VERSION")) {
-      assert(fprintf(f, "%ld", bundle_version));
-    } else if (0 == strcmp(p, "IOS_METHOD")) {
+static void print_key(FILE * f, const char * p) {
+  char * env = getenv(p);
+  if (strncmp(p, "IOS_", 4)) {
+    assert(fprintf(f, "&%s;", p));
+  } else if (0 == strcmp(p, "IOS_APP_NAME")) {
+    assert(fprintf(f, APP));
+  } else if (0 == strcmp(p, "IOS_BUNDLE_VERSION")) {
+    assert(fprintf(f, "%ld", bundle_version));
+  } else if (0 == strcmp(p, "IOS_METHOD")) {
 #if UPLOAD
-      assert(fprintf(f, "app-store-connect"));
+    assert(fprintf(f, "app-store-connect"));
 #else
-      assert(fprintf(f, "debugging"));
+    assert(fprintf(f, "debugging"));
 #endif
-    } else if (env) {
-      assert(fprintf(f, "%s", env));
-    } else {
-      fprintf(stderr, "Missing environment: %s\n", p);
-      exit(1);
-    }
-
-    file = ++pp;
+  } else if (env) {
+    assert(fprintf(f, "%s", env));
+  } else {
+    fprintf(stderr, "Missing environment: %s\n", p);
+    exit(1);
   }
-
-  assert(fprintf(f, "%s", file));
-  fclose(f);
-  return 0;
 }
 
 static int pch() {

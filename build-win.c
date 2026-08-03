@@ -40,8 +40,21 @@ static int icon() {
   return 0;
 }
 
+static void print_key(FILE * f, const char * p) {
+  char * env = getenv(p);
+  if (strncmp(p, "WIN_", 4)) {
+    assert(fprintf(f, "&%s;", p));
+  } else if (env) {
+    assert(fprintf(f, "%s", env));
+  } else {
+    fprintf(stderr, "Missing environment: %s\n", p);
+    exit(1);
+  }
+}
 static int pack() {
   // https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/how-to-create-a-basic-package-manifest
+  if (apply("AppxManifest.xml.in", "AppxManifest.xml")) return 1;
+
   // RUN("c:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\makeappx.exe", "pack", "/f", "AppxMapping.ini", "/p", "boas.msix");
   return 0;
 }

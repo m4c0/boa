@@ -60,6 +60,9 @@ jobs:
       - run: mv bin/glslang.exe .
       - run: clang -o build.exe build-win.c
       - run: ./build.exe
+        env:
+          WIN_IDENTITY_NAME: ${{ secrets.WIN_IDENTITY_NAME }}
+          WIN_IDENTITY_PUBLISHER: ${{ secrets.WIN_IDENTITY_PUBLISHER }}
       - uses: actions/upload-artifact@v7
         with:
           name: windows-exe
