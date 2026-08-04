@@ -1,5 +1,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
+#include "gme.h"
 #include "vlk.h"
 
 unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {
@@ -35,11 +36,20 @@ HWND vlk_hwnd;
 void * vlk_metal_layer;
 #endif
 
+extern unsigned snk_target;
+
 void shot(unsigned w, unsigned h) {
   char fn[1024];
   snprintf(fn, 1024, "shot-%dx%d.png", w, h);
 
   vlk_init(0);
+
+  snk_target = 10;
+  gme_left(); gme_tick(); gme_tick();
+  gme_down(); gme_tick(); gme_tick();
+  gme_right(); gme_tick(); gme_tick(); gme_tick();
+  gme_pc.time = 2.0;
+
   void * buf = vlk_headless(w, h);
   stbi_write_png(fn, w, h, 4, buf, w * 4);
   vlk_deinit();
@@ -52,4 +62,7 @@ int main() {
  
   // itch
   shot(630, 500);
+
+  // windows store
+  shot(1366, 768);
 }
