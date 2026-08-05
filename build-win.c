@@ -52,6 +52,8 @@ static void print_key(FILE * f, const char * p) {
   }
 }
 static int pack() {
+  if (getenv("WIN_BUILD_ONLY")) return 0;
+
   // https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/how-to-create-a-basic-package-manifest
   if (apply("AppxManifest.xml.in", "AppxManifest.xml")) return 1;
 
