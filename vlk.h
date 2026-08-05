@@ -7,8 +7,6 @@ void vlk_deinit();
 
 void * vlk_headless(int w, int h);
 
-void vlk_reset();
-
 extern unsigned vlk_open(const char * name, const char * ext, const void ** ptr);
 
 #ifdef __APPLE__
