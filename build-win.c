@@ -57,8 +57,16 @@ static int pack() {
   // https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/how-to-create-a-basic-package-manifest
   if (apply("AppxManifest.xml.in", "AppxManifest.xml")) return 1;
 
-  // RUN("c:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\makeappx.exe", "pack", "/f", "AppxMapping.ini", "/p", "boas.msix");
-  return 0;
+  unlink("boas.msix");
+
+  char argv0[1024];
+  snprintf(argv0, 1024,
+      "c:\\Program Files (x86)\\Windows Kits\\10\\bin\\%s\\x64\\makeappx.exe",
+      getenv("WIN_KIT_VERSION"));
+
+  char argv1[1024];
+  snprintf(argv1, 1024, "\"%s\"", argv0);
+  return _spawnl(_P_WAIT, argv0, argv1, "pack", "/f", "AppxMapping.ini", "/p", "boas.msix", NULL);
 }
 
 int main(int argc, char ** argv) {
