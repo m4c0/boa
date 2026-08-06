@@ -6,6 +6,8 @@
 
 #include <sys/stat.h>
 
+static void print_key(FILE * f, const char * key) {}
+
 static int pch() {
   RUN("clang", "-Wall", "-g", "-x", "c-header",
     "-IVulkan-Headers/include",

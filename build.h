@@ -33,7 +33,7 @@ static char * slurp(const char * file, unsigned * osz) {
 }
 
 static void print_key(FILE * f, const char * key);
-static int apply(char * src, char * tgt) {
+static inline int apply(char * src, char * tgt) {
   char * file = slurp(src, NULL); // TODO: use size instead of cstr
 
   FILE * f = fopen(tgt, "wb");
