@@ -15,6 +15,7 @@
 #define UPLOAD 0
 
 static time_t bundle_version;
+static int uploading;
 
 static void print_key(FILE * f, const char * p) {
   char * env = getenv(p);
@@ -25,11 +26,11 @@ static void print_key(FILE * f, const char * p) {
   } else if (0 == strcmp(p, "IOS_BUNDLE_VERSION")) {
     assert(fprintf(f, "%ld", bundle_version));
   } else if (0 == strcmp(p, "IOS_METHOD")) {
-#if UPLOAD
-    assert(fprintf(f, "app-store-connect"));
-#else
-    assert(fprintf(f, "debugging"));
-#endif
+    if (uploading) {
+      assert(fprintf(f, "app-store-connect"));
+    } else {
+      assert(fprintf(f, "debugging"));
+    }
   } else if (env) {
     assert(fprintf(f, "%s", env));
   } else {
@@ -131,6 +132,7 @@ static int link_exe() {
 
 int main(int argc, char ** argv) {
   bundle_version = time(NULL);
+  uploading = getenv("IOS_UPLOAD") != NULL;
 
   mkdir("export.xcarchive", 0777);
   mkdir("export.xcarchive/Products", 0777);
@@ -153,12 +155,13 @@ int main(int argc, char ** argv) {
   if (codesign()) return 1;
   if (symbols())  return 1;
   if (export())   return 1;
-#if UPLOAD
-  if (validate("--upload-app")) return 1;
-#else
-  if (install()) return 1;
-  if (validate("--validate-app")) return 1;
-#endif
+
+  if (uploading) {
+    if (validate("--upload-app")) return 1;
+  } else {
+    if (install()) return 1;
+    if (validate("--validate-app")) return 1;
+  }
 
   return 0;
 }
