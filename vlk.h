@@ -345,8 +345,6 @@ static void vlk_allocate_command_buffers(int count, VkCommandBuffer * cbs) {
 }
 
 static void vlk_record_cmdbuf(int i) {
-  gme_pc.aspect = (float)vlk_ext.width / (float)vlk_ext.height;
-
   VkCommandBuffer cb = vlk_cb[i];
 
   VkCommandBufferBeginInfo binfo = {

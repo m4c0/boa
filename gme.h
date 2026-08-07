@@ -52,8 +52,9 @@ gme_storage_t gme_buf[GME_MAX_CELLS];
 gme_upc_t gme_pc;
 struct timeval gme_base_clk;
 
-static snk_outcome_t gme_reset() {
+static snk_outcome_t gme_reset(float aspect) {
   gme_pc = (gme_upc_t) {
+    .aspect      = aspect,
     .pad         = 0,
     .grid_width  = snk_grid_w,
     .grid_height = snk_grid_h,
@@ -107,11 +108,11 @@ void gme_update(snk_outcome_t outcome) {
 
 void gme_resize(unsigned w, unsigned h) {
   snk_resize(w, h);
-  gme_update(gme_reset());
+  gme_update(gme_reset((float)w / (float)h));
 }
 
 void gme_new_game() {
-  gme_update(snk_is_over() ? gme_reset() : snk_o_none);
+  gme_update(snk_is_over() ? gme_reset(gme_pc.aspect) : snk_o_none);
 }
 
 void gme_left()  { gme_update(snk_update_dir(snk_d_l)); }
