@@ -1,15 +1,51 @@
 #import <CoreFoundation/CoreFoundation.h>
+#import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
 #import <UIKit/UIKit.h>
 
 #include "gme.h"
 
+static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
+  NSString * path = [[NSBundle mainBundle] pathForResource:name ofType:@"metal"];
+  NSString * src = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+  MTLCompileOptions * opts = [MTLCompileOptions new];
+  NSError * err;
+  id<MTLLibrary> lib = [device newLibraryWithSource:src options:opts error:&err];
+  if (err) {
+    NSLog(@"Error compiling shader: %@", err);
+    return nil;
+  }
+  return lib;
+}
+
 @interface POCViewDelegate : NSObject<MTKViewDelegate>
+@property (nonatomic,strong) id<MTLCommandQueue> queue;
+@property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
+@property (nonatomic,strong) id<MTLBuffer> grid;
 @end
 @implementation POCViewDelegate
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
+  gme_resize(size.width, size.height);
 }
 - (void)drawInMTKView:(MTKView *)view {
+  gme_load(self.grid.contents);
+  gme_frame();
+
+  MTLRenderPassDescriptor * rpd = view.currentRenderPassDescriptor;
+  if (rpd == nil) return;
+
+  id<MTLCommandBuffer> cb = [self.queue commandBuffer];
+
+  id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
+  [enc setRenderPipelineState:self.pipeline];
+  [enc setVertexBytes:&gme_pc length:sizeof(gme_upc_t) atIndex:0];
+  [enc setFragmentBytes:&gme_pc length:sizeof(gme_upc_t) atIndex:0];
+  [enc setFragmentBuffer:self.grid offset:0 atIndex:1];
+  [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+  [enc endEncoding];
+
+  [cb presentDrawable:view.currentDrawable];
+  [cb commit];
 }
 @end
 
@@ -36,8 +72,32 @@
 {
   UIWindowScene * windowScene = (UIWindowScene *)scene;
 
+  id<MTLDevice> d = MTLCreateSystemDefaultDevice();
+
+  POCViewDelegate * vd = [POCViewDelegate new];
+  vd.queue = [d newCommandQueue];
+
+  id<MTLLibrary> vert = load_library(d, @"shader.vert");
+  id<MTLLibrary> frag = load_library(d, @"shader.frag");
+  if (!vert || !frag) return;
+
+  MTLRenderPipelineDescriptor * pd = [MTLRenderPipelineDescriptor new];
+  pd.vertexFunction   = [vert newFunctionWithName:@"main0"];
+  pd.fragmentFunction = [frag newFunctionWithName:@"main0"];
+  pd.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
+  NSError * err;
+  vd.pipeline = [d newRenderPipelineStateWithDescriptor:pd error:&err];
+  if (err) {
+    NSLog(@"Error creating pipeline: %@", err);
+    return;
+  }
+
+  vd.grid = [d newBufferWithLength:GME_BUF_SIZE options:MTLResourceStorageModeShared];
+
   MTKView * view = [MTKView new];
-  view.delegate = [POCViewDelegate new];
+  view.device = d;
+  view.clearColor = MTLClearColorMake(0.01, 0.02, 0.03, 1.0);
+  view.delegate = vd;
 
   POCViewController * vc = [POCViewController new];
   vc.view = view;
@@ -76,6 +136,8 @@
   self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
   self.window.rootViewController = vc;
   [self.window makeKeyAndVisible];
+
+  gme_init();
 }
 @end
 
@@ -96,6 +158,7 @@ configurationForConnectingSceneSession:(UISceneSession *) connectingSceneSession
 }
 
 - (void)applicationWillTerminate:(UIApplication *)app {
+  gme_deinit();
 }
 @end
 

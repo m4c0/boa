@@ -4,7 +4,7 @@
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios26.0"
 
-#define RES_PATH "export.xcarchive/Products/Applications/"APP".app"
+#define RES_PATH "."
 #define CFLAGS "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH, "-IVulkan-Headers/include"
 #include "build.h"
 
@@ -13,6 +13,8 @@
 #include <time.h>
 
 #define UPLOAD 0
+
+#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", "export.xcarchive/Products/Applications/"APP".app/shader."X".metal", "--flip-vert-y", "--msl-ios")
 
 static time_t bundle_version;
 static int uploading;
@@ -52,12 +54,12 @@ static int codesign() {
   char * team = getenv("IOS_TEAM");
   assert(team && "Missing IOS_TEAM environment variable");
 
-  RUN("codesign", "-f", "-s", strdup(team), RES_PATH);
+  RUN("codesign", "-f", "-s", strdup(team), "export.xcarchive/Products/Applications/boas.app");
   return 0;
 }
  
 static int symbols() {
-  RUN("dsymutil", RES_PATH"/"APP, "-o", "export.xcarchive/dSYMS/"APP".app.dSYM");
+  RUN("dsymutil", "export.xcarchive/Products/Applications/boas.app/"APP, "-o", "export.xcarchive/dSYMS/"APP".app.dSYM");
   return 0;
 }
 
@@ -85,7 +87,7 @@ static int actool() {
       "--development-region", "en",
       "--minimum-deployment-target", "26",
       "--output-partial-info-plist", "icon-partial.plist",
-      "--compile", RES_PATH,
+      "--compile", "export.xcarchive/Products/Applications/boas.app",
       "Assets.xcassets");
   return 0;
 }
@@ -125,7 +127,7 @@ static int link_exe() {
       "-framework", "MetalKit",
       "-framework", "QuartzCore",
       "-framework", "UIKit",
-      "-o", RES_PATH"/"APP, 
+      "-o", "export.xcarchive/Products/Applications/boas.app/"APP, 
       OBJS, "app-ios.o");
   return 0;
 }
@@ -137,13 +139,16 @@ int main(int argc, char ** argv) {
   mkdir("export.xcarchive", 0777);
   mkdir("export.xcarchive/Products", 0777);
   mkdir("export.xcarchive/Products/Applications", 0777);
-  mkdir(RES_PATH, 0777);
+  mkdir("export.xcarchive/Products/Applications/boas.app", 0777);
 
   if (pch()) return 1;
 
   CM("app-ios");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
+
+  CROSS("frag");
+  CROSS("vert");
 
   if (apply("export.plist.in",    "export.plist")) return 1;
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;
