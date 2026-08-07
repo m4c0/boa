@@ -8,6 +8,8 @@ typedef struct gme_storage {
   float seen;
 } gme_storage_t;
 
+#define GME_BUF_SIZE GME_MAX_CELLS * sizeof(gme_storage_t)
+
 typedef struct gme_ivec2 {
   unsigned x, y;
 } gme_ivec2_t;

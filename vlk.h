@@ -24,8 +24,6 @@ extern HWND vlk_hwnd;
 #include "tme.h"
 #include "tmr.h"
 
-#define VBUF_SIZE GME_MAX_CELLS * sizeof(gme_storage_t)
-
 #define MAX_SWAPCHAIN_IMAGES 8
 typedef struct vlk_swc {
   VkFramebuffer   fb  [MAX_SWAPCHAIN_IMAGES];
@@ -533,11 +531,11 @@ void vlk_init(int surf) {
   vlk_create_semaphores();
   vlk_create_fence();
 
-  vlk_vbuf = vlk_create_buffer(VBUF_SIZE, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+  vlk_vbuf = vlk_create_buffer(GME_BUF_SIZE, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
   VkMemoryAllocateInfo vmem_info = {
     .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-    .allocationSize = VBUF_SIZE,
+    .allocationSize = GME_BUF_SIZE,
     .memoryTypeIndex = vlk_find_host_memory(),
   };
   _(vkAllocateMemory(vlk_dev, &vmem_info, NULL, &vlk_vmem));
