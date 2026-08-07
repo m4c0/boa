@@ -5,7 +5,6 @@
 #include "gme.h"
 
 @interface POCViewDelegate : NSObject<MTKViewDelegate>
-@property (nonatomic) BOOL ready;
 @end
 @implementation POCViewDelegate
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
@@ -14,10 +13,18 @@
 }
 @end
 
-@interface POCAppDelegate : NSObject<UIApplicationDelegate>
-@property(nonatomic, strong) UIWindow * window;
+@interface POCViewController : UIViewController
 @end
-@implementation POCAppDelegate
+@implementation POCViewController
+- (BOOL)canBecomeFirstResponder {
+  return YES;
+}
+@end
+
+@interface POCWindowSceneDelegate : NSObject<UIWindowSceneDelegate>
+@property (nonatomic, strong) UIWindow * window;
+@end
+@implementation POCWindowSceneDelegate
 - (void)swipeLeft   { gme_left  (); }
 - (void)swipeRight  { gme_right (); }
 - (void)swipeTop    { gme_up    (); }
@@ -25,11 +32,14 @@
 
 - (void)tap { gme_new_game(); }
 
-- (BOOL)application:(UIApplication *)app didFinishLaunchingWithOptions:(id)options {
+- (void)scene:(UIScene *) scene willConnectToSession:(UISceneSession *) session options:(UISceneConnectionOptions *) connectionOptions
+{
+  UIWindowScene * windowScene = (UIWindowScene *)scene;
+
   MTKView * view = [MTKView new];
   view.delegate = [POCViewDelegate new];
 
-  UIViewController * vc = [UIViewController new];
+  POCViewController * vc = [POCViewController new];
   vc.view = view;
 
   UISwipeGestureRecognizer * left = [UISwipeGestureRecognizer new];
@@ -63,12 +73,28 @@
   [tap addTarget:self action:@selector(tap)];
   [vc.view addGestureRecognizer:tap];
 
-  self.window = [UIWindow new];
-  self.window.frame = [UIScreen mainScreen].bounds;
+  self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
   self.window.rootViewController = vc;
   [self.window makeKeyAndVisible];
-  return YES;
 }
+@end
+
+@interface POCAppDelegate : NSObject<UIApplicationDelegate>
+@end
+@implementation POCAppDelegate
+- (UISceneConfiguration *) application:(UIApplication *) application 
+configurationForConnectingSceneSession:(UISceneSession *) connectingSceneSession 
+                               options:(UISceneConnectionOptions *) options
+{
+  application.applicationSupportsShakeToEdit = YES;
+
+  UISceneConfiguration * res = [[UISceneConfiguration alloc] initWithName:@"Default"
+                                                              sessionRole:connectingSceneSession.role];
+  res.sceneClass = [UIWindowScene class];
+  res.delegateClass = [POCWindowSceneDelegate class];
+  return res;
+}
+
 - (void)applicationWillTerminate:(UIApplication *)app {
 }
 @end
