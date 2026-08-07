@@ -3,9 +3,6 @@
 #import <UIKit/UIKit.h>
 
 #include "gme.h"
-#include "vlk.h"
-
-CAMetalLayer * vlk_metal_layer;
 
 @interface POCViewDelegate : NSObject<MTKViewDelegate>
 @property (nonatomic) BOOL ready;
@@ -14,13 +11,6 @@ CAMetalLayer * vlk_metal_layer;
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
 }
 - (void)drawInMTKView:(MTKView *)view {
-  if (!self.ready) {
-    vlk_metal_layer = (CAMetalLayer *)view.layer;
-
-    vlk_init(1);
-    self.ready = YES;
-  }
-  vlk_frame();
 }
 @end
 
@@ -80,24 +70,8 @@ CAMetalLayer * vlk_metal_layer;
   return YES;
 }
 - (void)applicationWillTerminate:(UIApplication *)app {
-  vlk_deinit();
 }
 @end
-
-__strong static NSData * last_resource;
-unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {
-  NSString * n = [NSString stringWithFormat:@"%s", name];
-  NSString * e = [NSString stringWithFormat:@"%s", ext];
-  NSString * path = [[NSBundle mainBundle] pathForResource:n ofType:e];
-  last_resource = [NSData dataWithContentsOfFile:path];
-  *ptr = [last_resource bytes];
-  return [last_resource length];
-}
-
-void vlk_log(int r, const char * msg) {
-  NSLog(@"Vulkan call failed (code=%d): %s\n", r, msg);
-  exit(1);
-}
 
 int main(int argc, char ** argv) {
   @autoreleasepool {
