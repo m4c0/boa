@@ -652,14 +652,17 @@ void vlk_init(int surf) {
   vkDestroyShaderModule(vlk_dev, vert, NULL);
   vkDestroyShaderModule(vlk_dev, frag, NULL);
 
-  _(vkMapMemory(vlk_dev, vlk_vmem, 0, VK_WHOLE_SIZE, 0, (void **)&gme_buf));
-
   gme_init();
   gme_resize(vlk_ext.width, vlk_ext.height);
 }
 
 void vlk_frame() {
   if (!vlk_swc.swc) vlk_create_swc();
+
+  void * ptr;
+  _(vkMapMemory(vlk_dev, vlk_vmem, 0, VK_WHOLE_SIZE, 0, &ptr));
+  gme_load(ptr);
+  vkUnmapMemory(vlk_dev, vlk_vmem);
 
   unsigned inf = vlk_cur_inflight;
 

@@ -25,7 +25,6 @@ typedef struct gme_upc {
 } gme_upc_t;
 
 extern gme_upc_t gme_pc;
-extern gme_storage_t * gme_buf;
 
 void gme_init();
 void gme_frame();
@@ -40,6 +39,7 @@ void gme_up();
 void gme_down();
 
 void gme_tick();
+void gme_load(void * ptr);
 
 #ifdef GME_IMPLEMENTATION
 #include "sfx.h"
@@ -48,7 +48,7 @@ void gme_tick();
 #include "tme.h"
 #include "tmr.h"
 
-gme_storage_t * gme_buf;
+gme_storage_t gme_buf[GME_MAX_CELLS];
 gme_upc_t gme_pc;
 struct timeval gme_base_clk;
 
@@ -137,6 +137,10 @@ void gme_frame() {
 void gme_deinit() {
   snd_deinit();
   tmr_deinit();
+}
+
+void gme_load(void * ptr) {
+  memcpy(ptr, gme_buf, GME_BUF_SIZE);
 }
 
 #endif
