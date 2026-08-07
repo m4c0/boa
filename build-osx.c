@@ -1,7 +1,7 @@
 #define APP "boas"
 
 #define CFLAGS "-g", "-IVulkan-Headers/include"
-#define RES_PATH APP".app/Contents/Resources"
+#define RES_PATH "."
 #include "build.h"
 
 #include <sys/stat.h>
@@ -21,9 +21,10 @@ static int link_exe() {
   RUN("clang", "-Wall",
     "-framework", "AppKit",
     "-framework", "AudioToolbox",
+    "-framework", "Metal",
     "-framework", "MetalKit",
     "-o", APP".app/Contents/MacOS/main", 
-    OBJS, "vulkan-osx.o", "volk.o");
+    OBJS, "app-osx.o", "volk.o");
   return 0;
 }
 
@@ -37,6 +38,8 @@ static int link_shots_exe() {
   return 0;
 }
 
+#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", APP".app/Contents/Resources/shader."X".metal", "--flip-vert-y");
+
 int main(int argc, char ** argv) {
   mkdir(APP".app", 0777);
   mkdir(APP".app/Contents", 0777);
@@ -48,9 +51,12 @@ int main(int argc, char ** argv) {
   if (pch()) return 1;
 
   CC("volk");
-  CM("vulkan-osx");
+  CM("app-osx");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
+
+  CROSS("frag");
+  CROSS("vert");
 
   CC("shots");
   if (link_shots_exe()) return 1;
