@@ -19,7 +19,7 @@ static int pch() {
 static int link_exe() {
   RUN("clang", "-Wall", OPT,
       "-o", "boas.exe",
-      OBJS, "vulkan-win.o", "volk.o", "main.res",
+      OBJS, "vulkan-win.o", "volk.o", "vlk.o", "main.res",
       "-lole32", "-luser32");
   return 0;
 }
@@ -78,6 +78,7 @@ int main(int argc, char ** argv) {
 
   CC("volk");
   CC("vulkan-win");
+  HDR("vlk", "VLK_IMPLEMENTATION");
   if (compile_and_link_exe()) return 1;
 
   if (pack()) return 1;

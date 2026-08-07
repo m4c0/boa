@@ -68,23 +68,6 @@
 }
 @end
 
-CAMetalLayer * vlk_metal_layer;
-
-__strong static NSData * last_resource;
-unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {
-  NSString * n = [NSString stringWithFormat:@"%s", name];
-  NSString * e = [NSString stringWithFormat:@"%s", ext];
-  NSString * path = [[NSBundle mainBundle] pathForResource:n ofType:e];
-  last_resource = [NSData dataWithContentsOfFile:path];
-  *ptr = [last_resource bytes];
-  return [last_resource length];
-}
-
-void vlk_log(int r, const char * msg) {
-  NSLog(@"Vulkan call failed (code=%d): %s\n", r, msg);
-  exit(1);
-}
-
 static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   NSString * path = [[NSBundle mainBundle] pathForResource:name ofType:@"metal"];
   NSString * src = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];

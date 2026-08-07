@@ -125,7 +125,7 @@ static int link_exe() {
       "-framework", "QuartzCore",
       "-framework", "UIKit",
       "-o", RES_PATH"/"APP, 
-      OBJS, "vulkan-ios.o",
+      OBJS, "vulkan-ios.o", "vlk.o",
       "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
       "-lc++");
   return 0;
@@ -142,6 +142,7 @@ int main(int argc, char ** argv) {
   if (pch()) return 1;
 
   CM("vulkan-ios");
+  HDR("vlk", "VLK_IMPLEMENTATION");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
 

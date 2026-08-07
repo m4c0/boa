@@ -29,7 +29,7 @@ static int link_exe() {
       "-Wl,-Bsymbolic", "-Wl,--no-undefined",
       "-o", "droid/apk/lib/" ARCHDIR "/libboas.so", 
       "-landroid", "-llog",
-      OBJS, "vulkan-droid.o", "volk.o");
+      OBJS, "vulkan-droid.o", "volk.o", "vlk.o");
   RUN("cp", "droid/apk/lib/" ARCHDIR "/libboas.so", "droid/aab/lib/" ARCHDIR "/");
   return 0;
 }
@@ -136,6 +136,7 @@ int main(int argc, char ** argv) {
 
   CC("volk");
   CC("vulkan-droid");
+  HDR("vlk", "VLK_IMPLEMENTATION");
   if (compile_and_link_exe()) return 1;
 
   return 0;

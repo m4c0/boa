@@ -104,14 +104,13 @@ int run(char ** args) {
 
 #define SHADER(src) RUN("glslang", "-V", src, "-o", RES_PATH "/" src ".spv")
 
-#define OBJS "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o", "vlk.o"
+#define OBJS "gme.o", "sfx.o", "snd.o", "snk.o", "tmr.o"
 static int compile_common() {
   HDR("gme", "GME_IMPLEMENTATION");
   HDR("sfx", "SFX_IMPLEMENTATION");
   HDR("snd", "SND_IMPLEMENTATION");
   HDR("snk", "SNK_IMPLEMENTATION");
   HDR("tmr", "TMR_IMPLEMENTATION");
-  HDR("vlk", "VLK_IMPLEMENTATION");
   return 0;
 }
 

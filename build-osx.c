@@ -34,7 +34,7 @@ static int link_shots_exe() {
     "-framework", "AudioToolbox",
     "-framework", "MetalKit",
     "-o", APP".app/Contents/MacOS/shots", 
-    OBJS, "volk.o", "shots.o");
+    OBJS, "volk.o", "shots.o", "vlk.o");
   return 0;
 }
 
@@ -59,6 +59,7 @@ int main(int argc, char ** argv) {
   CROSS("vert");
 
   CC("shots");
+  HDR("vlk", "VLK_IMPLEMENTATION");
   if (link_shots_exe()) return 1;
 
   return 0;
