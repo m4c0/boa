@@ -2,13 +2,12 @@
 #define GME_H
 
 #define GME_MAX_CELLS (24 * 24 * 4)
+#define GME_BUF_SIZE GME_MAX_CELLS * sizeof(gme_storage_t)
 
 typedef struct gme_storage {
   float first_seen;
   float seen;
 } gme_storage_t;
-
-#define GME_BUF_SIZE GME_MAX_CELLS * sizeof(gme_storage_t)
 
 typedef struct gme_ivec2 {
   unsigned x, y;
@@ -28,6 +27,10 @@ typedef struct gme_upc {
 extern gme_upc_t gme_pc;
 extern gme_storage_t * gme_buf;
 
+void gme_init();
+void gme_frame();
+void gme_deinit();
+
 void gme_resize(unsigned w, unsigned h);
 void gme_new_game();
 
@@ -41,9 +44,13 @@ void gme_tick();
 #ifdef GME_IMPLEMENTATION
 #include "sfx.h"
 #include "snk.h"
+#include "snd.h"
+#include "tme.h"
+#include "tmr.h"
 
 gme_storage_t * gme_buf;
 gme_upc_t gme_pc;
+struct timeval gme_base_clk;
 
 static snk_outcome_t gme_reset() {
   gme_pc = (gme_upc_t) {
@@ -113,6 +120,24 @@ void gme_up()    { gme_update(snk_update_dir(snk_d_u)); }
 void gme_down()  { gme_update(snk_update_dir(snk_d_d)); }
 
 void gme_tick() { gme_update(snk_run_tick()); }
+void gme_init() {
+  tme_gettime(&gme_base_clk);
+
+  tmr_fn = &gme_tick;
+  sfx_init();
+  snd_init(&sfx_fill);
+}
+
+void gme_frame() {
+  struct timeval now;
+  tme_gettime(&now);
+  gme_pc.time = (now.tv_sec - gme_base_clk.tv_sec) + (now.tv_usec - gme_base_clk.tv_usec) / 1.0e6; 
+}
+
+void gme_deinit() {
+  snd_deinit();
+  tmr_deinit();
+}
 
 #endif
 #endif

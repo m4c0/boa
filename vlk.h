@@ -19,10 +19,6 @@ extern HWND vlk_hwnd;
 
 #ifdef VLK_IMPLEMENTATION
 #include "gme.h"
-#include "sfx.h"
-#include "snd.h"
-#include "tme.h"
-#include "tmr.h"
 
 #define MAX_SWAPCHAIN_IMAGES 8
 typedef struct vlk_swc {
@@ -62,8 +58,6 @@ static VkDescriptorSet       vlk_dset;
 static VkDeviceMemory        vlk_vmem;
 static VkPipelineLayout      vlk_pl;
 static VkPipeline            vlk_ppl;
-
-struct timeval clk;
 
 void vlk_log(int r, const char * msg);
 static void vlk_check(VkResult r, const char * msg) {
@@ -658,14 +652,9 @@ void vlk_init(int surf) {
   vkDestroyShaderModule(vlk_dev, vert, NULL);
   vkDestroyShaderModule(vlk_dev, frag, NULL);
 
-  tme_gettime(&clk);
-
   _(vkMapMemory(vlk_dev, vlk_vmem, 0, VK_WHOLE_SIZE, 0, (void **)&gme_buf));
 
-  tmr_fn = &gme_tick;
-  sfx_init();
-  snd_init(&sfx_fill);
-
+  gme_init();
   gme_resize(vlk_ext.width, vlk_ext.height);
 }
 
@@ -680,9 +669,7 @@ void vlk_frame() {
   unsigned idx;
   vkAcquireNextImageKHR(vlk_dev, vlk_swc.swc, ~0UL, vlk_sema_img[inf], VK_NULL_HANDLE, &idx);
 
-  struct timeval now;
-  tme_gettime(&now);
-  gme_pc.time = (now.tv_sec - clk.tv_sec) + (now.tv_usec - clk.tv_usec) / 1.0e6; 
+  gme_frame();
 
   vlk_record_cmdbuf(idx);
 
@@ -729,8 +716,7 @@ void vlk_frame() {
 }
 
 void vlk_deinit() {
-  snd_deinit();
-  tmr_deinit();
+  gme_deinit();
 
   vkDeviceWaitIdle(vlk_dev);
 
