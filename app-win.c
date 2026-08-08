@@ -37,6 +37,7 @@ static ID3D12RootSignature       * d3d_root_sign;
 static ID3D12PipelineState       * d3d_pso;
 
 static ID3D12Resource * d3d_rt[BUFFER_COUNT];
+static ID3D12Resource * d3d_buffer;
 
 static ID3D12Fence * d3d_fence;
 static unsigned      d3d_frame_idx;
@@ -161,11 +162,13 @@ static int d3d_init_root_signature() {
   ID3DBlob * blob;
   ID3DBlob * err;
   D3D12_ROOT_SIGNATURE_DESC desc = {
-    .NumParameters      = 1,
+    .NumParameters      = 2,
     .pParameters        = (D3D12_ROOT_PARAMETER[]) {{
+      .ParameterType    = D3D12_ROOT_PARAMETER_TYPE_SRV,
+    }, {
       .ParameterType    = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
       .Constants        = (D3D12_ROOT_CONSTANTS) {
-        .Num32BitValues = 1,
+        .Num32BitValues = sizeof(gme_upc_t) / 4,
       },
     }},
   };
@@ -227,6 +230,30 @@ static int d3d_init_pso() {
   return 0;
 }
 
+static int d3d_init_buffer(void) {
+  int size = GME_BUF_SIZE;
+
+  D3D12_HEAP_PROPERTIES heap = {
+    .Type = D3D12_HEAP_TYPE_UPLOAD,
+  };
+  D3D12_RESOURCE_DESC res = {
+    .Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER,
+    .Width            = size,
+    .Height           = 1,
+    .DepthOrArraySize = 1,
+    .MipLevels        = 1,
+    .Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
+    .SampleDesc       = (DXGI_SAMPLE_DESC) {
+      .Count          = 1,
+    },
+  };
+  COM_CHK(d3d_device, CreateCommittedResource,
+      &heap, D3D12_HEAP_FLAG_NONE, &res, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, 
+      &IID_ID3D12Resource, (void **)&d3d_buffer);
+
+  return 0;
+}
+
 int d3d_init(HWND hwnd) {
   if (FAILED(CreateDXGIFactory2(d3d_debug(), &IID_IDXGIFactory4, (void **)&d3d_factory))) return 1;
 
@@ -244,6 +271,8 @@ int d3d_init(HWND hwnd) {
   if (d3d_init_root_signature()) return 1;
   if (d3d_init_pso())            return 1;
   if (d3d_init_cmdlist())        return 1;
+
+  if (d3d_init_buffer()) return 1;
 
   COM_CHK(d3d_device, CreateFence, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, (void **)&d3d_fence);
   d3d_frame_idx   = COM(d3d_swc, GetCurrentBackBufferIndex);
@@ -275,6 +304,7 @@ void d3d_deinit(void) {
 
   d3d_release(d3d_fence);
 
+  d3d_release(d3d_buffer);
   d3d_release(d3d_cmd_list);
   d3d_release(d3d_pso);
   d3d_release(d3d_root_sign);
@@ -304,13 +334,13 @@ int d3d_frame(void) {
   COM_CHK(d3d_cmd_list, Reset, d3d_cmd_alloc, d3d_pso);
 
   COM(d3d_cmd_list, SetGraphicsRootSignature, d3d_root_sign);
+  COM(d3d_cmd_list, SetGraphicsRootShaderResourceView, 0, COM(d3d_buffer, GetGPUVirtualAddress));
+  COM(d3d_cmd_list, SetGraphicsRoot32BitConstants, 1, sizeof(gme_upc_t) / 4, &gme_pc, 0);
 
   D3D12_VIEWPORT vp = { 0, 0, SCR_W, SCR_H };
   COM(d3d_cmd_list, RSSetViewports, 1, &vp);
   D3D12_RECT     sc = { 0, 0, SCR_W, SCR_H };
   COM(d3d_cmd_list, RSSetScissorRects, 1, &sc);
-
-  COM(d3d_cmd_list, SetGraphicsRoot32BitConstants, 0, sizeof(gme_upc_t) / 4, &gme_pc, 0);
 
   d3d_cmd_transition_barrier(D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
@@ -353,13 +383,15 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
 
       return 0;
     case WM_PAINT:
-      //gme_load();
+      // TODO: map once on init
+      void * buf;
+      COM_CHK(d3d_buffer, Map, 0, NULL, &buf);
+      gme_load(buf);
+      COM(d3d_buffer, Unmap, 0, NULL);
+
       gme_frame();
       if (d3d_frame()) PostQuitMessage(1);
       return 0;
-    case WM_SIZE:
-      gme_resize(LOWORD(l_param), HIWORD(l_param));
-      break;
   }
   return DefWindowProc(hwnd, msg, w_param, l_param);
 }
@@ -398,6 +430,7 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
 
   if (d3d_init(hwnd)) return 1;
   gme_init();
+  gme_resize(SCR_W, SCR_H);
 
   ShowWindow(hwnd, cmd_show);
   UpdateWindow(hwnd);

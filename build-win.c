@@ -69,7 +69,7 @@ static int pack() {
   return _spawnl(_P_WAIT, argv0, argv1, "pack", "/f", "AppxMapping.ini", "/p", "boas.msix", NULL);
 }
 
-#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--hlsl", "--output", "shader."X".hlsl", "--shader-model", "50");
+#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--hlsl", "--output", "shader."X".hlsl", "--shader-model", "50", "--flip-vert-y");
 
 int main(int argc, char ** argv) {
   if (pch()) return 1;
