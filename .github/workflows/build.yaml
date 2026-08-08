@@ -52,12 +52,14 @@ jobs:
     runs-on: windows-latest
     steps:
       - run: dir 'c:\Program Files (x86)\Windows Kits\10\bin'
+      - run: vcpkg install spirv-cross
       - uses: actions/checkout@v6
         with:
           submodules: true
       - run: curl -L -o glslang.zip https://github.com/KhronosGroup/glslang/releases/download/main-tot/glslang-main-windows-x86_64-release.zip
       - run: unzip glslang.zip bin/glslang.exe
       - run: mv bin/glslang.exe .
+      - run: copy "C:\vcpkg\installed\x64-windows\tools\spirv-cross\spirv-cross.exe" .
       - run: clang -o build.exe build-win.c
       - run: ./build.exe
         env:
