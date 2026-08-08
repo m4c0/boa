@@ -1,4 +1,4 @@
 IDI_APPICON ICON "icon.ico"
 
-shader.frag spv "shader.frag.spv"
-shader.vert spv "shader.vert.spv"
+shader.frag hlsl "shader.frag.hlsl"
+shader.vert hlsl "shader.vert.hlsl"

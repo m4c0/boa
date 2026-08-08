@@ -19,7 +19,7 @@ static int pch() {
 static int link_exe() {
   RUN("clang", "-Wall", OPT,
       "-o", "boas.exe",
-      OBJS, "vulkan-win.o", "volk.o", "vlk.o", "main.res",
+      OBJS, "app-win.o", "main.res",
       "-lole32", "-luser32");
   return 0;
 }
@@ -69,16 +69,18 @@ static int pack() {
   return _spawnl(_P_WAIT, argv0, argv1, "pack", "/f", "AppxMapping.ini", "/p", "boas.msix", NULL);
 }
 
+#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--hlsl", "--output", "shader."X".hlsl", "--shader-model", "50");
+
 int main(int argc, char ** argv) {
   if (pch()) return 1;
 
   if (icon())    return 1;
   if (shaders()) return 1;
+  CROSS("frag");
+  CROSS("vert");
   RUN("llvm-rc", "/FO", "main.res", "main.rc");
 
-  CC("volk");
-  CC("vulkan-win");
-  HDR("vlk", "VLK_IMPLEMENTATION");
+  CC("app-win");
   if (compile_and_link_exe()) return 1;
 
   if (pack()) return 1;
