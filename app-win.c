@@ -181,26 +181,25 @@ static int d3d_init_root_signature() {
   return 0;
 }
 
-static ID3DBlob * d3d_compile(const char * tgt, const char * shd) {
+static ID3DBlob * d3d_compile(const char * tgt, const char * name) {
+  HRSRC r = FindResource(NULL, name, "hlsl");
+  HGLOBAL g = LoadResource(NULL, r);
+  void * ptr = LockResource(g);
+  unsigned sz = SizeofResource(NULL, r);
+
   ID3DBlob * blob;
   ID3DBlob * err;
-  if (FAILED(D3DCompile(shd, strlen(shd), NULL, NULL, NULL, "main", tgt, 0, 0, &blob, &err))) return (d3d_report_err(err), NULL);
-  if (err) return (d3d_report_err(err), NULL);
+  if (FAILED(D3DCompile(ptr, sz, NULL, NULL, NULL, "main", tgt, 0, 0, &blob, &err))) return (d3d_report_err(err), NULL);
+  // If you want warnings as well:
+  // if (err) return (d3d_report_err(err), NULL);
   return blob;
 }
 static D3D12_SHADER_BYTECODE d3d_blob2shader(ID3DBlob * blob) {
   return (D3D12_SHADER_BYTECODE){ COM(blob, GetBufferPointer), COM(blob, GetBufferSize) };
 }
 static int d3d_init_pso() {
-  ID3DBlob * vs = d3d_compile("vs_5_0",
-      "cbuffer upc { float scale; };"
-      "float4 main(uint vid : SV_VertexID) : SV_POSITION {"
-      "  return float4(scale * (vid & 1), scale * ((vid >> 1) & 1), 0, 1);"
-      "}"
-      );
-  ID3DBlob * ps = d3d_compile("ps_5_0",
-      "float4 main() : SV_TARGET { return float4(0.2, 0.3, 0.4, 1.0); }"
-      );
+  ID3DBlob * vs = d3d_compile("vs_5_0", "shader.vert");
+  ID3DBlob * ps = d3d_compile("ps_5_0", "shader.frag");
   if (!vs || !ps) return 1;
 
   D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {
